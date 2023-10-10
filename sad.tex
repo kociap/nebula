@@ -1,0 +1,253 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[left=4cm, right=4cm]{geometry}
+\usepackage{setspace}
+
+\renewcommand{\labelitemi}{-}
+
+\newenvironment{itemlist}
+{\begin{itemize}
+  \setlength{\itemsep}{0pt}}
+{\end{itemize}}
+
+\onehalfspacing
+
+\title{Architecture and Development Documentation of CODENAME}
+\author{Piotr Kocia}
+\date{}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+The purpose of this document is to explain the architecture and architectural decisions, the
+development process and the structure of CODENAME. The aim is to shed light on what CODENAME will be
+at the end of the planned development, what features will be present and what risks are possible
+throughout the entire process. Additionally, this document steps into some lower level architectural
+details of certain systems so as to elucidate why certain decisions have been made.
+
+\section{CODENAME}
+CODENAME is a standalone desktop program for designing, building and simulating integrated
+electronic circuits (circuits). The end goal is to be able to create circuits from basic logic
+building blocks (logic gates, gates) by connecting them with wires, simulate their working by
+providing binary inputs and transform the representation into technical diagrams within the program
+itself. The program will be run as a standalone desktop window program where the user interacts with
+it via user interface elements.
+
+The core planned features are:
+\begin{itemlist}
+\item realtime rendering of the circuits,
+\item realtime interaction and modification of the circuits,
+\item grouping of components into larger units for reuse,
+\item simulation of execution for given binary inputs,
+\item clock-based continuous simulation,
+\item persistence of created designs.
+\end{itemlist}
+
+Several interesting features are sadly out of the scope of this project at the time due to the
+imposed timeframe, hence we consider them extension features which will be implemented once all core
+features are completed and time budget allows. Such features are:
+\begin{itemlist}
+\item automatic layouting,
+\item generation of technical diagrams.
+\end{itemlist}
+
+\section{Development Phases}
+The development is divided into 4 phases: setup, bootstrap, core development, finalisation.
+
+\subsection{Setup}
+In the setup phase the goal is to create a formalise the processes within the project. This
+encompases initial project setup, standardisation and establishment of guidelines and preparation of
+workflows, as well as environment setup, acquisition of tools and brief technical onboarding.
+
+A hard time estimate for this phase is 1 week with no planned overruns.
+
+\subsection{Bootstrap}
+In the bootstrap phase the goal is to create a working foundation of the project which will enable
+further concurrent development of the planned features. This phase consists primarily of low-level
+design of the critical systems and modules, as well as early development of the blocking parts of
+the program.
+
+A hard time estimate for this phase is 1 week with no planned overruns.
+
+\subsection{Core Development}
+Core development is the largest phase of the project optimistically estimated to last 9 weeks. After
+that time the project enters the finalisation phase regardless of whether an overrun occurs.
+
+The main focus is on developing the core set of features of the application as those have the
+highest priority and are essential to proper functioning and experience of CODENAME. In the unlikely
+case that all core features are completed before the end of this phase, work on extension features
+may start.
+
+\subsection{Finalisation}
+The finalisation phase is the last phase of the project. This phase serves primarily as a buffer for
+an overrun in the core development phase so that all core features might be completed and polished.
+Any extension features successfully developed before the end of this phase will be merged. The
+planned duration of this phase is 1 week with a possible extension to 2 weeks.
+
+\section{Architecture Overview}
+CODENAME consists of several interoperating modules: model, renderer, executor, persistence, user
+interface.
+
+DIAGRAM HERE
+
+\subsection{Model}
+Model is the core module responsible for in-memory storage of the logical and structural
+representation of the circuits and the related functionality. The Core Representation (CR)
+encompasses gates, components, IO connectors, wires.
+
+Gates are builtin atomic components which perform boolean operations on inputs. The only necessary
+gate is NAND, however, for the convenience of a user and performance all basic operations are
+included (NOT, AND, NAND, OR, NOR, XOR, XNOR). Additionally, SR Latch and D Latch may be considered
+for inclusion in this set, as those are elemental memory units.
+
+Components are groups of smaller components with defined IO acting as a single building block.
+
+IO connectors are used to transfer into and out of components. Types of IO connectors are essential
+to proper UX as errors resulting from mismatched types of IO connectors, such as input-input
+connections or 8 bit to 1 bit connection, will be difficult to locate by the end user. No debugging
+functionality is planned, hence minimising possible points of failure is crucial.
+
+Wires are an explicit representation of the connections between components. Wires may have junctions
+that split the wire into multiple lines transferring the same value. There is no distinction between
+different bit width buses to simplify construction of more complex circuits.
+
+The CR, for the purposes of execution, may be lowered to a performance oriented representation (PR)
+which is built on-demand before execution and is structurally immutable.
+
+\subsection{Renderer}
+The renderer is fed geometry and color/texture data, and draws it on screen. The internal design is
+entirely dependent on the graphics API, however, the interface of this module should be
+straightforward in the way that it should be possible to issue individual draws efficiently. It is
+an independent module that does not have any strict ties to any other modules.
+
+\subsection{Executor}
+Executor simulates the the circuit with a set of given inputs calculating the outputs of all gates
+and subcomponents, and propagating them throughout the system. Executor supports execution triggered
+by input change and continuous or step clock-based execution to simulate working of a real circuit.
+
+\subsection{Persistence}
+Storage of created designs is essential, as recreating them from scratch each time would be
+deterring to say the least. Persistence must be capable of serialising the model to store it
+externally and reconstruct the model from serialised data.
+
+\subsection{User Interface}
+User Interaface (UI) is the primary method of interaction with the program. UI exposes interactivity
+points that manipulate the state of the program and handles user input, possible actions being:
+\begin{itemlist}
+\item dragging view,
+\item creating a gate
+\item moving a gate,
+\item creating a wire between two IO connectors,
+\item box-selecting gates,
+\item grouping gates into a larger component,
+\item starting simulation,
+\item importing/exporting the design.
+\end{itemlist}
+UI should expose 2 views - main view of the circuit and component editor view. The component editor
+is used to edit components, that is modify their internal structure and modify IO. In the case that
+a component has its IO edited, an old version of the component should be maintained until all
+occurences of it are replaced. UI should warn the user that instances of such a component must be
+updated, ideally providing ways to navigate to such locations, and prevent execution until it is
+done.
+
+On top of that, UI prepares geometry data of the whole user facing side of the application that is
+to be passed to the renderer and initiates rendering of a frame.
+
+\subsection{Resolving Dependencies}
+From the above we may conclude that the model is a critical component blocking other modules except
+renderer and the design must be established early on to further development. There is a blocking
+dependency of UI on the renderer as it is impossible to display any results on-screen without a
+working renderer. This makes the model and the renderer the highest priority goals. A simple
+bootstrap renderer should be developed early on to unblock other modules. An improved version would
+then be developed incrementally and concurrently with other modules.
+
+\section{Technical Evaluation}
+The core technologies used in the project are:
+\begin{itemlist}
+\item C++
+\item OpenGL
+\item GLSL
+\end{itemlist}
+
+Additionally, the following libraries are evaluated:
+\begin{itemlist}
+\item anton{\_}core
+\item GLFW
+\item Dear Imgui
+\end{itemlist}
+
+\subsection{Evaluation of C++}
+C++ is a widespread programming language with a large community of experts and a standard committee.
+The language has been in use for over 30 years, especially favoured by the game development industry
+for its performance, interoperability as well as a range of frameworks and libraries. It is safe to
+assume that the compilers of this language have been thoroughly tested for our use cases.
+
+The project mandates use of a language that has a high interoperability with graphics APIs. C++
+fulfills this role is it allows for low-level manipulation of memory, but at the same time provides
+facilities for high-level abstractions. The complexity of the language is overwhelming, however, the
+commonly used subset of the language is well known and should not pose any risk in terms of possible
+target overruns. Using other less known languages, such as Rust, would require an initial learning
+period taking away from the development and would greatly contribute to stalls due to lack of
+essential knowledge furthering overruns.
+
+The version used is C++20 with the exception that only the C++17 feature set and a subset of C++20
+features is allowed. This is due to the fact that many of the additions in C++20 have a major
+overhead in terms of compilation speed.
+
+\subsection{Evaluation of OpenGL}
+OpenGL (GL) is an industry standard graphics API in use for over 30 years. The 4.5 version of GL
+released in 2016 has been widely adopted with major GPU retailers adding support for this version to
+their drivers within 2 years of the release. Over 5 years of continuous support proves its stability
+and reliability.
+
+Although version 4.0 and especially 3.3 have a much longer tenure and larger adoption, the newly
+added features in versions 4.1-4.5 are extremely convenient and provide tools for the programmers,
+such as Debug Output (dbgout) which outputs robust debug diagnostics on various errors easing
+development and debugging.
+
+GL provides two profiles: core and compatibility. The compatibility profile is designed for
+upgrading existing software to newer versions of GL while maintaining the existing codebase. We do
+not have any legacy code, hence compatibility profile is not required and we may proceed with core.
+
+An alternative to GL is Vulkan (Vk) which is a newer API targeted at ultrahigh performance graphics
+programs. Primarily used in game development, Vk provides a more robust API allowing a fine control
+over the hardware. Vk has several disadvantages over GL for our purposes:
+\begin{itemlist}
+\item Vk is difficult. The concepts innate to Vk are difficult for beginners as it exposes the inner
+  workings of the GPU drivers to a greater extent, primarily to allow for the fine control. An
+  example is synchronisation which is done automatically in GL, but in Vk requires a considerable
+  amount of work.
+\item Vk is verbose. Compared to GL, the exact same boilerplate program requires several times more
+  code to set up. Further development of the program in Vk would require proportionally more code
+  hindering speed of development.
+\end{itemlist}
+
+CODENAME is not a graphics intensive program, hence the benefits offered by Vk are minimal while the
+disadvantages may significantly slow down the development and cause target overruns.
+
+Other mainstream options, such as Metal, DirectX, are not viable due to being locked to specific
+platforms which are not out target platforms.
+
+\subsection{Evaluation of GLSL}
+GLSL, OpenGL Shading Language, is a shading language for creating GPU shading programs (shaders)
+designed to work directly with GL. This compatibility naturally translates to a simpler workflow as
+other options require cross-compilation to intermediate formats to be able to load them. There are
+no performance implications of choosing GLSL over other languages.
+
+GLSL allows the users to choose a version of the compiler that will be used at load time. To remain
+consistent with the version of GL, we use version '450 core'.
+
+\subsection{Evaluation of anton{\_}core}
+TODO
+
+\subsection{Evaluation of GLFW}
+TODO
+
+\subsection{Evaluation of Dear Imgui}
+TODO
+
+\end{document}
