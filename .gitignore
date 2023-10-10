@@ -1,0 +1,7 @@
+build/
+
+# TeX files
+*.aux
+*.log
+*.toc
+*.pdf
