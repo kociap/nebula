@@ -23,12 +23,3 @@ jobs:
           cmake ..
           make
         continue-on-error: false
-
-      - name: Check Compilation
-        run: |
-          if [ -f "build/your_executable_name" ]; then
-            echo "Compilation successful."
-          else
-            echo "Compilation failed."
-            exit 1
-          fi
