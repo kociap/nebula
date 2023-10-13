@@ -17,5 +17,4 @@ else
     echo "GLFW development libraries are already installed."
 fi
 
-
 echo "Installation complete."
