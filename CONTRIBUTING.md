@@ -1,12 +1,15 @@
-# Contribution Guidelines
-## Fundamentals
+Contribution Guidelines
+=======================
+Fundamentals
+------------
 - Patches should not mix code changes with formatting changes.
 - Contributed code must follow the Code Guidelines.
 - Patches should not introduce build breaks and should be bisectable.
 - Patches should be limited to the smallest scope possible, ideally only an
   individual module.
 
-## Patch message
+Patch message
+-------------
 - Lines should be limited to 75 characters so that they are properly displayed
   in 80-column mode.
 - The first line should start with the name of the module and be a concise
@@ -26,3 +29,7 @@
   numbers as it makes accessing the page easier. Example:
 
     Closes: https://github.com/kociap/nebula/issues/1
+
+Authors
+-------
+Piotr Kocia <peter.kocia@gmail.com>
