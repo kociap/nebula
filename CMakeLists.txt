@@ -22,7 +22,9 @@ set(NEBULA_COMPILE_FLAGS
   -Werror=uninitialized
 
   -Wnon-virtual-dtor
-  -Wnewline-eof
+  # -Wnewline-eof
+
+  # -ferror-limit=1
 )
 
 set(ANTON_BUILD_DEBUG $<CONFIG:Debug>)
@@ -34,14 +36,19 @@ set(ANTON_UNREACHABLE_ASSERTS ON)
 FetchContent_Declare(
   anton_core
   GIT_REPOSITORY https://github.com/kociap/anton_core.git
-  GIT_TAG b0f2d7901838ab343da8d66407c0f5c62686d4d6
+  GIT_TAG 30b35af2d4cbc29ac910e9ca31a7125811de5566
 )
 FetchContent_MakeAvailable(anton_core)
 
-find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
+# Add GLFW
+FetchContent_Declare(
+  glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG 3eaf1255b29fdf5c2895856c7be7d7185ef2b241
+)
+FetchContent_MakeAvailable(glfw)
 
-set(HEADERS_DIR include)
+find_package(OpenGL REQUIRED)
 
 add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 set_target_properties(nebula PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
