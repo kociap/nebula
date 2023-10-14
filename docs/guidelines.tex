@@ -1,0 +1,177 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[left=3cm, right=3cm, top=4cm, bottom=4cm]{geometry}
+\usepackage{setspace}
+
+\renewcommand{\labelitemi}{-}
+
+\newenvironment{itemlist}
+{
+\vspace{-0.5\topsep}
+\begin{itemize}
+  \setlength{\itemsep}{4pt}
+  % \setlength{\topsep}{0pt}
+  \setlength{\parskip}{0pt}
+  % \setlength{\partopsep}{0pt}
+} {
+\end{itemize}
+\vspace{-0.5\topsep}
+}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\onehalfspacing
+% \singlespacing
+
+\title{Nebula Code Guidelines}
+\author{Piotr Kocia}
+\date{}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\pagenumbering{gobble}
+
+\pagebreak
+
+\pagenumbering{arabic}
+
+\section{Introduction}
+C++ is the primary language used for the development of Nebula. While being
+extremely powerful, the language has significant complexity which might turn the
+code unmanageable, difficult to read or maintain. The goal of this set of rules
+and guidelines is to manage this complexity by explicitly allowing or
+disallowing certain features or practices.
+
+\section{Naming}
+As names are the most fundamental part of reading and understanding code, they
+should be optimised for readability. Avoid using abbreviations or removing
+letters from words. Proper nouns and universal abbreviations in names are
+permitted to not adhere to the following rules if doing otherwise would hinder
+readability.
+
+\subsection{Files}
+File names are lowercase with underscores \code{\_} separating individual words.
+
+C++ source files should end in \code{.cpp} and header files should end in
+\code{.hpp}.
+
+\subsection{Code}
+Names follow the Anton\_Case convention:
+\begin{itemlist}
+  \item Words are separated with underscores \code{\_}.
+  \item Variable, constant, function, namespace, typedef/using names are in
+  lowercase.
+  \item In class and enumerator names each word starts with an uppercase letter
+  followed by lowercase letters.
+  \item Macro names are all uppercase.
+\end{itemlist}
+
+\section{Formatting}
+The project comes with a clang-format file to automatically impose a predefined
+formatting.
+
+\section{Style}
+\subsection{\#pragma guards}
+\code{\#pragma} guards are an alternative mechanism for preventing multiple
+inclusion of a single header file in a TU.
+
+\noindent\textbf{Pros:}
+\begin{itemlist}
+  \item Supported across all major compilers.
+  \item Less verbose and error prone.
+\end{itemlist}
+
+\noindent\textbf{Cons:}
+\begin{itemlist}
+  \item Non-standard solution.
+\end{itemlist}
+
+\noindent\textbf{Decision:} \\
+Use \code{\#pragma} guards.
+
+\subsection{Use \#include<>}
+
+\subsection{Avoid the Standard Library}
+The Standard Library (STD) provides a variety of functions and utilities to ease
+daily programming. However, STD:
+\begin{itemlist}
+  \item is extremely large and contains features far outside the scope of what
+  is necessary,
+  \item is extremely verbose and relies heavily on templates making it difficult
+  to read,
+  \item provides debugging utilities which result in the behaviour of the code
+  changing between debug and release builds,
+  \item is slow to compile,
+  \item has inferior performance.
+\end{itemlist}
+\noindent Thus it is best to avoid STD and use the available replacement
+library.
+
+\subsection{Use struct instead of class}
+\subsection{Use typename instead of class}
+\subsection{Use typed enums}
+\subsection{Use static instead of unnamed namespaces}
+\subsection{Use C++ casts}
+C++ introduced 4 intrinsic functions to cast types - \code{static\_cast},
+\code{const\_cast}, \code{reinterpret\_cast} and \code{dynamic\_cast}. Unlike
+the C cast, those can perform only certain types of type conversions and will
+generate errors when violating the rules, e.g. it is impossible to
+\code{static\_cast} \code{T const\*} to \code{T*}.
+
+\noindent\textbf{Pros:}
+\begin{itemlist}
+  \item Clearer intent.
+  \item Stricter casting rules.
+  \item Error diagnostics.
+\end{itemlist}
+
+\noindent\textbf{Cons:}
+\begin{itemlist}
+  \item More verbose.
+  \item \code{dynamic\_cast} is expensive as it traverses the inheritance
+  hierarchy.
+  \item \code{dynamic\_cast} throws exceptions when it fails.
+\end{itemlist}
+
+\noindent\textbf{Decision:} \\
+Use C++ casts instead of C casts. Use \code{reinterpret\_cast} judiciously. Do
+not use \code{dynamic\_cast}.
+
+\section{Prohibited}
+\subsection{External Global Variables}
+
+\subsection{Exceptions}
+Do not use exceptions.
+
+\noindent\textbf{Pros:}
+\begin{itemlist}
+  \item Exceptions are the only mechanism in the language that allows a
+  constructor to fail. Without exceptions the work of a constructor must be
+  moved to an initialisation function, but that requires an "invalid" state.
+\end{itemlist}
+
+\noindent\textbf{Cons:}
+\begin{itemlist}
+  \item Throwing exceptions creates implicit exit points from functions
+  complicating the control flow of the program and making it difficult to reason
+  about the code as functions may exit in places you do not expect.
+  \item Throwing a new exception silently changes the contract of the function
+  forcing us to reexamine all transitive callers for exception safety.
+  \item Compiling with exceptions embeds additional information into the binary
+  file resulting in size increase.
+  \item Exceptions are slow on the exceptional path.
+\end{itemlist}
+
+\noindent\textbf{Decision:} \\
+Exceptions and all related utilities provide benefits, however, the
+aforementioned disadvantages greatly outweigh them. We do not believe that the
+alternative mechanisms for handling error states, which are already in place,
+introduce a significant burden.
+
+\subsection{RTTI}
+Run Time Type Information (RTTI)
+
+\end{document}
