@@ -1,5 +1,6 @@
+# Cmake generated files
 build/
-
+cmake-build-debug/
 # TeX files
 *.aux
 *.log
