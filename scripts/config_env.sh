@@ -2,7 +2,7 @@
 
 sudo apt-get update
 
-# Check if CMake is installed
+# Check if CMake is installed.
 if ! command -v cmake &>/dev/null; then
     echo "CMake is not installed. Installing..."
     sudo apt-get update
@@ -12,6 +12,6 @@ else
 fi
 
 # GLFW dependencies.
-sudo apt-get install -y libxinerama-dev libxcursor-dev libxi-dev
+sudo apt-get install -y libxinerama-dev libxcursor-dev libxi-dev libxrandr-dev
 
 echo "Installation complete."
