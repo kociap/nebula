@@ -1,9 +1,12 @@
-# Cmake generated files
+# CMake generated files
 build/
 cmake-build-debug/
 
 # Directory for personal files
 personal/
+
+# clangd
+.cache/
 
 # TeX files
 *.aux
