@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    name: Build and Compile
+    name: Build and Compile with clang
     runs-on: ubuntu-latest
 
     steps:
@@ -20,6 +20,6 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake ..
+          cmake .. -DCMAKE_CXX_COMPILER="clang"
           make
         continue-on-error: false
