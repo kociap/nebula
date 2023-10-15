@@ -32,6 +32,14 @@ set(ANTON_ITERATOR_DEBUG $<CONFIG:Debug>)
 set(ANTON_OPTIONAL_CHECK_VALUE $<CONFIG:Debug>)
 set(ANTON_UNREACHABLE_ASSERTS ON)
 
+# Add GLAD
+FetchContent_Declare(
+  glad
+  GIT_REPOSITORY https://github.com/kociap/glad.git
+  GIT_TAG b4d4f69539196fdb08a56b88fd15b7287c838b87
+)
+FetchContent_MakeAvailable(glad)
+
 # Add anton_core
 FetchContent_Declare(
   anton_core
@@ -48,12 +56,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
-find_package(OpenGL REQUIRED)
-
 add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 set_target_properties(nebula PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
-target_link_libraries(nebula anton_core ${OPENGL_LIBRARIES} glfw)
-target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src" ${OPENGL_INCLUDE_DIR})
+target_link_libraries(nebula anton_core glad glfw)
+target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_options(nebula PRIVATE ${NEBULA_COMPILE_FLAGS})
 target_sources(nebula
   PRIVATE
