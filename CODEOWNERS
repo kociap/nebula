@@ -1,2 +1,11 @@
 # Global owner
 * @kociap
+
+# Module owners
+ci/ @sebawoz02
+src/executor/ @miloszchojecki
+src/model/ @kociap
+src/persistence/ @vytax248
+src/renderer/ @kociap
+src/ui/ @BartoszMichalak13 @sebawoz02
+src/windowing/ @sebawoz02
