@@ -1,10 +1,10 @@
-name: Clang_CI
+name: g++
 
 on: [push]
 
 jobs:
   build:
-    name: Build and Compile with clang
+    name: Build and Compile
     runs-on: ubuntu-latest
 
     steps:
@@ -14,13 +14,12 @@ jobs:
       - name: Prepare env
         run: |
           sudo ./ci/config_env.sh
-          sudo apt-get install -y clang
         continue-on-error: true
 
       - name: Configure and build
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_CXX_COMPILER="clang"
+          cmake ..
           make
         continue-on-error: false
