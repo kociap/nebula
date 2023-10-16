@@ -5,7 +5,6 @@ sudo apt-get update
 # Check if CMake is installed.
 if ! command -v cmake &>/dev/null; then
     echo "CMake is not installed. Installing..."
-    sudo apt-get update
     sudo apt-get install -y cmake
 else
     echo "CMake is already installed."
