@@ -1,0 +1,31 @@
+name: Run Stability
+
+on: [push]
+
+jobs:
+  stability_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Prepare env
+        run: |
+          sudo ./ci/config_env.sh
+
+      - name: Build Nebula
+        run: |
+          cmake .
+          make
+        shell: bash
+
+      - name: Run the Program and Check for Stability
+        run: |
+          timeout 5s ./nebula
+          if [ $? -eq 0 ]; then
+            echo "Program ran without crashing for 5 seconds."
+          else
+            echo "ERROR: Program crashed or was terminated before 5 seconds."
+          fi
+        shell: bash
