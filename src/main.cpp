@@ -23,6 +23,13 @@ int main(int argc, char* argv[])
     return -1;
   }
   glfwMakeContextCurrent(window);
+
+  // Initialize Glad
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    glfwTerminate();
+    return -1;
+  }
+
   // Main loop
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);

@@ -56,10 +56,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+# Add OpenGL
+find_package(OpenGL REQUIRED)
+
 add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 set_target_properties(nebula PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
-target_link_libraries(nebula anton_core glad glfw)
-target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_link_libraries(nebula anton_core glad ${OPENGL_LIBRARIES} glfw)
+target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src" ${OPENGL_INCLUDE_DIR})
 target_compile_options(nebula PRIVATE ${NEBULA_COMPILE_FLAGS})
 target_sources(nebula
   PRIVATE
