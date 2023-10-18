@@ -23,9 +23,4 @@ jobs:
       - name: Run the Program and Check for Stability
         run: |
           timeout 5s ./nebula
-          if [ $? -eq 0 ]; then
-            echo "Program ran without crashing for 5 seconds."
-          else
-            echo "ERROR: Program crashed or was terminated before 5 seconds."
-          fi
         shell: bash
