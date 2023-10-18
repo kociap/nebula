@@ -12,6 +12,6 @@ else
 fi
 
 # GLFW dependencies.
-sudo apt-get install -y libxinerama-dev libxcursor-dev libxi-dev libxrandr-dev
+sudo apt-get install -y libxinerama-dev libxcursor-dev libxi-dev libxrandr-dev freeglut3-dev
 
 echo "Installation complete."
