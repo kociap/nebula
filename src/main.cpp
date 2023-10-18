@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 
   // Initialize GLFW
   if(!glfwInit()) {
-    return -1;
+    return 1;
   }
   // Create a GLFW window
   GLFWwindow* window =
@@ -20,9 +20,15 @@ int main(int argc, char* argv[])
 
   if(!window) {
     glfwTerminate();
-    return -1;
+    return 1;
   }
   glfwMakeContextCurrent(window);
+
+  bool const glad_initialised = gladLoadGL();
+  if(!glad_initialised) {
+    return 1;
+  }
+
   // Main loop
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);

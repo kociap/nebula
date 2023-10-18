@@ -7,7 +7,6 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 project(Nebula)
 
-
 set(NEBULA_COMPILE_FLAGS
   ${CMAKE_CXX_FLAGS}
   -Wall
