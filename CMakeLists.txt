@@ -55,7 +55,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
-add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_rect.cpp")
 set_target_properties(nebula PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
 target_link_libraries(nebula anton_core glad glfw)
 target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
