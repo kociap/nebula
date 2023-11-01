@@ -1,42 +1,16 @@
-#include <glad/glad.h>
-
-// GLAD must be included first. clang-format sorts includes, hence this comment
-// here.
-
-#include <GLFW/glfw3.h>
+#include <ui/window.hpp>
 
 int main(int argc, char* argv[])
 {
   (void)argc;
   (void)argv;
 
-  // Initialize GLFW
-  if(!glfwInit()) {
-    return 1;
-  }
-  // Create a GLFW window
-  GLFWwindow* window =
-    glfwCreateWindow(800, 600, "Hello GLFW", nullptr, nullptr);
-
-  if(!window) {
-    glfwTerminate();
-    return 1;
-  }
-  glfwMakeContextCurrent(window);
-
-  bool const glad_initialised = gladLoadGL();
-  if(!glad_initialised) {
-    return 1;
+  if(UI_Window_Init() != 0) {
+      return 1;
   }
 
-  // Main loop
-  while(!glfwWindowShouldClose(window)) {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-  }
+  UI_Window_Start_Main_Loop();
 
-  glfwTerminate();
-
+  UI_Window_Terminate();
   return 0;
 }
