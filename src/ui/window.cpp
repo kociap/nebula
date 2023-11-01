@@ -3,7 +3,6 @@
 // GLAD must be included first. clang-format sorts includes, hence this comment
 // here.
 
-#include <GLFW/glfw3.h>
 #include "window.hpp"
 #include "movable_rect.hpp"
 
@@ -14,7 +13,6 @@ static GLFWwindow* window = nullptr;        // Window instance
 static List<UI_Movable_Rect_S*> movable_rectangles;
 static UI_Movable_Rect_S* currently_moved_rectangle = nullptr;  // Currently dragged rectangle.
 static f32 last_x, last_y;    // Last mouse x and y position
-
 
 
 /**
@@ -41,7 +39,6 @@ static void mouse_button_callbacks(GLFWwindow* win, int button, int action, int 
                     last_y = ypos;
                 }
             }
-
         } else if (action == GLFW_RELEASE)
         {
             currently_moved_rectangle = nullptr;
@@ -68,7 +65,10 @@ static void cursor_position_callbacks(GLFWwindow* win, double xpos, double ypos)
     }
 }
 
-// It's example of Movable Rectangle's render function.
+// It's an example of Movable Rectangle's render function.
+// TODO: A separate function should be defined for AND, OR, XOR etc.
+// TODO: each should make the rectangle stand out from the others.
+// TODO: I suggest defining them in separate files -> addressed to Bartosz
 // Any other function can be passed to the constructor as long as it matches the pattern:
 // return -> type void
 // Single parameter -> type Rect_f32
@@ -119,8 +119,14 @@ u8 UI_Window_Init()
     {
         return 1;
     }
+    // Get the primary monitor's video mode to determine the screen resolution
+    GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primary_monitor);
+    i32 width = mode->width;
+    i32 height = mode->height;
+
     // Create a GLFW window
-    window = glfwCreateWindow(1200, 800, "Nebula", nullptr, nullptr);
+    window = glfwCreateWindow(width, height, "Nebula", nullptr, nullptr);
 
     if(!window)
     {
@@ -139,7 +145,10 @@ u8 UI_Window_Init()
     glfwSetMouseButtonCallback(window, mouse_button_callbacks);
     glfwSetCursorPosCallback(window, cursor_position_callbacks);
 
-    movable_rectangles.emplace_front(UI_Movable_Rect_Init(&render));
+    // This makes 2 movable rectangles appear on screen
+    movable_rectangles.emplace_front(UI_Movable_Rect_Init(&render, width, height));
+    movable_rectangles.emplace_front(UI_Movable_Rect_Init(&render, width, height));
+
     return 0;
 }
 
@@ -165,5 +174,9 @@ void UI_Window_Terminate()
     if(window == nullptr)
         return;
     glfwTerminate();
+    for(auto & mr : movable_rectangles)
+    {
+        UI_Movable_Rect_Destroy(mr);
+    }
     movable_rectangles.clear();
 }

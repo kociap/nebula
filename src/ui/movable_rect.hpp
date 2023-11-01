@@ -14,9 +14,12 @@ typedef struct UI_Movable_Rect_S UI_Movable_Rect_S;
 /**
  * Creates a new visual movable object at the middle of the screen following instructions in passed function.
  * @param render_function - function used to render object on the screen passed by MR button.
+ * @param window_width - window width. Important for correct position calculation during movement
+ * @param window_height - window height. Important for correct position calculation during movement
  * @return pointer to the newly created movable rectangle structure
  */
-UI_Movable_Rect_S* UI_Movable_Rect_Init(void (*render_function)(anton::Rect_f32 position));
+UI_Movable_Rect_S* UI_Movable_Rect_Init(void (*render_function)(anton::Rect_f32 position), i32 window_width
+                                        , i32 window_height);
 
 /**
  * Renders an object
