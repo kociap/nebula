@@ -1,7 +1,7 @@
 #include <ui/node_rect.hpp>
 
 namespace nebula {
-  bool Node_Rect::is_under_point(Vec2 const point) const
+  bool Node_Rect::is_under_point(math::Vec2 const point) const
   {
     bool const fits_on_left = point.x >= coordinates.x;
     bool const fits_on_right = point.x <= coordinates.x + dimensions.x;

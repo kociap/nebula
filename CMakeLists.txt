@@ -62,6 +62,22 @@ target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_options(nebula PRIVATE ${NEBULA_COMPILE_FLAGS})
 target_sources(nebula
   PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_rect.cpp"
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/core/error.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/core/handle.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/core/types.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/logging/logging.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/logging/logging.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/framebuffer.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/framebuffer.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/opengl.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/opengl_defs.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/opengl.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/opengl_undefs.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/rendering.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/rendering.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/shader.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/shader.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/rendering/vertex.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_rect.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.cpp"
 )

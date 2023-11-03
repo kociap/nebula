@@ -1,7 +1,7 @@
 #pragma once
 
 #include <anton/math/vec2.hpp>
-#include <types.hpp>
+#include <core/types.hpp>
 #include <ui/node_rect.hpp>
 
 namespace nebula {
@@ -24,7 +24,7 @@ namespace nebula {
      * @return pointer to the newly created movable rectangle structure
      */
     Movable_Rect(void (*render_function)(Node_Rect rect),
-                 Vec2 rectangle_dimensions, Vec2 window_dimensions);
+                 math::Vec2 rectangle_dimensions, math::Vec2 window_dimensions);
 
     /**
      * Renders an object.
@@ -36,11 +36,11 @@ namespace nebula {
      * @param mouse_location - vector, mouse x and y location
      * @return true if rectangle is under given location
      */
-    [[nodiscard]] bool is_under_mouse(Vec2 mouse_location) const;
+    [[nodiscard]] bool is_under_mouse(math::Vec2 mouse_location) const;
     /**
      * Changes the location of an object
      * @param offset - vector, offset from previous mouse x and y location
      */
-    void move(Vec2 offset);
+    void move(math::Vec2 offset);
   };
 } // namespace nebula
