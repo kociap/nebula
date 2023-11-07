@@ -9,7 +9,7 @@ namespace nebula {
   using namespace anton::types;
 
   template<typename T>
-  using Array = anton::Array<T, anton::Polymorphic_Allocator>;
+  using Array = anton::Array<T>;
 
   template<typename T>
   using List = anton::List<T, anton::Polymorphic_Allocator>;
