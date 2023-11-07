@@ -43,7 +43,7 @@ FetchContent_MakeAvailable(glad)
 FetchContent_Declare(
   anton_core
   GIT_REPOSITORY https://github.com/kociap/anton_core.git
-  GIT_TAG 5b3401a113b656fe714de197a5ce51a928c33644
+  GIT_TAG 6b215b9f78a322fb806c983e1ba57c55c383f7de
 )
 FetchContent_MakeAvailable(anton_core)
 
@@ -62,5 +62,6 @@ target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_options(nebula PRIVATE ${NEBULA_COMPILE_FLAGS})
 target_sources(nebula
   PRIVATE
-
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_rect.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.cpp"
 )
