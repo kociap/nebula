@@ -4,8 +4,6 @@
 // GLAD must be included first. clang-format sorts includes, hence this comment
 // here.
 
-#include <GLFW/glfw3.h>
-
 #include <anton/optional.hpp>
 
 #include <core/types.hpp>
@@ -13,6 +11,7 @@
 #include <rendering/framebuffer.hpp>
 #include <rendering/rendering.hpp>
 #include <rendering/shader.hpp>
+#include <windowing/window.hpp>
 
 using namespace nebula;
 
@@ -37,25 +36,15 @@ int main(int argc, char* argv[])
   (void)argc;
   (void)argv;
 
-  //
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-  // Initialize GLFW
-  if(!glfwInit()) {
+  auto* window = windowing::init();
+  if(window == nullptr) {
     return 1;
   }
 
-  i64 const width = 800;
-  i64 const height = 600;
-  // Create a GLFW window
-  GLFWwindow* window =
-    glfwCreateWindow(800, 600, "Hello GLFW", nullptr, nullptr);
+  Vec2 dim = windowing::get_dimensions(window);
 
-  if(!window) {
-    glfwTerminate();
-    return 1;
-  }
-  glfwMakeContextCurrent(window);
+  i64 const width = static_cast<i64>(dim.x);
+  i64 const height = static_cast<i64>(dim.y);
 
   {
     Expected<void, Error> result = rendering::initialise(width, height);
@@ -125,7 +114,6 @@ int main(int argc, char* argv[])
     LOG_FATAL("could not bind uv shader");
     return 1;
   }
-
   rendering::bind_draw_buffers();
   rendering::bind_transient_geometry_buffers();
 
@@ -142,16 +130,19 @@ int main(int argc, char* argv[])
   cmd.instance_count = 1;
   rendering::bind_default_framebuffer();
   glClearColor(0.0, 0.0, 0.0, 0.0);
+
   // Main loop
-  while(!glfwWindowShouldClose(window)) {
+  while(!windowing::should_close(window)) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     rendering::add_draw_command(cmd);
     rendering::commit_draw();
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+
+    windowing::render_objects(window);
+    windowing::swap_buffers(window);
+    windowing::pool_events();
   }
 
-  glfwTerminate();
-
+  nebula::windowing::destroy(window);
   return 0;
 }

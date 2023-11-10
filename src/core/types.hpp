@@ -11,6 +11,7 @@ namespace nebula {
   using namespace anton;
   using namespace anton::types;
   using namespace anton::literals;
+  using Vec2 = anton::math::Vec2;
 
   template<typename T>
   using List = anton::List<T, anton::Polymorphic_Allocator>;
