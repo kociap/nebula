@@ -1,0 +1,57 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=1cm]{geometry}
+
+\title{Persistence - Nebula}
+\author{Michał Biszczanik}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+This module is responsible for serializing the model to store it externally and reconstructing the model from serialized data, as well as handling file input and output. Below are the individually planned implementation phases.
+
+\begin{itemize}
+
+\item \textbf{Week 1: Planning}
+    \begin{itemize}
+        \item Define design details and functionality
+        \item Create a work schedule for 10 weeks
+        \item Prepare the programming environment
+    \end{itemize}
+
+\item \textbf{Week 2: Learning the Project Structure}
+    \begin{itemize}
+        \item Understand the project structure
+        \item Understand the model (gates, components, IO connectors, wires)
+        \item Learn how the model data will be stored in memory
+    \end{itemize}
+
+\item \textbf{Week 3-4: Seralization and deserialization of components}
+    \begin{itemize}
+        \item Convert in-memory representation of components into a component file format
+        \item Convert binary files into in-memory representation
+    \end{itemize}
+    
+    \item \textbf{Week 5-6: Seralization and deserialization of whole project}
+    \begin{itemize}
+        \item Convert in-memory representation of the project into a project file format
+        \item Convert project files into in-memory representation
+    \end{itemize}
+    
+    \item \textbf{Week 7: Handling file I/O}
+    \begin{itemize}
+        \item Implement importing and exporting components from/to *.nbc files
+        \item Implement loading and saving projects from/to *.neb files
+    \end{itemize}
+    
+    \item \textbf{Week 8-10: Testing and Bugfixing}
+    \begin{itemize}
+        \item Test the module
+        \item Fix bugs and errors
+        \item Optimize code
+    \end{itemize}
+\end{itemize}
+
+\end{document}
