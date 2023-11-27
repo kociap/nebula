@@ -13,7 +13,7 @@ jobs:
 
       - name: Prepare env
         run: |
-          sudo ./ci/config_env.sh
+          sudo ./ci/config_gcc.sh
         continue-on-error: true
 
       - name: Configure and build

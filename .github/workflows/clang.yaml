@@ -13,14 +13,13 @@ jobs:
 
       - name: Prepare env
         run: |
-          sudo ./ci/config_env.sh
-          sudo apt-get install -y clang
+          sudo ./ci/config_clang.sh
         continue-on-error: true
 
       - name: Configure and build
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_CXX_COMPILER="clang"
+          cmake .. -DCMAKE_C_COMPILER="clang" -DCMAKE_CXX_COMPILER="clang++"
           make
         continue-on-error: false
