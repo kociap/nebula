@@ -1,7 +1,7 @@
 #pragma once
 
+#include <core/types.hpp>
 #include <model/fwd.hpp>
-#include <types.hpp>
 
 namespace nebula {
   enum struct Node_Kind : u8 {

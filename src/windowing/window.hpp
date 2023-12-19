@@ -1,5 +1,6 @@
 #pragma once
 
+#include <core/input.hpp>
 #include <core/types.hpp>
 #include <ui/movable_rect.hpp>
 
@@ -43,6 +44,15 @@ namespace nebula::windowing {
    * @return Vec2{width, height}
    */
   [[nodiscard]] Vec2 get_dimensions(Window* window);
+
+  using keyboard_callback_t = void (*)(Window* window, Key key,
+                                       Input_State state);
+  using framebuffer_resize_callback_t = void (*)(Window* window, i64 width,
+                                                 i64 height);
+
+  void set_keyboard_callback(Window* window, keyboard_callback_t callback);
+  void set_framebuffer_resize_callback(Window* window,
+                                       framebuffer_resize_callback_t callback);
 
   /**
    * Destroys window and terminates glfw.

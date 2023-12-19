@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include <core/input.hpp>
 #include <windowing/window.hpp>
 
 namespace nebula::windowing {
@@ -12,14 +13,10 @@ namespace nebula::windowing {
     Vec2 last_mouse_position; // last mouse position
     List<Movable_Rect> movable_rectangles; // All created rectangles/gates
     Movable_Rect* currently_moved_rectangle; // Currently moved rect/gate
+    keyboard_callback_t keyboard_callback = nullptr;
+    framebuffer_resize_callback_t framebuffer_resize_callback = nullptr;
   };
 
-  static void keyboard_button_callback(GLFWwindow* win, int key, int scancode,
-                                       int action, int mods);
-  static void mouse_button_callbacks(GLFWwindow* win, int button, int action,
-                                     int mods);
-  static void cursor_position_callbacks(GLFWwindow* win, double xpos,
-                                        double ypos);
   /**
    * Adds new rectangle. Function used by MR buttons.
    * @param window - window instance
@@ -29,16 +26,28 @@ namespace nebula::windowing {
   static void add_rectangle(Window* window, void (*render_function)(Node_Rect),
                             Vec2 rectangle_dimensions);
 
-  static void keyboard_button_callback(GLFWwindow* win, int key, int scancode,
-                                       int action, int mods)
+  static void keyboard_button_callback(GLFWwindow* glfw_window, int key,
+                                       int scancode, int action, int mods)
   {
-    auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(win));
-    // EMPTY FOR NOW
-    (void)instance;
-    (void)key;
     (void)scancode;
-    (void)action;
     (void)mods;
+
+    Window* const window =
+      reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window->keyboard_callback != nullptr) {
+      window->keyboard_callback(window, static_cast<Key>(key),
+                                static_cast<Input_State>(action));
+    }
+  }
+
+  static void framebuffer_resize_callback(GLFWwindow* glfw_window, int width,
+                                          int height)
+  {
+    Window* const window =
+      reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window->framebuffer_resize_callback != nullptr) {
+      window->framebuffer_resize_callback(window, width, height);
+    }
   }
 
   static void mouse_button_callbacks(GLFWwindow* win, int button, int action,
@@ -109,7 +118,7 @@ namespace nebula::windowing {
     // Initialize GLFW
     glfwInit();
 
-    auto* win = new Window;
+    auto* const win = new Window;
     // Get the primary monitor's video mode to determine the screen resolution
     GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary_monitor);
@@ -132,6 +141,8 @@ namespace nebula::windowing {
     glfwSetMouseButtonCallback(win->glfw_window, mouse_button_callbacks);
     glfwSetKeyCallback(win->glfw_window, keyboard_button_callback);
     glfwSetCursorPosCallback(win->glfw_window, cursor_position_callbacks);
+    glfwSetFramebufferSizeCallback(win->glfw_window,
+                                   framebuffer_resize_callback);
 
     glfwMakeContextCurrent(win->glfw_window);
 
@@ -172,4 +183,14 @@ namespace nebula::windowing {
     return {static_cast<f32>(window->width), static_cast<f32>(window->height)};
   }
 
+  void set_keyboard_callback(Window* window, keyboard_callback_t callback)
+  {
+    window->keyboard_callback = callback;
+  }
+
+  void set_framebuffer_resize_callback(Window* window,
+                                       framebuffer_resize_callback_t callback)
+  {
+    window->framebuffer_resize_callback = callback;
+  }
 } // namespace nebula::windowing

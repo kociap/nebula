@@ -140,6 +140,13 @@ namespace nebula::rendering {
     return expected_value;
   }
 
+  static void destroy_framebuffers()
+  {
+    back_postprocess_fb.delete_framebuffer();
+    front_postprocess_fb.delete_framebuffer();
+    primary_fb.delete_framebuffer();
+  }
+
   Expected<void, Error> initialise(i64 const width, i64 const height)
   {
     bool const glad_initialised = gladLoadGL();
@@ -169,9 +176,7 @@ namespace nebula::rendering {
 
   void teardown()
   {
-    back_postprocess_fb.delete_framebuffer();
-    front_postprocess_fb.delete_framebuffer();
-    primary_fb.delete_framebuffer();
+    destroy_framebuffers();
   }
 
   Framebuffer* get_primary_framebuffer()
@@ -192,6 +197,15 @@ namespace nebula::rendering {
   void swap_postprocess_framebuffers()
   {
     swap(front_postprocess_fb, back_postprocess_fb);
+  }
+
+  void resize_framebuffers(i64 const width, i64 const height)
+  {
+    // TODO: This should be a transaction as creating framebuffers might fail
+    //       and we'll be left without framebuffers at all.
+    destroy_framebuffers();
+    Expected<void, Error> result = create_framebuffers(width, height);
+    ANTON_UNUSED(result);
   }
 
   void bind_draw_buffers()

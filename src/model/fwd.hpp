@@ -1,6 +1,6 @@
 #pragma once
 
-#include <types.hpp>
+#include <core/types.hpp>
 
 namespace nebula {
   enum struct Node_Kind : u8;

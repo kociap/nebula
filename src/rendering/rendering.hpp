@@ -37,6 +37,7 @@ namespace nebula::rendering {
   [[nodiscard]] Framebuffer* get_front_postprocess_framebuffer();
   [[nodiscard]] Framebuffer* get_back_postprocess_framebuffer();
   void swap_postprocess_framebuffers();
+  void resize_framebuffers(i64 width, i64 height);
 
   // Binding numbers of various buffers.
 

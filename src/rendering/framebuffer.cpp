@@ -194,7 +194,7 @@ namespace nebula::rendering {
       return;
     }
 
-    LOG_INFO("deleting framebuffer '{}'", info.name);
+    LOG_DEBUG("deleting framebuffer '{}'", info.name);
     if(depth_buffer != 0) {
       if(info.depth_buffer.buffer_type == Buffer_Type::renderbuffer) {
         glDeleteRenderbuffers(1, &depth_buffer);
