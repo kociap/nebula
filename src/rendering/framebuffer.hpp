@@ -49,6 +49,7 @@ namespace nebula::rendering {
     };
 
     struct Construct_Info {
+      String_View name;
       Fixed_Array<Color_Buffer_Info, max_color_attachments> color_buffers;
       Depth_Buffer_Info depth_buffer;
       Stencil_Buffer_Info stencil_buffer;

@@ -3,7 +3,6 @@
 #include <anton/algorithm.hpp>
 #include <anton/array.hpp>
 #include <anton/assert.hpp>
-#include <anton/console.hpp>
 #include <anton/flat_hash_map.hpp>
 #include <anton/format.hpp>
 #include <anton/string.hpp>

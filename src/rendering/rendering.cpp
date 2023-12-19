@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 
-#include <anton/console.hpp>
 #include <anton/flat_hash_map.hpp>
 #include <anton/intrinsics.hpp>
 #include <anton/math/vec2.hpp>
@@ -104,6 +103,7 @@ namespace nebula::rendering {
   create_framebuffers(i64 const width, i64 const height)
   {
     Framebuffer::Construct_Info primary_info;
+    primary_info.name = "primary"_sv;
     primary_info.width = width;
     primary_info.height = height;
     primary_info.depth_buffer.enabled = true;
@@ -120,6 +120,7 @@ namespace nebula::rendering {
     }
 
     Framebuffer::Construct_Info postprocess_info;
+    postprocess_info.name = "postprocess back"_sv;
     postprocess_info.color_buffers.resize(1);
     postprocess_info.width = width;
     postprocess_info.height = height;
@@ -129,6 +130,7 @@ namespace nebula::rendering {
       return result_back;
     }
 
+    postprocess_info.name = "postprocess front";
     Expected<void, Error> result_front =
       front_postprocess_fb.create_framebuffer(postprocess_info);
     if(!result_front) {
@@ -163,6 +165,13 @@ namespace nebula::rendering {
     }
 
     return expected_value;
+  }
+
+  void teardown()
+  {
+    back_postprocess_fb.delete_framebuffer();
+    front_postprocess_fb.delete_framebuffer();
+    primary_fb.delete_framebuffer();
   }
 
   Framebuffer* get_primary_framebuffer()

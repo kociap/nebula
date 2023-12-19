@@ -31,6 +31,8 @@ namespace nebula::rendering {
   };
 
   Expected<void, Error> initialise(i64 width, i64 height);
+  void teardown();
+
   [[nodiscard]] Framebuffer* get_primary_framebuffer();
   [[nodiscard]] Framebuffer* get_front_postprocess_framebuffer();
   [[nodiscard]] Framebuffer* get_back_postprocess_framebuffer();

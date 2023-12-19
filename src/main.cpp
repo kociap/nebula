@@ -31,12 +31,26 @@ using namespace nebula;
   return ANTON_MOV(uv_vert_source);
 }
 
+struct Shutdown_Guard {
+private:
+  windowing::Window* window = nullptr;
+
+public:
+  Shutdown_Guard(windowing::Window* window): window(window) {}
+
+  ~Shutdown_Guard()
+  {
+    rendering::teardown();
+    windowing::destroy(window);
+  }
+};
+
 int main(int argc, char* argv[])
 {
   (void)argc;
   (void)argv;
 
-  auto* window = windowing::init();
+  windowing::Window* window = windowing::init();
   if(window == nullptr) {
     return 1;
   }
@@ -53,6 +67,8 @@ int main(int argc, char* argv[])
       return 1;
     }
   }
+
+  Shutdown_Guard shutdown_guard(window);
 
   fs::Input_File_Stream uv_frag_file(String("shaders/uv.frag"));
   if(!uv_frag_file.is_open()) {
@@ -143,6 +159,5 @@ int main(int argc, char* argv[])
     windowing::pool_events();
   }
 
-  nebula::windowing::destroy(window);
   return 0;
 }

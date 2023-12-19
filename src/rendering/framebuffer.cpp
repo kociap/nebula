@@ -4,6 +4,7 @@
 
 #include <anton/type_traits/properties.hpp>
 
+#include <logging/logging.hpp>
 #include <rendering/opengl.hpp>
 
 #define ENUM_TO_VALUE(v) static_cast<underlying_type<decltype(v)>>(v)
@@ -42,8 +43,10 @@ namespace nebula::rendering {
           glTextureStorage2DMultisample(color_buffers[i], info.samples,
                                         internal_format, info.width,
                                         info.height, GL_TRUE);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+          glTextureParameteri(color_buffers[i], GL_TEXTURE_WRAP_S,
+                              GL_CLAMP_TO_EDGE);
+          glTextureParameteri(color_buffers[i], GL_TEXTURE_WRAP_T,
+                              GL_CLAMP_TO_EDGE);
           glFramebufferTexture2D(
             GL_FRAMEBUFFER, static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i),
             GL_TEXTURE_2D_MULTISAMPLE, color_buffers[i], 0);
@@ -51,22 +54,26 @@ namespace nebula::rendering {
       } else {
         glCreateTextures(GL_TEXTURE_2D, active_color_buffers,
                          color_buffers.data());
-        for(u32 i = 0; i < active_color_buffers; ++i) {
+        for(i32 i = 0; i < active_color_buffers; ++i) {
           GLenum const internal_format =
             ENUM_TO_VALUE(info.color_buffers[i].internal_format);
           glTextureStorage2D(color_buffers[i], 1, internal_format, info.width,
                              info.height);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+          glTextureParameteri(color_buffers[i], GL_TEXTURE_MIN_FILTER,
+                              GL_LINEAR);
+          glTextureParameteri(color_buffers[i], GL_TEXTURE_MAG_FILTER,
+                              GL_LINEAR);
+          glTextureParameteri(color_buffers[i], GL_TEXTURE_WRAP_S,
+                              GL_CLAMP_TO_EDGE);
+          glTextureParameteri(color_buffers[i], GL_TEXTURE_WRAP_T,
+                              GL_CLAMP_TO_EDGE);
           glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
                                  GL_TEXTURE_2D, color_buffers[i], 0);
         }
       }
 
       u32 active_color_attachments[max_color_attachments];
-      for(u32 i = 0; i < color_buffers.size(); ++i) {
+      for(i32 i = 0; i < color_buffers.size(); ++i) {
         active_color_attachments[i] = GL_COLOR_ATTACHMENT0 + i;
       }
       glDrawBuffers(active_color_buffers, active_color_attachments);
@@ -183,26 +190,32 @@ namespace nebula::rendering {
 
   void Framebuffer::delete_framebuffer()
   {
+    if(!created()) {
+      return;
+    }
+
+    LOG_INFO("deleting framebuffer '{}'", info.name);
     if(depth_buffer != 0) {
       if(info.depth_buffer.buffer_type == Buffer_Type::renderbuffer) {
         glDeleteRenderbuffers(1, &depth_buffer);
       } else {
         glDeleteTextures(1, &depth_buffer);
       }
-    }
-    if(stencil_buffer != 0) {
-      glDeleteRenderbuffers(1, &stencil_buffer);
-    }
-    if(active_color_buffers > 0) {
-      glDeleteTextures(active_color_buffers, &color_buffers[0]);
-    }
-    if(framebuffer != 0) {
-      glDeleteFramebuffers(1, &framebuffer);
+      depth_buffer = 0;
     }
 
+    if(stencil_buffer != 0) {
+      glDeleteRenderbuffers(1, &stencil_buffer);
+      stencil_buffer = 0;
+    }
+
+    if(active_color_buffers > 0) {
+      glDeleteTextures(active_color_buffers, color_buffers.data());
+      active_color_buffers = 0;
+    }
+
+    glDeleteFramebuffers(1, &framebuffer);
     framebuffer = 0;
-    depth_buffer = 0;
-    stencil_buffer = 0;
   }
 
   Framebuffer::Framebuffer(Framebuffer&& fbo)
