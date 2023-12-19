@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
 
     windowing::render_objects(window);
     windowing::swap_buffers(window);
-    windowing::pool_events();
+    windowing::poll_events();
   }
 
   return 0;

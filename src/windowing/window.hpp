@@ -31,7 +31,7 @@ namespace nebula::windowing {
    * events will cause the window and input callbacks associated
    * with those events to be called.
    */
-  void pool_events();
+  void poll_events();
 
   /**
    * Swaps the front and back buffers of the specified window.

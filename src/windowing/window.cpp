@@ -149,7 +149,7 @@ namespace nebula::windowing {
     glfwTerminate();
   }
 
-  void pool_events()
+  void poll_events()
   {
     glfwPollEvents();
   }
