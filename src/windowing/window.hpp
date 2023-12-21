@@ -2,12 +2,13 @@
 
 #include <core/input.hpp>
 #include <core/types.hpp>
+#include <rendering/shader.hpp>
 #include <ui/movable_rect.hpp>
 
 namespace nebula::windowing {
 
   struct Window;
-
+  
   /**
    * Initializes glfw and creates new fullscreen window with
    * callbacks.
@@ -19,6 +20,13 @@ namespace nebula::windowing {
    * @return true if window should close or is nullptr
    */
   [[nodiscard]] bool should_close(Window* window);
+
+  /**
+   * Sets up the camera for wireframe rendering using the provided shader.
+   * @param shader_wire - handle to the wireframe shader
+   */
+  void setup_camera_projection(Window* window,
+                               Handle<rendering::Shader> shader_wire);
 
   /**
    * Function to render all objects like movable_rectangles.
