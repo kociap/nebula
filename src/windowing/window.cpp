@@ -1,12 +1,12 @@
-#include <glad/glad.h>
-
 #include <GLFW/glfw3.h>
 
 #include <core/input.hpp>
+#include <windowing/camera.hpp>
 #include <windowing/window.hpp>
 
 namespace nebula::windowing {
   struct Window {
+    Camera camera;
     i32 width; // window width
     i32 height; // window height
     GLFWwindow* glfw_window; // GLFW window instance
@@ -67,11 +67,16 @@ namespace nebula::windowing {
         for(auto& mr: instance->movable_rectangles) {
           if(mr.is_under_mouse(mouse_position)) {
             instance->currently_moved_rectangle = &mr;
-            instance->last_mouse_position = mouse_position;
           }
+        }
+        instance->last_mouse_position = mouse_position;
+
+        if(instance->currently_moved_rectangle == nullptr) {
+          instance->camera.is_moving = true;
         }
       } else if(action == GLFW_RELEASE) {
         instance->currently_moved_rectangle = nullptr;
+        instance->camera.is_moving = false;
       }
     }
   }
@@ -80,20 +85,31 @@ namespace nebula::windowing {
                                         double ypos)
   {
     auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(win));
-    if(instance->currently_moved_rectangle == nullptr) {
-      return;
+    if(instance->camera.is_moving) {
+      f32 x = static_cast<f32>(xpos);
+      f32 y = static_cast<f32>(ypos);
+
+      math::Vec3 offset;
+      offset.x = x - instance->last_mouse_position.x;
+      offset.y = y - instance->last_mouse_position.y;
+
+      instance->camera.move(offset);
+    } else {
+      if(instance->currently_moved_rectangle == nullptr) {
+        return;
+      }
+
+      f32 x = static_cast<f32>(xpos);
+      f32 y = static_cast<f32>(ypos);
+      // Calculate the new position of the rectangle based on mouse movement
+      Vec2 offset;
+      offset.x = x - instance->last_mouse_position.x;
+      offset.y = y - instance->last_mouse_position.y;
+
+      instance->currently_moved_rectangle->move(offset);
+      instance->last_mouse_position.x = x;
+      instance->last_mouse_position.y = y;
     }
-
-    f32 x = static_cast<f32>(xpos);
-    f32 y = static_cast<f32>(ypos);
-    // Calculate the new position of the rectangle based on mouse movement
-    Vec2 offset;
-    offset.x = x - instance->last_mouse_position.x;
-    offset.y = y - instance->last_mouse_position.y;
-
-    instance->currently_moved_rectangle->move(offset);
-    instance->last_mouse_position.x = x;
-    instance->last_mouse_position.y = y;
   }
 
   void render_objects(Window* window)
@@ -101,6 +117,12 @@ namespace nebula::windowing {
     for(auto& rect: window->movable_rectangles) {
       rect.render();
     }
+  }
+
+  void setup_camera_projection(Window* window,
+                               Handle<rendering::Shader> shader_wire)
+  {
+    window->camera.setup_projection(shader_wire);
   }
 
   static void add_rectangle(Window* window, void (*render_function)(Node_Rect),
@@ -115,6 +137,7 @@ namespace nebula::windowing {
   Window* init()
   {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     // Initialize GLFW
     glfwInit();
 
@@ -134,6 +157,11 @@ namespace nebula::windowing {
       glfwTerminate();
       return nullptr;
     }
+    // Init camera
+    Camera camera;
+    camera.init();
+    win->camera = camera;
+
     // Set custom window pointer to this structure
     glfwSetWindowUserPointer(win->glfw_window, win);
 
@@ -193,4 +221,5 @@ namespace nebula::windowing {
   {
     window->framebuffer_resize_callback = callback;
   }
+
 } // namespace nebula::windowing
