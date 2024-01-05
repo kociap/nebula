@@ -187,7 +187,9 @@ int main(int argc, char* argv[])
     rendering::add_draw_command(cmd);
     rendering::commit_draw();
 
+    windowing::setup_camera_projection(window, shader_wire);
     windowing::render_objects(window);
+
     windowing::swap_buffers(window);
     windowing::poll_events();
   }
