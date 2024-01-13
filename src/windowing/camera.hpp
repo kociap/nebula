@@ -7,8 +7,6 @@
 
 namespace nebula::windowing {
   struct Camera {
-    math::Vec3 location; // Camera location
-    math::Mat4 ortho_proj_matrix;
     bool is_moving;
 
     /**
@@ -26,5 +24,24 @@ namespace nebula::windowing {
      * @param offset - vector, offset from previous mouse x and y location
      */
     void move(math::Vec3 offset);
+
+    /**
+     * Adjusts the camera's zoom level.
+     * This function modifies the camera's zoom level based on the provided zoom speed.
+     * @param zl_delta Zoom level delta.
+     */
+    void zoom(f32 zl_delta);
+
+    /**
+     * Camera borders getter.
+     */
+    [[nodiscard]] math::Vec4 get_borders();
+
+  private:
+    math::Vec3 position; // Camera eye
+    math::Vec4 borders;
+    f32 zoom_level;
+
+    [[nodiscard]] math::Mat4 get_projection_mat() const;
   };
 } // namespace nebula::windowing
