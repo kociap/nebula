@@ -8,7 +8,6 @@
 namespace nebula::windowing {
 
   struct Window;
-  
   /**
    * Initializes glfw and creates new fullscreen window with
    * callbacks.

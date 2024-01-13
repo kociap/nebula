@@ -32,7 +32,7 @@ namespace nebula::windowing {
     (void)scancode;
     (void)mods;
 
-    Window* const window =
+    auto* const window =
       reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
     if(window->keyboard_callback != nullptr) {
       window->keyboard_callback(window, static_cast<Key>(key),
@@ -43,7 +43,7 @@ namespace nebula::windowing {
   static void framebuffer_resize_callback(GLFWwindow* glfw_window, int width,
                                           int height)
   {
-    Window* const window =
+    auto* const window =
       reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
     if(window->framebuffer_resize_callback != nullptr) {
       window->framebuffer_resize_callback(window, width, height);
@@ -79,6 +79,18 @@ namespace nebula::windowing {
         instance->camera.is_moving = false;
       }
     }
+  }
+
+  // Function to handle mouse scroll events
+  static void scroll_callback(GLFWwindow* window, double xoffset,
+                              double yoffset)
+  {
+    (void)xoffset;
+
+    auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+    const f32 zoom_speed = 0.1f;
+    instance->camera.zoom(static_cast<f32>(yoffset) * zoom_speed);
   }
 
   static void cursor_position_callbacks(GLFWwindow* win, double xpos,
@@ -137,7 +149,6 @@ namespace nebula::windowing {
   Window* init()
   {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
     // Initialize GLFW
     glfwInit();
 
@@ -171,6 +182,7 @@ namespace nebula::windowing {
     glfwSetCursorPosCallback(win->glfw_window, cursor_position_callbacks);
     glfwSetFramebufferSizeCallback(win->glfw_window,
                                    framebuffer_resize_callback);
+    glfwSetScrollCallback(win->glfw_window, scroll_callback);
 
     glfwMakeContextCurrent(win->glfw_window);
 
@@ -221,5 +233,4 @@ namespace nebula::windowing {
   {
     window->framebuffer_resize_callback = callback;
   }
-
 } // namespace nebula::windowing

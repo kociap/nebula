@@ -11,6 +11,7 @@ layout(binding = 1, std430) readonly buffer vertex_buffer
   Vertex vertices[];
 };
 
+uniform f32 zoom_level;
 uniform vec3 camera_position;
 uniform mat4 ortho_projection;
 
