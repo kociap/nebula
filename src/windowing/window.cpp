@@ -1,8 +1,11 @@
+#include <windowing/window.hpp>
+
+// Do not include the GL headers.
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <core/input.hpp>
 #include <windowing/camera.hpp>
-#include <windowing/window.hpp>
 
 namespace nebula::windowing {
   struct Window {
