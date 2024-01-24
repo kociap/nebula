@@ -47,8 +47,9 @@ namespace nebula::rendering {
   static GPU_Buffer gpu_vertex_buffer;
   static GPU_Buffer gpu_element_buffer;
   static GPU_Buffer gpu_draw_cmd_buffer;
-  static Flat_Hash_Map<u64, Draw_Elements_Command> persistent_draw_commands_map;
-  static Array<Draw_Elements_Command> draw_cmds;
+  static Flat_Hash_Map<u64, Draw_Elements_Command>*
+    persistent_draw_commands_map;
+  static Array<Draw_Elements_Command>* draw_cmds;
   static Buffer<Vertex> vertex_buffer;
   static Buffer<u32> element_buffer;
   static Buffer<Draw_Elements_Command> draw_cmd_buffer;
@@ -164,6 +165,10 @@ namespace nebula::rendering {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0, 0, 0, 1);
 
+    persistent_draw_commands_map =
+      new_obj<Flat_Hash_Map<u64, Draw_Elements_Command>>();
+    draw_cmds = new_obj<Array<Draw_Elements_Command>>();
+
     create_buffers();
 
     Expected<void, Error> result = create_framebuffers(width, height);
@@ -176,8 +181,9 @@ namespace nebula::rendering {
 
   void teardown()
   {
-    draw_cmds.reset();
     destroy_framebuffers();
+    delete_obj(draw_cmds);
+    delete_obj(persistent_draw_commands_map);
   }
 
   Framebuffer* get_primary_framebuffer()
@@ -245,13 +251,13 @@ namespace nebula::rendering {
 
   void add_draw_command(Draw_Elements_Command const command)
   {
-    draw_cmds.push_back(command);
+    draw_cmds->push_back(command);
   }
 
   void add_draw_command(Draw_Persistent_Geometry_Command const cmd)
   {
-    auto iter = persistent_draw_commands_map.find(cmd.handle);
-    if(iter == persistent_draw_commands_map.end()) {
+    auto iter = persistent_draw_commands_map->find(cmd.handle);
+    if(iter == persistent_draw_commands_map->end()) {
       LOG_WARNING("persistent draw command ID={} not found. ignoring draw.",
                   cmd.handle);
       return;
@@ -265,24 +271,24 @@ namespace nebula::rendering {
 
   void commit_draw()
   {
-    if(draw_cmds.size() <= 0) {
+    if(draw_cmds->size() <= 0) {
       return;
     }
 
     i64 const remaining_space = draw_cmd_buffer.end - draw_cmd_buffer.head;
-    if(draw_cmds.size() > remaining_space) {
+    if(draw_cmds->size() > remaining_space) {
       draw_cmd_buffer.head = draw_cmd_buffer.buffer;
     }
 
-    memcpy(draw_cmd_buffer.head, draw_cmds.data(),
-           draw_cmds.size() * sizeof(Draw_Elements_Command));
+    memcpy(draw_cmd_buffer.head, draw_cmds->data(),
+           draw_cmds->size() * sizeof(Draw_Elements_Command));
     i64 const offset = (draw_cmd_buffer.head - draw_cmd_buffer.buffer) *
                        sizeof(Draw_Elements_Command);
     glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (void*)offset,
-                                draw_cmds.size(),
+                                draw_cmds->size(),
                                 sizeof(Draw_Elements_Command));
-    draw_cmd_buffer.head += draw_cmds.size();
-    draw_cmds.clear();
+    draw_cmd_buffer.head += draw_cmds->size();
+    draw_cmds->clear();
   }
 
   void render_texture_quad()

@@ -8,6 +8,7 @@
 #include <anton/string.hpp>
 #include <anton/string_view.hpp>
 
+#include <core/error.hpp>
 #include <core/handle.hpp>
 #include <core/types.hpp>
 
@@ -20,6 +21,7 @@ namespace nebula::rendering {
   struct Shader;
   struct Shader_Stage;
 
+  anton::Expected<void, Error> initialise_shaders();
   void teardown_shaders();
 
   [[nodiscard]] Expected<Handle<Shader_Stage>, String>

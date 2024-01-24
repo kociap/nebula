@@ -110,20 +110,14 @@ static void framebuffer_resize_callback(windowing::Window* const window,
   glViewport(0, 0, width, height);
 }
 
-struct Shutdown_Guard {
-private:
-  windowing::Window* window = nullptr;
-
-public:
-  Shutdown_Guard(windowing::Window* window): window(window) {}
-
-  ~Shutdown_Guard()
-  {
-    rendering::teardown();
-    rendering::teardown_shaders();
-    windowing::destroy(window);
+#define INITIALISE(fn, msg)            \
+  {                                    \
+    Expected<void, Error> result = fn; \
+    if(!result) {                      \
+      LOG_FATAL(msg, result.error());  \
+      return 1;                        \
+    }                                  \
   }
-};
 
 int main(int argc, char* argv[])
 {
@@ -140,15 +134,11 @@ int main(int argc, char* argv[])
   i64 const width = static_cast<i64>(dim.x);
   i64 const height = static_cast<i64>(dim.y);
 
-  {
-    Expected<void, Error> result = rendering::initialise(width, height);
-    if(!result) {
-      LOG_FATAL("rendering initialisation failed: {}", result.error());
-      return 1;
-    }
-  }
-
-  Shutdown_Guard shutdown_guard(window);
+  // TODO: Does not deinitialise previously initialised modules on failure.
+  INITIALISE(rendering::initialise(width, height),
+             "initialisation of rendering failed: {}");
+  INITIALISE(rendering::initialise_shaders(),
+             "initialisation of shaders failed: {}");
 
   windowing::set_keyboard_callback(window, keyboard_callback);
   windowing::set_framebuffer_resize_callback(window,
@@ -194,6 +184,10 @@ int main(int argc, char* argv[])
     windowing::swap_buffers(window);
     windowing::poll_events();
   }
+
+  rendering::teardown_shaders();
+  rendering::teardown();
+  windowing::destroy(window);
 
   return 0;
 }

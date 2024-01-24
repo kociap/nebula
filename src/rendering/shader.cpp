@@ -47,24 +47,31 @@ namespace nebula::rendering {
     }
   }
 
-  static Array<Shader_Stage> shader_stages;
+  static Array<Shader_Stage>* shader_stages;
   static u64 shader_stage_handle_index_counter = 0;
-  static Array<Shader> shaders;
+  static Array<Shader>* shaders;
   static u64 shader_handle_index_counter = 0;
+
+  anton::Expected<void, Error> initialise_shaders()
+  {
+    shader_stages = new_obj<Array<Shader_Stage>>();
+    shaders = new_obj<Array<Shader>>();
+    return anton::expected_value;
+  }
 
   void teardown_shaders()
   {
-    shaders.reset();
-    shader_stages.reset();
+    delete_obj(shaders);
+    delete_obj(shader_stages);
   }
 
   [[nodiscard]] static Shader_Stage*
   find_shader_stage(Handle<Shader_Stage> const handle)
   {
     auto r = anton::find_if(
-      shader_stages.begin(), shader_stages.end(),
+      shader_stages->begin(), shader_stages->end(),
       [handle](Shader_Stage const& stage) { return stage.handle == handle; });
-    if(r != shader_stages.end()) {
+    if(r != shader_stages->end()) {
       return &*r;
     } else {
       return nullptr;
@@ -74,9 +81,9 @@ namespace nebula::rendering {
   [[nodiscard]] static Shader* find_shader(Handle<Shader> const handle)
   {
     auto r = anton::find_if(
-      shaders.begin(), shaders.end(),
+      shaders->begin(), shaders->end(),
       [handle](Shader const& shader) { return shader.handle == handle; });
-    if(r != shaders.end()) {
+    if(r != shaders->end()) {
       return &*r;
     } else {
       return nullptr;
@@ -116,7 +123,7 @@ namespace nebula::rendering {
     }
 
     Handle<Shader_Stage> handle{shader_stage_handle_index_counter++};
-    shader_stages.push_back(Shader_Stage{ANTON_MOV(name), handle, gl_handle});
+    shader_stages->push_back(Shader_Stage{ANTON_MOV(name), handle, gl_handle});
     return {anton::expected_value, handle};
   }
 
@@ -124,7 +131,7 @@ namespace nebula::rendering {
   {
     u32 const gl_handle = glCreateProgram();
     Handle<Shader> handle{shader_handle_index_counter++};
-    shaders.push_back(Shader({}, ANTON_MOV(name), handle, gl_handle));
+    shaders->push_back(Shader({}, ANTON_MOV(name), handle, gl_handle));
     return handle;
   }
 
