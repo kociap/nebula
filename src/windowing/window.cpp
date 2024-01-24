@@ -12,20 +12,11 @@ namespace nebula::windowing {
   struct Window {
     GLFWwindow* glfw_window; // GLFW window instance
     Vec2 last_mouse_position; // last mouse position
-    List<Movable_Rect> movable_rectangles; // All created rectangles/gates
-    Movable_Rect* currently_moved_rectangle; // Currently moved rect/gate
+    Movable_Gate* currently_moved_rectangle; // Currently moved rect/gate
     keyboard_callback_t keyboard_callback = nullptr;
     framebuffer_resize_callback_t framebuffer_resize_callback = nullptr;
   };
 
-  /**
-   * Adds new rectangle. Function used by MR buttons.
-   * @param window - window instance
-   * @param render_function - render function inherited from MR button.
-   * @param rectangle_dimensions - dimensions inherited from MR button.
-   */
-  static void add_rectangle(Window* window, void (*render_function)(Node_Rect),
-                            Vec2 rectangle_dimensions);
 
   static void keyboard_button_callback(GLFWwindow* glfw_window, int key,
                                        int scancode, int action, int mods)
@@ -65,11 +56,11 @@ namespace nebula::windowing {
         mouse_position.x = static_cast<f32>(x);
         mouse_position.y = static_cast<f32>(y);
         // Check if the mouse click is within any rectangle
-        for(auto& mr: instance->movable_rectangles) {
-          if(mr.is_under_mouse(mouse_position)) {
-            instance->currently_moved_rectangle = &mr;
-          }
-        }
+        // for(auto& mr: instance->movable_rectangles) {
+        // if(mr.is_under_mouse(mouse_position)) {
+        //    instance->currently_moved_rectangle = &mr;
+        //  }
+        // }
         instance->last_mouse_position = mouse_position;
 
         if(instance->currently_moved_rectangle == nullptr) {
@@ -132,18 +123,9 @@ namespace nebula::windowing {
 
   void render_objects(Window* window)
   {
-    for(auto& rect: window->movable_rectangles) {
-      rect.render();
-    }
+      (void) window;
   }
 
-  static void add_rectangle(Window* window, void (*render_function)(Node_Rect),
-                            Vec2 rectangle_dimensions)
-  {
-    Vec2 const dimensions = get_framebuffer_size(window);
-    Movable_Rect rect(render_function, rectangle_dimensions, dimensions);
-    window->movable_rectangles.emplace_front(rect);
-  }
 
   Window* init()
   {

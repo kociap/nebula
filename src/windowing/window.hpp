@@ -3,7 +3,7 @@
 #include <core/input.hpp>
 #include <core/types.hpp>
 #include <rendering/shader.hpp>
-#include <ui/movable_rect.hpp>
+#include <ui/movable_gate.hpp>
 
 namespace nebula::windowing {
 
