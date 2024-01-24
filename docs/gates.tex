@@ -1,0 +1,147 @@
+\documentclass{article}
+
+\begin{document}
+
+\section{Logical Gates Documentation}
+
+\subsection{AND Gate}
+
+\begin{center}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Input A} & \textbf{Input B} & \textbf{Output} \\
+    \hline
+    0 & 0 & 0 \\
+    0 & 1 & 0 \\
+    1 & 0 & 0 \\
+    1 & 1 & 1 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Definition} 
+The AND gate is a digital logic gate that produces an output signal only when both of its inputs are true (high, or 1). It returns a low (false, or 0) signal if either or both of its inputs are false.
+
+\subsubsection{Description} 
+The AND gate symbol is typically represented as a triangle pointing to the right, with two inputs and one output. It is a fundamental building block in digital circuits and is used to perform logical conjunction operations.
+
+\subsection{OR Gate}
+\begin{center}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Input A} & \textbf{Input B} & \textbf{Output} \\
+    \hline
+    0 & 0 & 0 \\
+    0 & 1 & 1 \\
+    1 & 0 & 1 \\
+    1 & 1 & 1 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Definition} 
+The OR gate is a digital logic gate that outputs a true (high, or 1) signal when at least one of its inputs is true. It produces a false (low, or 0) signal only if both of its inputs are false.
+
+\subsubsection{Description} 
+The OR gate is symbolized by a shape similar to the letter 'D,' with two inputs and one output. It is widely employed in digital circuit design to implement logical disjunction.
+
+\subsection{XOR Gate}
+\begin{center}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Input A} & \textbf{Input B} & \textbf{Output} \\
+    \hline
+    0 & 0 & 0 \\
+    0 & 1 & 1 \\
+    1 & 0 & 1 \\
+    1 & 1 & 0 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Definition} 
+The XOR (exclusive OR) gate is a digital logic gate that produces a true output when the number of true inputs is odd. It returns a false output for an even number of true inputs.
+
+\subsubsection{Description} 
+The XOR gate is symbolized by a curved line with two inputs and one output. It is frequently used in applications where an exclusive choice or comparison is required.
+
+\subsection{NAND Gate}
+\begin{center}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Input A} & \textbf{Input B} & \textbf{Output} \\
+    \hline
+    0 & 0 & 1 \\
+    0 & 1 & 1 \\
+    1 & 0 & 1 \\
+    1 & 1 & 0 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Definition} 
+The NAND gate is a digital logic gate that acts as an inverted AND gate. It produces a false output only when both of its inputs are true, and it returns a true output in all other cases.
+
+\subsubsection{Description} 
+The NAND gate is represented by a triangle pointing to the right with a small circle at its output. It is a universal gate, meaning that any other logic gate can be constructed using only NAND gates.
+
+\subsection{NOR Gate}
+\begin{center}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Input A} & \textbf{Input B} & \textbf{Output} \\
+    \hline
+    0 & 0 & 1 \\
+    0 & 1 & 0 \\
+    1 & 0 & 0 \\
+    1 & 1 & 0 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Definition} 
+The NOR gate is a digital logic gate that serves as an inverted OR gate. It produces a true output only when both of its inputs are false, and it returns a false output if at least one input is true.
+
+\subsubsection{Description} 
+The NOR gate symbol is similar to an OR gate but with a small circle at its output. Like the NAND gate, the NOR gate is also a universal gate.
+
+\subsection{XNOR Gate}
+\begin{center}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{Input A} & \textbf{Input B} & \textbf{Output} \\
+    \hline
+    0 & 0 & 1 \\
+    0 & 1 & 0 \\
+    1 & 0 & 0 \\
+    1 & 1 & 1 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Definition} 
+The XNOR (exclusive NOR) gate is a digital logic gate that produces a true output when the number of true inputs is even. It returns a false output for an odd number of true inputs.
+
+\subsubsection{Description} 
+The XNOR gate is symbolized by a curved line similar to the XOR gate but with a small circle at its output. It is commonly used for equality checking in digital systems.
+
+\subsection{NOT Gate}
+\begin{center}
+  \begin{tabular}{|c|c|}
+    \hline
+    \textbf{Input} & \textbf{Output} \\
+    \hline
+    0 & 1 \\
+    1 & 0 \\
+    \hline
+  \end{tabular}
+\end{center}
+
+\subsubsection{Definition} 
+The NOT gate, also known as an inverter, is a digital logic gate that outputs the opposite of its input signal. If the input is true, the output is false, and vice versa.
+
+\subsubsection{Description} 
+The NOT gate is represented by a triangle pointing to the right with a small circle at its input. It is a simple yet essential gate used to complement or invert signals in digital circuits.
+
+\end{document}
+
