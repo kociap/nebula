@@ -52,6 +52,12 @@ namespace nebula::rendering {
   static Array<Shader> shaders;
   static u64 shader_handle_index_counter = 0;
 
+  void teardown_shaders()
+  {
+    shaders.reset();
+    shader_stages.reset();
+  }
+
   [[nodiscard]] static Shader_Stage*
   find_shader_stage(Handle<Shader_Stage> const handle)
   {

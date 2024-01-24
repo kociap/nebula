@@ -120,6 +120,7 @@ public:
   ~Shutdown_Guard()
   {
     rendering::teardown();
+    rendering::teardown_shaders();
     windowing::destroy(window);
   }
 };

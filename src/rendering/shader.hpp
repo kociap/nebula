@@ -17,13 +17,14 @@ namespace nebula::rendering {
     fragment,
   };
 
+  struct Shader;
   struct Shader_Stage;
+
+  void teardown_shaders();
 
   [[nodiscard]] Expected<Handle<Shader_Stage>, String>
   compile_shader_stage(String name, Shader_Stage_Kind type,
                        String const& source);
-
-  struct Shader;
 
   [[nodiscard]] Handle<Shader> create_shader(String name);
   [[nodiscard]] bool attach_shader_stage(Handle<Shader> shader,

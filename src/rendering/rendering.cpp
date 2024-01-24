@@ -176,6 +176,7 @@ namespace nebula::rendering {
 
   void teardown()
   {
+    draw_cmds.reset();
     destroy_framebuffers();
   }
 
