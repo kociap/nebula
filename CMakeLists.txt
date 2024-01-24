@@ -43,7 +43,7 @@ FetchContent_MakeAvailable(glad)
 FetchContent_Declare(
   anton_core
   GIT_REPOSITORY https://github.com/kociap/anton_core.git
-  GIT_TAG 015ea68db52411fed9daba27440a2a0a1287bba5
+  GIT_TAG 89f26c3947701407acb6e6cb8130db4d22b17c75
 )
 FetchContent_MakeAvailable(anton_core)
 
