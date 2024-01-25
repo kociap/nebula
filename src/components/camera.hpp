@@ -9,8 +9,6 @@ namespace nebula {
   struct Camera {
     math::Vec3 position;
     f32 zoom_level = 1.0f;
-    bool is_moving = false;
-
     /**
      * Initialize camera parameters.
      */

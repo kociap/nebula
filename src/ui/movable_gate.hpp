@@ -29,9 +29,9 @@ namespace nebula {
     ~Movable_Gate();
 
     /**
-     * Renders the gate and its ports.
+     * Renders the gate.
      */
-    void render() const;
+    void add_to_render_loop() const;
 
     /**
      * Check whether the object is located at the given mouse location

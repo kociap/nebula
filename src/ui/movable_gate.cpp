@@ -35,17 +35,9 @@ namespace nebula {
     }
   }
 
-  void Movable_Gate::Movable_Gate::render() const
+  void Movable_Gate::Movable_Gate::add_to_render_loop() const
   {
-    // TODO: Tender loop
-
-    // Render ports
-    for(Port* p: in_ports) {
-      p->render();
-    }
-    for(Port* p: out_ports) {
-      p->render();
-    }
+    // TODO: Adding gate to render loop
   }
 
   bool Movable_Gate::is_under_mouse(math::Vec2 const mouse_location) const

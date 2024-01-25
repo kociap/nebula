@@ -40,15 +40,18 @@ namespace nebula {
     /**
      * Renders the circle shaped port visually.
      */
-    void render() const;
+    void add_to_render_loop() const;
 
     /**
      * @return Ports coordinates.
      */
     [[nodiscard]] Vec2 get_coordinates() const;
 
+    [[nodiscard]] bool is_under_mouse(Vec2 mouse_position) const;
+
   private:
     Vec2 coordinates;
+    f32 radius;
     List<Port*> connections;
     port_t type;
   };

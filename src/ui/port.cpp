@@ -5,6 +5,7 @@ namespace nebula {
   {
     this->coordinates = coordinates;
     this->type = type;
+    radius = 0.1f; // Adjust this value
   }
 
   void Port::move(nebula::Vec2 const offset)
@@ -13,23 +14,9 @@ namespace nebula {
     coordinates.y += offset.y;
   }
 
-  void Port::render() const
+  void Port::add_to_render_loop() const
   {
-    // Set color based on port type
-    if(type == IN) {
-      // Red for IN port
-    } else {
-      // Green for OUT port
-    }
-
-    // Draw circle shaped port
-
-    if(type == OUT) { // Draw connections
-      for(Port* p: connections) {
-        Vec2 sec_point = p->get_coordinates();
-        // Draw connection
-      }
-    }
+    // TODO: Add port to render loop
   }
 
   void Port::remove_connection(Port* old_port)
@@ -66,5 +53,14 @@ namespace nebula {
   Vec2 Port::get_coordinates() const
   {
     return coordinates;
+  }
+
+  bool Port::is_under_mouse(Vec2 const mouse_position) const
+  {
+    f32 const distance =
+      math::sqrt(math::pow(mouse_position.x - coordinates.x, 2) +
+                 math::pow(mouse_position.y - coordinates.y, 2));
+    bool const clicked = (distance <= radius);
+    return clicked;
   }
 } // namespace nebula

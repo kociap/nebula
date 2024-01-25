@@ -7,16 +7,29 @@
 #include <components/camera.hpp>
 #include <core/input.hpp>
 #include <logging/logging.hpp>
+#include <ui/ui.hpp>
+
 
 namespace nebula::windowing {
+  enum window_mode {
+    WIN_MODE_DEFAULT,
+    WIN_MODE_CAMERA_MOVING,
+    WIN_MODE_GATE_MOVING,
+    WIN_MODE_PORT_CONNECTING,
+  };
+
   struct Window {
+    window_mode mode;
+    UI ui;
+    i32 width; // window width
+    i32 height; // window height
     GLFWwindow* glfw_window; // GLFW window instance
     Vec2 last_mouse_position; // last mouse position
-    Movable_Gate* currently_moved_rectangle; // Currently moved rect/gate
+    Movable_Gate* currently_moved_gate; // Currently moved rect/gate
+    Port* connected_port;
     keyboard_callback_t keyboard_callback = nullptr;
     framebuffer_resize_callback_t framebuffer_resize_callback = nullptr;
   };
-
 
   static void keyboard_button_callback(GLFWwindow* glfw_window, int key,
                                        int scancode, int action, int mods)
@@ -55,20 +68,27 @@ namespace nebula::windowing {
         Vec2 mouse_position;
         mouse_position.x = static_cast<f32>(x);
         mouse_position.y = static_cast<f32>(y);
-        // Check if the mouse click is within any rectangle
-        // for(auto& mr: instance->movable_rectangles) {
-        // if(mr.is_under_mouse(mouse_position)) {
-        //    instance->currently_moved_rectangle = &mr;
-        //  }
-        // }
-        instance->last_mouse_position = mouse_position;
+        instance->currently_moved_gate =
+          instance->ui.check_if_gate_clicked(mouse_position);
 
-        if(instance->currently_moved_rectangle == nullptr) {
-          get_primary_camera().is_moving = true;
+        instance->last_mouse_position = mouse_position;
+        if(instance->currently_moved_gate != nullptr) {
+          instance->mode = WIN_MODE_GATE_MOVING;
+          return;
         }
+
+        instance->connected_port =
+          instance->ui.check_if_port_clicked(mouse_position);
+        if(instance->connected_port != nullptr) {
+          instance->mode = WIN_MODE_PORT_CONNECTING;
+          return;
+        }
+
+        instance->mode = WIN_MODE_CAMERA_MOVING;
       } else if(action == GLFW_RELEASE) {
-        instance->currently_moved_rectangle = nullptr;
-        get_primary_camera().is_moving = false;
+        instance->currently_moved_gate = nullptr;
+        instance->connected_port = nullptr;
+        instance->mode = WIN_MODE_DEFAULT;
       }
     }
   }
@@ -94,7 +114,7 @@ namespace nebula::windowing {
                                         double ypos)
   {
     auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(win));
-    if(get_primary_camera().is_moving) {
+    if(instance->mode == WIN_MODE_CAMERA_MOVING) {
       f32 x = static_cast<f32>(xpos);
       f32 y = static_cast<f32>(ypos);
 
@@ -103,11 +123,7 @@ namespace nebula::windowing {
       offset.y = y - instance->last_mouse_position.y;
 
       get_primary_camera().move(offset);
-    } else {
-      if(instance->currently_moved_rectangle == nullptr) {
-        return;
-      }
-
+    } else if(instance->mode == WIN_MODE_GATE_MOVING) {
       f32 x = static_cast<f32>(xpos);
       f32 y = static_cast<f32>(ypos);
       // Calculate the new position of the rectangle based on mouse movement
@@ -115,15 +131,17 @@ namespace nebula::windowing {
       offset.x = x - instance->last_mouse_position.x;
       offset.y = y - instance->last_mouse_position.y;
 
-      instance->currently_moved_rectangle->move(offset);
+      instance->currently_moved_gate->move(offset);
       instance->last_mouse_position.x = x;
       instance->last_mouse_position.y = y;
+    } else if(instance->mode == WIN_MODE_PORT_CONNECTING) {
+      // TODO: Implement port connecting
     }
   }
 
-  void render_objects(Window* window)
+  void add_objects_to_render_loop(Window* window)
   {
-      (void) window;
+    window->ui.add_gates_to_render_loop();
   }
 
 
@@ -138,7 +156,7 @@ namespace nebula::windowing {
     GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary_monitor);
 
-    win->currently_moved_rectangle = nullptr;
+    win->currently_moved_gate = nullptr;
     // Create a GLFW window
     win->glfw_window =
       glfwCreateWindow(mode->width, mode->height, "Nebula", nullptr, nullptr);
@@ -147,6 +165,9 @@ namespace nebula::windowing {
       glfwTerminate();
       return nullptr;
     }
+
+    win->ui = UI();
+    win->mode = WIN_MODE_DEFAULT;
 
     // Set custom window pointer to this structure
     glfwSetWindowUserPointer(win->glfw_window, win);
