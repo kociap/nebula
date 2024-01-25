@@ -1,8 +1,5 @@
 #pragma once
 
-#include <anton/math/mat4.hpp>
-#include <anton/math/vec3.hpp>
-#include <core/types.hpp>
 #include <rendering/shader.hpp>
 
 namespace nebula {
@@ -18,14 +15,27 @@ namespace nebula {
      * Changes cameras location
      * @param offset - vector, offset from previous mouse x and y location
      */
-    void move(math::Vec3 offset);
+    void move(math::Vec2 offset);
 
     /**
      * Adjusts the camera's zoom level.
      * This function modifies the camera's zoom level based on the provided zoom speed.
-     * @param zl_delta Zoom level delta.
+     * @param factor Zoom level delta.
      */
     void zoom(f32 factor);
+
+
+    /**
+     * Returns the coordinates in the scene located at the clicked
+     * location in the window.
+     * @param win_position - position on the screen
+     * @param width - window width
+     * @param height - window height
+     * @return scene coordinates
+     */
+    [[nodiscard]] Vec2 window_to_scene_position(Vec2 win_position, i32 width,
+                                                i32 height) const;
+
   };
 
   [[nodiscard]] math::Mat4 get_view_matrix(Camera const& camera);

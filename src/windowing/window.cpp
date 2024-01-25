@@ -6,16 +6,17 @@
 
 #include <components/camera.hpp>
 #include <core/input.hpp>
+
 #include <logging/logging.hpp>
 #include <ui/ui.hpp>
 
 
 namespace nebula::windowing {
-  enum window_mode {
-    WIN_MODE_DEFAULT,
-    WIN_MODE_CAMERA_MOVING,
-    WIN_MODE_GATE_MOVING,
-    WIN_MODE_PORT_CONNECTING,
+  enum struct window_mode {
+    none,
+    camera_moving,
+    gate_moving,
+    port_connecting,
   };
 
   struct Window {
@@ -53,6 +54,8 @@ namespace nebula::windowing {
     if(window->framebuffer_resize_callback != nullptr) {
       window->framebuffer_resize_callback(window, width, height);
     }
+    window->width = width;
+    window->height = height;
   }
 
   static void mouse_button_callbacks(GLFWwindow* win, int button, int action,
@@ -65,30 +68,32 @@ namespace nebula::windowing {
         double x, y;
         glfwGetCursorPos(win, &x, &y);
 
-        Vec2 mouse_position;
-        mouse_position.x = static_cast<f32>(x);
-        mouse_position.y = static_cast<f32>(y);
+        Camera& cam = get_primary_camera();
+        Vec2 scene_position = cam.window_to_scene_position(
+                {static_cast<f32>(x), static_cast<f32>(y)}, instance->width,
+                instance->height);
         instance->currently_moved_gate =
-          instance->ui.check_if_gate_clicked(mouse_position);
+          instance->ui.check_if_gate_clicked(scene_position);
 
-        instance->last_mouse_position = mouse_position;
+        instance->last_mouse_position = scene_position;
         if(instance->currently_moved_gate != nullptr) {
-          instance->mode = WIN_MODE_GATE_MOVING;
+          instance->mode = window_mode::gate_moving;
           return;
         }
 
         instance->connected_port =
-          instance->ui.check_if_port_clicked(mouse_position);
+          instance->ui.check_if_port_clicked(scene_position);
         if(instance->connected_port != nullptr) {
-          instance->mode = WIN_MODE_PORT_CONNECTING;
+          instance->mode = window_mode::port_connecting;
           return;
         }
 
-        instance->mode = WIN_MODE_CAMERA_MOVING;
+        instance->mode = window_mode::camera_moving;
+        instance->last_mouse_position = scene_position;
       } else if(action == GLFW_RELEASE) {
         instance->currently_moved_gate = nullptr;
         instance->connected_port = nullptr;
-        instance->mode = WIN_MODE_DEFAULT;
+        instance->mode = window_mode::none;
       }
     }
   }
@@ -98,14 +103,13 @@ namespace nebula::windowing {
                               double yoffset)
   {
     (void)xoffset;
-
-    auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
+    (void)window;
 
     Camera& primary_camera = get_primary_camera();
     if(yoffset < 0.0) {
-      primary_camera.zoom(2);
+      primary_camera.zoom(1.25);
     } else {
-      primary_camera.zoom(0.5);
+      primary_camera.zoom(0.8);
     }
     LOG_DEBUG("zoom changed: {}", primary_camera.zoom_level);
   }
@@ -114,29 +118,25 @@ namespace nebula::windowing {
                                         double ypos)
   {
     auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(win));
-    if(instance->mode == WIN_MODE_CAMERA_MOVING) {
-      f32 x = static_cast<f32>(xpos);
-      f32 y = static_cast<f32>(ypos);
 
-      math::Vec3 offset;
-      offset.x = x - instance->last_mouse_position.x;
-      offset.y = y - instance->last_mouse_position.y;
+    Camera& cam = get_primary_camera();
+    Vec2 window_position = {static_cast<f32>(xpos), static_cast<f32>(ypos)};
+    Vec2 scene_position = cam.window_to_scene_position(
+            window_position, instance->width, instance->height);
 
-      get_primary_camera().move(offset);
-    } else if(instance->mode == WIN_MODE_GATE_MOVING) {
-      f32 x = static_cast<f32>(xpos);
-      f32 y = static_cast<f32>(ypos);
-      // Calculate the new position of the rectangle based on mouse movement
-      Vec2 offset;
-      offset.x = x - instance->last_mouse_position.x;
-      offset.y = y - instance->last_mouse_position.y;
+    math::Vec2 offset;
+    offset.x = scene_position.x - instance->last_mouse_position.x;
+    offset.y = scene_position.y - instance->last_mouse_position.y;
 
+    if(instance->mode == window_mode::camera_moving) {
+      cam.move(offset);
+    } else if(instance->mode == window_mode::gate_moving) {
       instance->currently_moved_gate->move(offset);
-      instance->last_mouse_position.x = x;
-      instance->last_mouse_position.y = y;
-    } else if(instance->mode == WIN_MODE_PORT_CONNECTING) {
+    } else if(instance->mode == window_mode::port_connecting) {
       // TODO: Implement port connecting
     }
+    instance->last_mouse_position.x = scene_position.x;
+    instance->last_mouse_position.y = scene_position.y;
   }
 
   void add_objects_to_render_loop(Window* window)
@@ -167,7 +167,8 @@ namespace nebula::windowing {
     }
 
     win->ui = UI();
-    win->mode = WIN_MODE_DEFAULT;
+    win->ui.add_movable_gate({0.4f, 0.2f}, {-1.0f, 1.0f, -1.0f, 1.0f}, 2, 1);
+    win->mode = window_mode::none;
 
     // Set custom window pointer to this structure
     glfwSetWindowUserPointer(win->glfw_window, win);

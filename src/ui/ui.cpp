@@ -2,13 +2,12 @@
 
 namespace nebula {
 
-  void UI::add_movable_gate(const anton::math::Vec2 rectangle_dimensions,
-                            const anton::math::Vec2 window_dimensions,
-                            const anton::u8 num_in_ports,
-                            const anton::u8 num_out_ports)
+  void UI::add_movable_gate(Vec2 const rectangle_dimensions,
+                            math::Vec4 const camera_borders,
+                            u8 const num_in_ports, u8 const num_out_ports)
   {
-    Movable_Gate new_gate = Movable_Gate(
-      rectangle_dimensions, window_dimensions, num_in_ports, num_out_ports);
+    Movable_Gate new_gate = Movable_Gate(rectangle_dimensions, camera_borders,
+                                         num_in_ports, num_out_ports);
     gates.emplace_front(new_gate);
     for(Port* p: new_gate.in_ports) {
       ports.emplace_front(p);
@@ -18,7 +17,7 @@ namespace nebula {
     }
   }
 
-  Movable_Gate* UI::check_if_gate_clicked(Vec2 mouse_position)
+  Movable_Gate* UI::check_if_gate_clicked(Vec2 const mouse_position)
   {
     for(Movable_Gate& mg: gates) {
       if(mg.is_under_mouse(mouse_position)) {
@@ -28,7 +27,7 @@ namespace nebula {
     return nullptr;
   }
 
-  Port* UI::check_if_port_clicked(Vec2 mouse_position)
+  Port* UI::check_if_port_clicked(Vec2 const mouse_position)
   {
     for(Port* p: ports) {
       if(p->is_under_mouse(mouse_position)) {
