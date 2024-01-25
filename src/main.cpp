@@ -222,10 +222,10 @@ int main(int argc, char* argv[])
       rendering::write_geometry(triangle, indices);
     cmd.instance_count = 1;
     rendering::add_draw_command(cmd);
+
+    windowing::add_objects_to_render_loop(window);
+
     rendering::commit_draw();
-
-    windowing::render_objects(window);
-
     windowing::swap_buffers(window);
     windowing::poll_events();
   }

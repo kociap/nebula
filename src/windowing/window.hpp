@@ -23,7 +23,7 @@ namespace nebula::windowing {
   /**
    * Function to render all objects like movable_rectangles.
    */
-  void render_objects(Window* window);
+  void add_objects_to_render_loop(Window* window);
 
   /**
    * Processes all pending events.

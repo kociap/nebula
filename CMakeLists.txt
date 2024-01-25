@@ -83,6 +83,7 @@ target_sources(nebula
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_gate.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/port.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/ui.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/window.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/window.hpp"
 )
