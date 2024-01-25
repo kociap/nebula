@@ -181,15 +181,6 @@ int main(int argc, char* argv[])
   rendering::bind_draw_buffers();
   rendering::bind_transient_geometry_buffers();
 
-  Vertex triangle[] = {
-    Vertex{.position = {1.0f, 1.0f, -5.0f}, .normal = {}, .uv = {1.0f, 1.0f}},
-    Vertex{.position = {-1.0f, 1.0f, -5.0f}, .normal = {}, .uv = {0.0f, 1.0f}},
-    Vertex{.position = {1.0f, -1.0f, -5.0f}, .normal = {}, .uv = {1.0f, 0.0f}},
-    Vertex{.position = {-1.0f, -1.0f, -5.0f}, .normal = {}, .uv = {0.0f, 0.0f}},
-  };
-  u32 indices[] = {
-    0, 1, 2, 1, 3, 2,
-  };
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
 
@@ -206,26 +197,23 @@ int main(int argc, char* argv[])
     math::Mat4 const p_mat =
       get_projection_matrix(primary_camera, viewport_size);
     math::Mat4 const vp_mat = p_mat * v_mat;
-    f32 const zoom = get_zoom(primary_camera);
+    f32 const zoom_level = get_zoom(primary_camera);
 
-    render_grid(v_mat, inv_aspect, zoom);
+    render_grid(v_mat, inv_aspect, zoom_level);
 
     bool const bind_result = rendering::bind_shader(shader_wire);
     if(!bind_result) {
       LOG_ERROR("could not bind 'shader_wire'");
     }
 
-    rendering::set_uniform_f32(shader_wire, "zoom", get_zoom(primary_camera));
-    rendering::set_uniform_mat4(shader_wire, "vp_mat", vp_mat);
 
-    rendering::Draw_Elements_Command cmd =
-      rendering::write_geometry(triangle, indices);
-    cmd.instance_count = 1;
-    rendering::add_draw_command(cmd);
+    rendering::set_uniform_f32(shader_wire, "zoom_level", zoom_level);
+    rendering::set_uniform_mat4(shader_wire, "vp_mat", vp_mat);
 
     windowing::add_objects_to_render_loop(window);
 
     rendering::commit_draw();
+
     windowing::swap_buffers(window);
     windowing::poll_events();
   }

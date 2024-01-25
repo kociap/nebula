@@ -3,7 +3,7 @@
 #include <core/types.hpp>
 
 namespace nebula {
-  enum port_t { IN, OUT };
+  enum struct port_t { in, out };
 
   struct Port {
   public:

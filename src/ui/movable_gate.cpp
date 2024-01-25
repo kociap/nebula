@@ -1,18 +1,20 @@
+#include <iostream>
+#include <rendering/rendering.hpp>
 #include <ui/movable_gate.hpp>
 
 namespace nebula {
   Movable_Gate::Movable_Gate(math::Vec2 const rectangle_dimensions,
-                             math::Vec2 const window_dimensions,
+                             math::Vec4 const camera_borders,
                              u8 const num_in_ports, u8 const num_out_ports)
   {
     // Center the rectangle on the screen
     math::Vec2 coordinates;
-    // Half of window width - half of rectangle width = x
-    coordinates.x =
-      (window_dimensions.x / (f32)2.0) - (rectangle_dimensions.x / (f32)2.0);
-    // Half of window height + half of rectangle height = y
-    coordinates.y =
-      (window_dimensions.y / (f32)2.0) + (rectangle_dimensions.y / (f32)2.0);
+    // Center of the camera - half of rectangle width = x
+    coordinates.x = ((camera_borders.y + camera_borders.x) / (f32)2.0) -
+                    (rectangle_dimensions.x / (f32)2.0);
+    // Center of the camera - half of rectangle height = y
+    coordinates.y = ((camera_borders.z + camera_borders.w) / (f32)2.0) -
+                    (rectangle_dimensions.y / (f32)2.0);
 
     rect = {coordinates, rectangle_dimensions};
 
@@ -20,8 +22,9 @@ namespace nebula {
     f32 in_dist = rectangle_dimensions.y / static_cast<f32>(num_in_ports + 1);
     for(u8 i = 1; i <= num_in_ports; i++) {
       // Create IN ports along the left edge of the gate
-      in_ports.emplace_front(new Port(
-        {coordinates.x, coordinates.y - in_dist * static_cast<f32>(i)}, IN));
+      in_ports.emplace_front(
+        new Port({coordinates.x, coordinates.y - in_dist * static_cast<f32>(i)},
+                 port_t::in));
     }
 
     // Distance between OUT ports
@@ -31,13 +34,37 @@ namespace nebula {
       out_ports.emplace_front(
         new Port({coordinates.x + rectangle_dimensions.x,
                   coordinates.y - out_dist * static_cast<f32>(i)},
-                 OUT));
+                 port_t::out));
     }
   }
 
-  void Movable_Gate::Movable_Gate::add_to_render_loop() const
+  void Movable_Gate::add_to_render_loop() const
   {
-    // TODO: Adding gate to render loop
+    Vertex vert[] = {
+      Vertex{.position = {rect.coordinates.x + rect.dimensions.x,
+                          rect.coordinates.y + rect.dimensions.y, 0.0f},
+             .normal = {},
+             .uv = {1.0f, 1.0f}},
+      Vertex{.position = {rect.coordinates.x,
+                          rect.coordinates.y + rect.dimensions.y, 0.0f},
+             .normal = {},
+             .uv = {0.0f, 1.0f}},
+      Vertex{.position = {rect.coordinates.x + rect.dimensions.x,
+                          rect.coordinates.y, 0.0f},
+             .normal = {},
+             .uv = {1.0f, 0.0f}},
+      Vertex{.position = {rect.coordinates.x, rect.coordinates.y, 0.0f},
+             .normal = {},
+             .uv = {0.0f, 0.0f}},
+    };
+    u32 indices[] = {
+      0, 1, 2, 1, 3, 2,
+    };
+    rendering::Draw_Elements_Command cmd =
+      rendering::write_geometry(vert, indices);
+    cmd.instance_count = 1;
+
+    rendering::add_draw_command(cmd);
   }
 
   bool Movable_Gate::is_under_mouse(math::Vec2 const mouse_location) const

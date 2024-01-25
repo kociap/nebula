@@ -1,3 +1,4 @@
+#include <rendering/rendering.hpp>
 #include <ui/port.hpp>
 
 namespace nebula {
@@ -5,7 +6,7 @@ namespace nebula {
   {
     this->coordinates = coordinates;
     this->type = type;
-    radius = 0.1f; // Adjust this value
+    radius = 0.05f; // Adjust this value
   }
 
   void Port::move(nebula::Vec2 const offset)
@@ -33,7 +34,7 @@ namespace nebula {
   void Port::add_connection(Port* new_port)
   {
     // For IN type ports only one connection is allowed
-    if(type == IN && connections.size() > 0) {
+    if(type == port_t::in && connections.size() > 0) {
       // Remove old connection
       Port* old_port = *(connections.begin());
       old_port->remove_connection(this);

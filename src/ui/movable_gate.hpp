@@ -1,7 +1,6 @@
 #pragma once
 
 #include <anton/math/vec2.hpp>
-#include <core/types.hpp>
 #include <ui/node_rect.hpp>
 #include <ui/port.hpp>
 
@@ -23,7 +22,7 @@ namespace nebula {
      * @param num_out_ports - number of OUT type ports
      * @return pointer to the newly created movable gate structure
      */
-    Movable_Gate(math::Vec2 rectangle_dimensions, math::Vec2 window_dimensions,
+    Movable_Gate(math::Vec2 rectangle_dimensions, math::Vec4 camera_borders,
                  u8 num_in_ports, u8 num_out_ports);
 
     ~Movable_Gate();

@@ -1,4 +1,5 @@
 #pragma once
+#include <anton/math/vec4.hpp>
 #include <core/types.hpp>
 #include <ui/movable_gate.hpp>
 
@@ -11,7 +12,7 @@ namespace nebula {
      * @param num_out_ports - number of OUT type ports
      */
     void add_movable_gate(math::Vec2 rectangle_dimensions,
-                          math::Vec2 window_dimensions, u8 num_in_ports,
+                          math::Vec4 camera_borders, u8 num_in_ports,
                           u8 num_out_ports);
 
     /**
