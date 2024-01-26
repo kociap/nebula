@@ -25,8 +25,6 @@ namespace nebula {
     Movable_Gate(math::Vec2 rectangle_dimensions, math::Vec4 camera_borders,
                  u8 num_in_ports, u8 num_out_ports);
 
-    ~Movable_Gate();
-
     /**
      * Renders the gate.
      */

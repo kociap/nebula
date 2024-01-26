@@ -28,7 +28,9 @@ namespace nebula {
     /**
      * Adds all gates and their ports to the render loop.
      */
-    void add_gates_to_render_loop() const;
+    void add_gates_to_render_loop();
+
+    ~UI();
 
   private:
     List<Movable_Gate> gates; // All gates visible on the screen

@@ -6,7 +6,7 @@ namespace nebula {
   {
     this->coordinates = coordinates;
     this->type = type;
-    radius = 0.05f; // Adjust this value
+    radius = 0.01f; // Adjust this value
   }
 
   void Port::move(nebula::Vec2 const offset)
@@ -17,7 +17,34 @@ namespace nebula {
 
   void Port::add_to_render_loop() const
   {
-    // TODO: Add port to render loop
+    math::Vec3 color;
+    if(type == port_t::in) {
+      color = {0.99f, 0.3f, 0.3f};
+    } else {
+      color = {0.6f, 0.9f, 0.2f};
+    }
+    Vertex vert[] = {
+      Vertex{.position = {coordinates.x + radius, coordinates.y + radius, 0.0f},
+             .normal = color,
+             .uv = {1.0f, 1.0f}},
+      Vertex{.position = {coordinates.x - radius, coordinates.y + radius, 0.0f},
+             .normal = color,
+             .uv = {0.0f, 1.0f}},
+      Vertex{.position = {coordinates.x + radius, coordinates.y - radius, 0.0f},
+             .normal = color,
+             .uv = {1.0f, 0.0f}},
+      Vertex{.position = {coordinates.x - radius, coordinates.y - radius, 0.0f},
+             .normal = color,
+             .uv = {0.0f, 0.0f}},
+    };
+    u32 indices[] = {
+      0, 1, 2, 1, 3, 2,
+    };
+    rendering::Draw_Elements_Command cmd =
+      rendering::write_geometry(vert, indices);
+    cmd.instance_count = 1;
+
+    rendering::add_draw_command(cmd);
   }
 
   void Port::remove_connection(Port* old_port)
