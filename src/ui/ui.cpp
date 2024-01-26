@@ -8,7 +8,7 @@ namespace nebula {
   {
     Movable_Gate new_gate = Movable_Gate(rectangle_dimensions, camera_borders,
                                          num_in_ports, num_out_ports);
-    gates.emplace_front(new_gate);
+    gates.emplace_back(new_gate);
     for(Port* p: new_gate.in_ports) {
       ports.emplace_front(p);
     }
@@ -37,10 +37,10 @@ namespace nebula {
     return nullptr;
   }
 
-  void UI::add_gates_to_render_loop() const
+  void UI::add_gates_to_render_loop()
   {
-    for(const Movable_Gate& mg: gates) {
-      // Draw gate
+    for(Movable_Gate& mg: gates) {
+      // Draw gate and ports
       mg.add_to_render_loop();
       // Draw in ports
       for(Port* p: mg.in_ports) {
@@ -50,6 +50,13 @@ namespace nebula {
       for(Port* p: mg.out_ports) {
         p->add_to_render_loop();
       }
+    }
+  }
+
+  UI::~UI()
+  {
+    for(Port* p: ports) {
+      delete p;
     }
   }
 } // namespace nebula

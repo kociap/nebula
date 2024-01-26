@@ -20,6 +20,12 @@ vec3 get_position(int index)
   return vec3(position[0], position[1], position[2]);
 }
 
+vec3 get_normal(int index)
+{
+  float normal[3] = vertices[index].normal;
+  return vec3(normal[0], normal[1], normal[2]);
+}
+
 vec2 get_uv(int index)
 {
   float uv[2] = vertices[index].uv;
@@ -27,9 +33,11 @@ vec2 get_uv(int index)
 }
 
 out vec2 uv;
+out vec3 normal;
 
 void main()
 {
   gl_Position = vp_mat * vec4(get_position(gl_VertexID), 1.0);
   uv = get_uv(gl_VertexID);
+  normal = get_normal(gl_VertexID);
 }

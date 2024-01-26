@@ -10,7 +10,6 @@
 #include <logging/logging.hpp>
 #include <ui/ui.hpp>
 
-
 namespace nebula::windowing {
   enum struct window_mode {
     none,
@@ -22,8 +21,6 @@ namespace nebula::windowing {
   struct Window {
     window_mode mode;
     UI ui;
-    i32 width; // window width
-    i32 height; // window height
     GLFWwindow* glfw_window; // GLFW window instance
     Vec2 last_mouse_position; // last mouse position
     Movable_Gate* currently_moved_gate; // Currently moved rect/gate
@@ -54,8 +51,6 @@ namespace nebula::windowing {
     if(window->framebuffer_resize_callback != nullptr) {
       window->framebuffer_resize_callback(window, width, height);
     }
-    window->width = width;
-    window->height = height;
   }
 
   static void mouse_button_callbacks(GLFWwindow* win, int button, int action,
@@ -69,12 +64,14 @@ namespace nebula::windowing {
         glfwGetCursorPos(win, &x, &y);
 
         Camera& cam = get_primary_camera();
-        Vec2 scene_position = cam.window_to_scene_position(
-                {static_cast<f32>(x), static_cast<f32>(y)}, instance->width,
-                instance->height);
+        Vec2 const viewport_size = get_framebuffer_size(instance);
+        Vec2 const window_size = get_window_size(instance);
+        Vec2 const scene_position = cam.window_to_scene_position(
+          {static_cast<f32>(x), static_cast<f32>(y)}, window_size,
+          viewport_size);
+
         instance->currently_moved_gate =
           instance->ui.check_if_gate_clicked(scene_position);
-
         instance->last_mouse_position = scene_position;
         if(instance->currently_moved_gate != nullptr) {
           instance->mode = window_mode::gate_moving;
@@ -121,8 +118,10 @@ namespace nebula::windowing {
 
     Camera& cam = get_primary_camera();
     Vec2 window_position = {static_cast<f32>(xpos), static_cast<f32>(ypos)};
-    Vec2 scene_position = cam.window_to_scene_position(
-            window_position, instance->width, instance->height);
+    Vec2 const viewport_size = get_framebuffer_size(instance);
+    Vec2 const window_size = get_window_size(instance);
+    Vec2 const scene_position =
+      cam.window_to_scene_position(window_position, window_size, viewport_size);
 
     math::Vec2 offset;
     offset.x = scene_position.x - instance->last_mouse_position.x;
@@ -143,7 +142,6 @@ namespace nebula::windowing {
   {
     window->ui.add_gates_to_render_loop();
   }
-
 
   Window* init()
   {
@@ -167,7 +165,8 @@ namespace nebula::windowing {
     }
 
     win->ui = UI();
-    win->ui.add_movable_gate({0.4f, 0.2f}, {-1.0f, 1.0f, -1.0f, 1.0f}, 2, 1);
+    win->ui.add_movable_gate({0.3f, 0.2f}, {-1.0f, 1.0f, -1.0f, 1.0f}, 2, 1);
+
     win->mode = window_mode::none;
 
     // Set custom window pointer to this structure
@@ -241,4 +240,5 @@ namespace nebula::windowing {
   {
     window->framebuffer_resize_callback = callback;
   }
+
 } // namespace nebula::windowing

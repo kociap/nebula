@@ -1,4 +1,3 @@
-#include <iostream>
 #include <ui/node_rect.hpp>
 
 namespace nebula {

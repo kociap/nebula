@@ -190,6 +190,7 @@ int main(int argc, char* argv[])
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
     Camera& primary_camera = get_primary_camera();
     Vec2 const viewport_size = windowing::get_framebuffer_size(window);
     f32 const inv_aspect = viewport_size.y / viewport_size.x;
@@ -200,6 +201,7 @@ int main(int argc, char* argv[])
     f32 const zoom_level = get_zoom(primary_camera);
 
     render_grid(v_mat, inv_aspect, zoom_level);
+
 
     bool const bind_result = rendering::bind_shader(shader_wire);
     if(!bind_result) {
