@@ -170,7 +170,7 @@ namespace nebula::rendering {
       anton::String log{anton::reserve, log_length};
       glGetProgramInfoLog(shader->gl_handle, log_length, &log_length,
                           log.data() + log.size_bytes());
-
+      log.force_size(log_length);
       return {anton::expected_error,
               anton::format("{}: {}"_sv, shader->name, log)};
     }

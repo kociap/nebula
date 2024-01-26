@@ -4,14 +4,12 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+#include <components/camera.hpp>
 #include <core/input.hpp>
-#include <windowing/camera.hpp>
+#include <logging/logging.hpp>
 
 namespace nebula::windowing {
   struct Window {
-    Camera camera;
-    i32 width; // window width
-    i32 height; // window height
     GLFWwindow* glfw_window; // GLFW window instance
     Vec2 last_mouse_position; // last mouse position
     List<Movable_Rect> movable_rectangles; // All created rectangles/gates
@@ -75,11 +73,11 @@ namespace nebula::windowing {
         instance->last_mouse_position = mouse_position;
 
         if(instance->currently_moved_rectangle == nullptr) {
-          instance->camera.is_moving = true;
+          get_primary_camera().is_moving = true;
         }
       } else if(action == GLFW_RELEASE) {
         instance->currently_moved_rectangle = nullptr;
-        instance->camera.is_moving = false;
+        get_primary_camera().is_moving = false;
       }
     }
   }
@@ -92,15 +90,20 @@ namespace nebula::windowing {
 
     auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-    const f32 zoom_speed = 0.1f;
-    instance->camera.zoom(static_cast<f32>(yoffset) * zoom_speed);
+    Camera& primary_camera = get_primary_camera();
+    if(yoffset < 0.0) {
+      primary_camera.zoom(2);
+    } else {
+      primary_camera.zoom(0.5);
+    }
+    LOG_DEBUG("zoom changed: {}", primary_camera.zoom_level);
   }
 
   static void cursor_position_callbacks(GLFWwindow* win, double xpos,
                                         double ypos)
   {
     auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(win));
-    if(instance->camera.is_moving) {
+    if(get_primary_camera().is_moving) {
       f32 x = static_cast<f32>(xpos);
       f32 y = static_cast<f32>(ypos);
 
@@ -108,7 +111,7 @@ namespace nebula::windowing {
       offset.x = x - instance->last_mouse_position.x;
       offset.y = y - instance->last_mouse_position.y;
 
-      instance->camera.move(offset);
+      get_primary_camera().move(offset);
     } else {
       if(instance->currently_moved_rectangle == nullptr) {
         return;
@@ -134,18 +137,11 @@ namespace nebula::windowing {
     }
   }
 
-  void setup_camera_projection(Window* window,
-                               Handle<rendering::Shader> shader_wire)
-  {
-    window->camera.setup_projection(shader_wire);
-  }
-
   static void add_rectangle(Window* window, void (*render_function)(Node_Rect),
                             Vec2 rectangle_dimensions)
   {
-    f32 w = static_cast<f32>(window->width);
-    f32 h = static_cast<f32>(window->height);
-    Movable_Rect rect(render_function, rectangle_dimensions, {w, h});
+    Vec2 const dimensions = get_framebuffer_size(window);
+    Movable_Rect rect(render_function, rectangle_dimensions, dimensions);
     window->movable_rectangles.emplace_front(rect);
   }
 
@@ -159,22 +155,16 @@ namespace nebula::windowing {
     // Get the primary monitor's video mode to determine the screen resolution
     GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary_monitor);
-    win->width = mode->width;
-    win->height = mode->height;
 
     win->currently_moved_rectangle = nullptr;
     // Create a GLFW window
     win->glfw_window =
-      glfwCreateWindow(win->width, win->height, "Nebula", nullptr, nullptr);
+      glfwCreateWindow(mode->width, mode->height, "Nebula", nullptr, nullptr);
 
     if(!win->glfw_window) {
       glfwTerminate();
       return nullptr;
     }
-    // Init camera
-    Camera camera;
-    camera.init();
-    win->camera = camera;
 
     // Set custom window pointer to this structure
     glfwSetWindowUserPointer(win->glfw_window, win);
@@ -221,9 +211,20 @@ namespace nebula::windowing {
     return glfwWindowShouldClose(window->glfw_window);
   }
 
-  Vec2 get_dimensions(Window* window)
+  Vec2 get_window_size(Window* const window)
   {
-    return {static_cast<f32>(window->width), static_cast<f32>(window->height)};
+    i32 width;
+    i32 height;
+    glfwGetWindowSize(window->glfw_window, &width, &height);
+    return Vec2(width, height);
+  }
+
+  Vec2 get_framebuffer_size(Window* const window)
+  {
+    i32 width;
+    i32 height;
+    glfwGetFramebufferSize(window->glfw_window, &width, &height);
+    return Vec2(width, height);
   }
 
   void set_keyboard_callback(Window* window, keyboard_callback_t callback)

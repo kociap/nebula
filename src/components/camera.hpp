@@ -5,19 +5,16 @@
 #include <core/types.hpp>
 #include <rendering/shader.hpp>
 
-namespace nebula::windowing {
+namespace nebula {
   struct Camera {
-    bool is_moving;
+    math::Vec3 position;
+    f32 zoom_level = 1.0f;
+    bool is_moving = false;
 
     /**
      * Initialize camera parameters.
      */
     void init();
-
-    /**
-     * Pass the camera position and orthographic projection to the shader.
-     */
-    void setup_projection(Handle<rendering::Shader> shader_wire) const;
 
     /**
      * Changes cameras location
@@ -30,18 +27,13 @@ namespace nebula::windowing {
      * This function modifies the camera's zoom level based on the provided zoom speed.
      * @param zl_delta Zoom level delta.
      */
-    void zoom(f32 zl_delta);
-
-    /**
-     * Camera borders getter.
-     */
-    [[nodiscard]] math::Vec4 get_borders();
-
-  private:
-    math::Vec3 position; // Camera eye
-    math::Vec4 borders;
-    f32 zoom_level;
-
-    [[nodiscard]] math::Mat4 get_projection_mat() const;
+    void zoom(f32 factor);
   };
-} // namespace nebula::windowing
+
+  [[nodiscard]] math::Mat4 get_view_matrix(Camera const& camera);
+  [[nodiscard]] math::Mat4 get_projection_matrix(Camera const& camera,
+                                                 Vec2 viewport_size);
+  [[nodiscard]] f32 get_zoom(Camera const& camera);
+
+  Camera& get_primary_camera();
+} // namespace nebula

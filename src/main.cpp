@@ -1,11 +1,12 @@
-#include <anton/filesystem.hpp>
 #include <glad/glad.h>
 
 // GLAD must be included first. clang-format sorts includes, hence this comment
 // here.
 
+#include <anton/filesystem.hpp>
 #include <anton/optional.hpp>
 
+#include <components/camera.hpp>
 #include <core/input.hpp>
 #include <core/types.hpp>
 #include <logging/logging.hpp>
@@ -34,62 +35,67 @@ static Handle<rendering::Shader> shader_wire;
   return ANTON_MOV(uv_vert_source);
 }
 
-static void compile_shaders()
+[[nodiscard]] static Handle<rendering::Shader>
+compile_shader(String const& vertex, String const& fragment, String const& name)
 {
-  LOG_INFO("compiling shader 'passthrough.vert'");
-  Optional<String> vert_source = read_file(String("shaders/passthrough.vert"));
+  LOG_INFO("compiling shader '{}'", vertex);
+  Optional<String> vert_source = read_file(vertex);
   if(!vert_source) {
-    LOG_ERROR("could not open 'shaders/passthrough.vert'");
-    return;
+    LOG_ERROR("could not open '{}'", vertex);
+    return {};
   }
 
   Expected<Handle<rendering::Shader_Stage>, String> vertex_result =
-    rendering::compile_shader_stage(String("passthrough.vert"),
-                                    rendering::Shader_Stage_Kind::vertex,
-                                    vert_source.value());
+    rendering::compile_shader_stage(
+      vertex, rendering::Shader_Stage_Kind::vertex, vert_source.value());
   if(!vertex_result) {
-    LOG_ERROR("compilation of 'passthrough.vert' failed\n{}",
-              vertex_result.error());
-    return;
+    LOG_ERROR("compilation of '{}' failed\n{}", vertex, vertex_result.error());
+    return {};
   }
 
-  LOG_INFO("compiling shader 'wire.frag'");
-  Optional<String> frag_source = read_file(String("shaders/wire.frag"));
+  LOG_INFO("compiling shader '{}'", fragment);
+  Optional<String> frag_source = read_file(fragment);
   if(!frag_source) {
-    LOG_ERROR("could not open 'shaders/wire.frag'");
-    return;
+    LOG_ERROR("could not open '{}'", fragment);
+    return {};
   }
 
   Expected<Handle<rendering::Shader_Stage>, String> fragment_result =
-    rendering::compile_shader_stage(String("wire.frag"),
-                                    rendering::Shader_Stage_Kind::fragment,
-                                    frag_source.value());
+    rendering::compile_shader_stage(
+      fragment, rendering::Shader_Stage_Kind::fragment, frag_source.value());
   if(!fragment_result) {
-    LOG_ERROR("compilation of 'wire.frag' failed\n{}", fragment_result.error());
-    return;
+    LOG_ERROR("compilation of '{}' failed\n{}", fragment,
+              fragment_result.error());
+    return {};
   }
 
-  Handle<rendering::Shader> shader = rendering::create_shader(String("uv"));
+  Handle<rendering::Shader> shader = rendering::create_shader(name);
   bool const vertex_attach_result =
     rendering::attach_shader_stage(shader, vertex_result.value());
   if(!vertex_attach_result) {
-    LOG_ERROR("vertex attach failed");
-    return;
+    LOG_ERROR("attach of '{}' to '{}' failed", vertex, name);
+    return {};
   }
   bool const fragment_attach_result =
     rendering::attach_shader_stage(shader, fragment_result.value());
   if(!fragment_attach_result) {
-    LOG_ERROR("fragment attach failed");
-    return;
+    LOG_ERROR("attach of '{}' to '{}' failed", fragment, name);
+    return {};
   }
 
   Expected<void, Error> link_result = rendering::link_shader(shader);
   if(!link_result) {
-    LOG_ERROR("linking of uv shader failed\n{}", link_result.error());
-    return;
+    LOG_ERROR("linking of '{}' failed\n{}", name, link_result.error());
+    return {};
   }
 
-  shader_wire = shader;
+  return shader;
+}
+
+static void compile_shaders()
+{
+  shader_wire = compile_shader(String("shaders/passthrough.vert"),
+                               String("shaders/wire.frag"), String("uv"));
 }
 
 static void keyboard_callback(windowing::Window* const window, Key const key,
@@ -104,10 +110,9 @@ static void keyboard_callback(windowing::Window* const window, Key const key,
 static void framebuffer_resize_callback(windowing::Window* const window,
                                         i64 const width, i64 const height)
 {
-  ANTON_UNUSED(window);
-  LOG_INFO("resized framebuffer to {}x{}", width, height);
   rendering::resize_framebuffers(width, height);
   glViewport(0, 0, width, height);
+  LOG_INFO("resized framebuffer to {}x{}", width, height);
 }
 
 #define INITIALISE(fn, msg)            \
@@ -129,7 +134,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  Vec2 dim = windowing::get_dimensions(window);
+  Vec2 dim = windowing::get_framebuffer_size(window);
 
   i64 const width = static_cast<i64>(dim.x);
   i64 const height = static_cast<i64>(dim.y);
@@ -170,15 +175,26 @@ int main(int argc, char* argv[])
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    Camera& primary_camera = get_primary_camera();
+    Vec2 const viewport_size = windowing::get_framebuffer_size(window);
+    f32 const inv_aspect = viewport_size.y / viewport_size.x;
+    math::Mat4 const v_mat = get_view_matrix(primary_camera);
+    math::Mat4 const p_mat =
+      get_projection_matrix(primary_camera, viewport_size);
+    math::Mat4 const vp_mat = p_mat * v_mat;
+    f32 const zoom = get_zoom(primary_camera);
+
     bool const bind_result = rendering::bind_shader(shader_wire);
     if(!bind_result) {
       LOG_ERROR("could not bind 'shader_wire'");
     }
 
+    rendering::set_uniform_f32(shader_wire, "zoom", get_zoom(primary_camera));
+    rendering::set_uniform_mat4(shader_wire, "vp_mat", vp_mat);
+
     rendering::add_draw_command(cmd);
     rendering::commit_draw();
 
-    windowing::setup_camera_projection(window, shader_wire);
     windowing::render_objects(window);
 
     windowing::swap_buffers(window);

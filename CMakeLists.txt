@@ -62,6 +62,8 @@ target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_options(nebula PRIVATE ${NEBULA_COMPILE_FLAGS})
 target_sources(nebula
   PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/components/camera.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/components/camera.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/core/error.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/core/handle.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/core/types.hpp"
@@ -81,5 +83,5 @@ target_sources(nebula
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_rect.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/window.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/camera.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/window.hpp"
 )

@@ -21,13 +21,6 @@ namespace nebula::windowing {
   [[nodiscard]] bool should_close(Window* window);
 
   /**
-   * Sets up the camera for wireframe rendering using the provided shader.
-   * @param shader_wire - handle to the wireframe shader
-   */
-  void setup_camera_projection(Window* window,
-                               Handle<rendering::Shader> shader_wire);
-
-  /**
    * Function to render all objects like movable_rectangles.
    */
   void render_objects(Window* window);
@@ -50,7 +43,9 @@ namespace nebula::windowing {
    * Returns window dimensions ( width, height )
    * @return Vec2{width, height}
    */
-  [[nodiscard]] Vec2 get_dimensions(Window* window);
+  [[nodiscard]] Vec2 get_window_size(Window* window);
+
+  [[nodiscard]] Vec2 get_framebuffer_size(Window* window);
 
   using keyboard_callback_t = void (*)(Window* window, Key key,
                                        Input_State state);

@@ -12,8 +12,7 @@ layout(binding = 1, std430) readonly buffer vertex_buffer
 };
 
 uniform float zoom_level;
-uniform vec3 camera_position;
-uniform mat4 ortho_projection;
+uniform mat4 vp_mat;
 
 vec3 get_position(int index)
 {
@@ -31,6 +30,6 @@ out vec2 uv;
 
 void main()
 {
-  gl_Position = ortho_projection * vec4(get_position(gl_VertexID) - camera_position, 1.0);
+  gl_Position = vp_mat * vec4(get_position(gl_VertexID), 1.0);
   uv = get_uv(gl_VertexID);
 }
