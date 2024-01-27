@@ -8,6 +8,8 @@ namespace nebula {
     mouse_4,
     mouse_5,
     key_r = 82,
+    key_left_control = 341,
+    key_right_control = 345,
   };
 
   enum struct Input_Action {

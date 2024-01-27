@@ -9,6 +9,7 @@ namespace nebula {
     camera_moving,
     gate_moving,
     port_linking,
+    object_delete,
   };
 
   struct Scene {
@@ -31,6 +32,8 @@ namespace nebula {
      */
     void add_gate(math::Vec2 dimensions, math::Vec2 coordinates,
                   Gate_Kind kind);
+
+    void delete_gate(Gate* gate);
 
     /**
      * It cycles through all gates to see if any have been clicked.

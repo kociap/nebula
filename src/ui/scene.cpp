@@ -72,4 +72,43 @@ namespace nebula {
     delete tmp_port;
     tmp_port_exists = false;
   }
+
+  void Scene::delete_gate(Gate* gate)
+  {
+    for(Port* p: gate->in_ports) {
+      // Remove all IN ports from ports list
+      for(auto it = ports.begin(); it != ports.end(); ++it) {
+        auto c = it;
+        if((*it) == p) {
+          ports.erase(c, ++it);
+          break;
+        }
+      }
+      // Remove connections
+      p->remove_all_connections();
+      delete p;
+    }
+
+    for(Port* p: gate->out_ports) {
+      // Remove all OUT ports from ports list
+      for(auto it = ports.begin(); it != ports.end(); ++it) {
+        auto c = it;
+        if((*it) == p) {
+          ports.erase(c, ++it);
+          break;
+        }
+      }
+      p->remove_all_connections();
+      delete p;
+    }
+    currently_moved_gate = nullptr;
+
+    // Remove gate from gates list
+    for(auto it = gates.begin(); it != gates.end(); ++it) {
+      if(&(*it) == gate) {
+        gates.erase(it);
+        break;
+      }
+    }
+  }
 } // namespace nebula
