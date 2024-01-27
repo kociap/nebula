@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
     math::Mat4 const vp_mat = p_mat * v_mat;
     f32 const zoom_level = get_zoom(primary_camera);
 
-    render_grid(v_mat, inv_aspect, zoom_level);
+    // render_grid(v_mat, inv_aspect, zoom_level);
 
     bool const bind_result = rendering::bind_shader(shader_wire);
     if(!bind_result) {
