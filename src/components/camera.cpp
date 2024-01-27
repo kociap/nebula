@@ -19,7 +19,7 @@ namespace nebula {
 
   void Camera::zoom(f32 const factor)
   {
-    zoom_level = math::max(zoom_level * factor, 1.0f);
+    zoom_level = math::clamp(zoom_level * factor, 1.0f, 35184372088832.0f);
   }
 
   math::Mat4 get_view_matrix(Camera const& camera)
