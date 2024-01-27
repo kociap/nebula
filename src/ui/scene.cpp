@@ -8,12 +8,12 @@ namespace nebula {
     }
   }
 
-  void Scene::add_movable_gate(Vec2 const rectangle_dimensions,
-                               math::Vec2 const coordinates,
-                               u8 const num_in_ports, u8 const num_out_ports)
+  void Scene::add_gate(Vec2 const rectangle_dimensions,
+                       math::Vec2 const coordinates, u8 const num_in_ports,
+                       u8 const num_out_ports)
   {
-    Movable_Gate new_gate = Movable_Gate(rectangle_dimensions, coordinates,
-                                         num_in_ports, num_out_ports);
+    Gate new_gate =
+      Gate(rectangle_dimensions, coordinates, num_in_ports, num_out_ports);
     gates.emplace_back(new_gate);
     for(Port* p: new_gate.in_ports) {
       ports.push_back(p);
@@ -23,9 +23,9 @@ namespace nebula {
     }
   }
 
-  Movable_Gate* Scene::check_if_gate_clicked(Vec2 const mouse_position)
+  Gate* Scene::check_if_gate_clicked(Vec2 const mouse_position)
   {
-    for(Movable_Gate& mg: gates) {
+    for(Gate& mg: gates) {
       if(test_hit(mg, mouse_position)) {
         return &mg;
       }
@@ -46,7 +46,7 @@ namespace nebula {
 
   void Scene::add_gates_to_render_loop()
   {
-    for(Movable_Gate& mg: gates) {
+    for(Gate& mg: gates) {
       // Draw gate
       mg.add_to_render_loop();
     }

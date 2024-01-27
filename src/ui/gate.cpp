@@ -1,10 +1,9 @@
 #include <rendering/rendering.hpp>
-#include <ui/movable_gate.hpp>
+#include <ui/gate.hpp>
 
 namespace nebula {
-  Movable_Gate::Movable_Gate(math::Vec2 const _dimensions,
-                             math::Vec2 const _coordinates,
-                             u8 const num_in_ports, u8 const num_out_ports)
+  Gate::Gate(math::Vec2 const _dimensions, math::Vec2 const _coordinates,
+             u8 const num_in_ports, u8 const num_out_ports)
     : coordinates(_coordinates), dimensions(_dimensions)
   {
     // Center the rectangle on the screen
@@ -29,7 +28,7 @@ namespace nebula {
     }
   }
 
-  void Movable_Gate::add_to_render_loop() const
+  void Gate::add_to_render_loop() const
   {
     Vertex vert[] = {
       Vertex{.position = {coordinates.x + dimensions.x,
@@ -56,7 +55,7 @@ namespace nebula {
     rendering::add_draw_command(cmd);
   }
 
-  void Movable_Gate::move(math::Vec2 const offset)
+  void Gate::move(math::Vec2 const offset)
   {
     coordinates.x += offset.x;
     coordinates.y += offset.y;
@@ -69,7 +68,7 @@ namespace nebula {
     }
   }
 
-  bool test_hit(Movable_Gate const& gate, math::Vec2 const point)
+  bool test_hit(Gate const& gate, math::Vec2 const point)
   {
     Vec2 const coordinates = gate.coordinates;
     Vec2 const dimensions = gate.dimensions;

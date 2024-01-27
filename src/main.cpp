@@ -230,8 +230,8 @@ int main(int argc, char* argv[])
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
 
-  scene.add_movable_gate({1.5f, 1.5f}, {1.0f, 0.0f}, 2, 1);
-  scene.add_movable_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, 2, 3);
+  scene.add_gate({1.5f, 1.5f}, {1.0f, 0.0f}, 2, 1);
+  scene.add_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, 2, 3);
 
   // Main loop
   while(!windowing::should_close(window)) {

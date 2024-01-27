@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/types.hpp>
-#include <ui/movable_gate.hpp>
+#include <ui/gate.hpp>
 
 namespace nebula {
   enum struct Window_Mode {
@@ -15,9 +15,9 @@ namespace nebula {
   public:
     Window_Mode mode = Window_Mode::none;
     Vec2 last_mouse_position;
-    Movable_Gate* currently_moved_gate = nullptr;
+    Gate* currently_moved_gate = nullptr;
     Port* connected_port = nullptr;
-    List<Movable_Gate> gates; // All gates visible on the screen
+    List<Gate> gates; // All gates visible on the screen
     Array<Port*> ports; // All ports visible on the screen
   private:
     bool tmp_port_exists = false;
@@ -30,14 +30,13 @@ namespace nebula {
      * @param num_in_ports - number of IN type ports
      * @param num_out_ports - number of OUT type ports
      */
-    void add_movable_gate(math::Vec2 rectangle_dimensions,
-                          math::Vec2 coordinates, u8 num_in_ports,
-                          u8 num_out_ports);
+    void add_gate(math::Vec2 rectangle_dimensions, math::Vec2 coordinates,
+                  u8 num_in_ports, u8 num_out_ports);
 
     /**
      * It cycles through all gates to see if any have been clicked.
      */
-    [[nodiscard]] Movable_Gate* check_if_gate_clicked(Vec2 mouse_position);
+    [[nodiscard]] Gate* check_if_gate_clicked(Vec2 mouse_position);
 
     /**
      * It cycles through all ports to see if any have been clicked.

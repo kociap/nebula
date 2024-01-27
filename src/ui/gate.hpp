@@ -5,11 +5,11 @@
 
 namespace nebula {
   /**
-   * Movable gate.
+   * Gate.
    * This structure holds information about objects
    * current location in the application window and its gates.
    **/
-  struct Movable_Gate {
+  struct Gate {
     Array<Port*> in_ports;
     Array<Port*> out_ports;
     /**
@@ -28,8 +28,8 @@ namespace nebula {
      * @param num_out_ports - number of OUT type ports
      * @return pointer to the newly created movable gate structure
      */
-    Movable_Gate(math::Vec2 rectangle_dimensions, math::Vec2 coords,
-                 u8 num_in_ports, u8 num_out_ports);
+    Gate(math::Vec2 rectangle_dimensions, math::Vec2 coords, u8 num_in_ports,
+         u8 num_out_ports);
 
     /**
      * Renders the gate.
@@ -48,5 +48,5 @@ namespace nebula {
    * @param point - x and y coordinates of point to check
    * @return true if rect is under given point
    */
-  [[nodiscard]] bool test_hit(Movable_Gate const& gate, math::Vec2 point);
+  [[nodiscard]] bool test_hit(Gate const& gate, math::Vec2 point);
 } // namespace nebula
