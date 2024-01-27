@@ -39,6 +39,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glad)
 
+# Add GLFW
+FetchContent_Declare(
+  glfw
+  GIT_REPOSITORY https://github.com/glfw/glfw.git
+  GIT_TAG 3eaf1255b29fdf5c2895856c7be7d7185ef2b241
+)
+FetchContent_MakeAvailable(glfw)
+
 # Add anton_core
 FetchContent_Declare(
   anton_core
@@ -47,13 +55,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(anton_core)
 
-# Add GLFW
+# Dear ImGui
 FetchContent_Declare(
-  glfw
-  GIT_REPOSITORY https://github.com/glfw/glfw.git
-  GIT_TAG 3eaf1255b29fdf5c2895856c7be7d7185ef2b241
+  imgui
+  GIT_REPOSITORY git@github.com:ocornut/imgui.git
+  GIT_TAG eb42e164dde71877c894b8fee4a555a738c0406b
 )
-FetchContent_MakeAvailable(glfw)
+FetchContent_MakeAvailable(imgui)
 
 add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 set_target_properties(nebula PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
