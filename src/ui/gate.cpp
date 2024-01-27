@@ -2,28 +2,28 @@
 
 namespace nebula {
   Gate::Gate(math::Vec2 const _dimensions, math::Vec2 const _coordinates,
-             u8 const num_in_ports, u8 const num_out_ports)
-    : coordinates(_coordinates), dimensions(_dimensions)
+             Gate_Kind const _kind)
+    : coordinates(_coordinates), dimensions(_dimensions), kind(_kind)
   {
-    // Center the rectangle on the screen
-    coordinates += dimensions / 2.0f;
+    i32 const out_count = 1;
+    i32 const in_count = kind == Gate_Kind::e_not ? 1 : 2;
 
     // Distance between IN ports
-    f32 in_dist = dimensions.y / static_cast<f32>(num_in_ports + 1);
-    for(u8 i = 1; i <= num_in_ports; i++) {
+    f32 in_dist = dimensions.y / static_cast<f32>(in_count + 1);
+    for(u8 i = 1; i <= in_count; i++) {
       // Create IN ports along the left edge of the gate
       Vec2 port_coordinates = {coordinates.x,
                                coordinates.y + in_dist * static_cast<f32>(i)};
-      in_ports.emplace_back(new Port(port_coordinates, port_t::in));
+      in_ports.emplace_back(new Port(port_coordinates, Port_Kind::in));
     }
 
     // Distance between OUT ports
-    f32 out_dist = dimensions.y / static_cast<f32>(num_out_ports + 1);
-    for(u8 i = 1; i <= num_out_ports; i++) {
+    f32 out_dist = dimensions.y / static_cast<f32>(out_count + 1);
+    for(u8 i = 1; i <= out_count; i++) {
       // Create OUT ports along the right edge of the gate
       Vec2 port_coordinates = {coordinates.x + dimensions.x,
                                coordinates.y + out_dist * static_cast<f32>(i)};
-      out_ports.emplace_back(new Port(port_coordinates, port_t::out));
+      out_ports.emplace_back(new Port(port_coordinates, Port_Kind::out));
     }
   }
 

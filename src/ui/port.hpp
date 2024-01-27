@@ -4,20 +4,20 @@
 #include <rendering/rendering.hpp>
 
 namespace nebula {
-  enum struct port_t { in, out };
+  enum struct Port_Kind { in, out };
 
   struct Port {
   public:
     List<Port*> connections;
     Vec2 coordinates;
     f32 radius;
-    port_t type;
+    Port_Kind type;
     /**
      * Initializes a circle shaped port with specified coordinates and type.
      * @param coordinates - x and y coordinates of the center
      * @param type - ports type IN/OUT
      */
-    Port(Vec2 coordinates, port_t type);
+    Port(Vec2 coordinates, Port_Kind type);
 
     /**
      * Moves the port by the given offset.

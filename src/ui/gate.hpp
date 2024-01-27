@@ -6,6 +6,18 @@
 #include <ui/port.hpp>
 
 namespace nebula {
+  enum struct Gate_Kind : u8 {
+    // Two input gates.
+    e_and,
+    e_or,
+    e_xor,
+    e_nand,
+    e_nor,
+    e_xnor,
+    // One input gates.
+    e_not,
+  };
+
   /**
    * Gate.
    * This structure holds information about objects
@@ -22,6 +34,7 @@ namespace nebula {
      * Dimensions of the rect. x - width, y - height
      */
     math::Vec2 dimensions;
+    Gate_Kind kind;
 
     /**
      * Creates a new visual movable object at the middle of the screen following
@@ -30,8 +43,7 @@ namespace nebula {
      * @param num_out_ports - number of OUT type ports
      * @return pointer to the newly created movable gate structure
      */
-    Gate(math::Vec2 rectangle_dimensions, math::Vec2 coords, u8 num_in_ports,
-         u8 num_out_ports);
+    Gate(math::Vec2 dimensions, math::Vec2 coordinates, Gate_Kind kind);
 
     /**
      * Changes the location of an object

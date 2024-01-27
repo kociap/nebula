@@ -89,11 +89,11 @@ static void mouse_button_callback(windowing::Window* const window,
       scene.connected_port = scene.check_if_port_clicked(scene_position);
       if(scene.connected_port != nullptr) {
         scene.mode = Window_Mode::port_linking;
-        port_t tmp_port_type;
-        if(scene.connected_port->type == port_t::in) {
-          tmp_port_type = port_t::out;
+        Port_Kind tmp_port_type;
+        if(scene.connected_port->type == Port_Kind::in) {
+          tmp_port_type = Port_Kind::out;
         } else {
-          tmp_port_type = port_t::in;
+          tmp_port_type = Port_Kind::in;
         }
         scene.create_tmp_port(scene.connected_port, scene_position,
                               tmp_port_type);
@@ -234,8 +234,8 @@ int main(int argc, char* argv[])
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
 
-  scene.add_gate({1.5f, 1.5f}, {1.0f, 0.0f}, 2, 1);
-  scene.add_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, 2, 3);
+  scene.add_gate({1.5f, 1.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
+  scene.add_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
 
   // Main loop
   while(!windowing::should_close(window)) {
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
     }
 
     for(Port const* const port: scene.ports) {
-      if(port->type != port_t::out) {
+      if(port->type != Port_Kind::out) {
         continue;
       }
 

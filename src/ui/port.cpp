@@ -2,7 +2,7 @@
 #include <ui/port.hpp>
 
 namespace nebula {
-  Port::Port(Vec2 const coordinates, port_t const type)
+  Port::Port(Vec2 const coordinates, Port_Kind const type)
   {
     this->coordinates = coordinates;
     this->type = type;
@@ -29,7 +29,7 @@ namespace nebula {
   void Port::add_connection(Port* new_port)
   {
     // For IN type ports only one connection is allowed
-    if(type == port_t::in && connections.size() > 0) {
+    if(type == Port_Kind::in && connections.size() > 0) {
       // Remove old connection
       Port* old_port = *(connections.begin());
       old_port->remove_connection(this);
@@ -63,7 +63,7 @@ namespace nebula {
   rendering::Draw_Elements_Command prepare_draw(Port const& port)
   {
     math::Vec3 color;
-    if(port.type == port_t::in) {
+    if(port.type == Port_Kind::in) {
       color = {0.99f, 0.3f, 0.3f};
     } else {
       color = {0.6f, 0.9f, 0.2f};

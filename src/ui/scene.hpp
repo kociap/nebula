@@ -26,12 +26,11 @@ namespace nebula {
     ~Scene();
 
     /**
-     * Creates a new gate with the specified number of ports in the center of the screen
-     * @param num_in_ports - number of IN type ports
-     * @param num_out_ports - number of OUT type ports
+     * Creates a new gate with the specified number of ports in the center of
+     * the screen
      */
-    void add_gate(math::Vec2 rectangle_dimensions, math::Vec2 coordinates,
-                  u8 num_in_ports, u8 num_out_ports);
+    void add_gate(math::Vec2 dimensions, math::Vec2 coordinates,
+                  Gate_Kind kind);
 
     /**
      * It cycles through all gates to see if any have been clicked.
@@ -46,9 +45,9 @@ namespace nebula {
     /**
      * Creates temporary port used to render connection.
      * @param coordinates - scene position
-     * @param type - port_t
+     * @param type - Port_Kind
      */
-    void create_tmp_port(Port* p, Vec2 coordinates, port_t type);
+    void create_tmp_port(Port* p, Vec2 coordinates, Port_Kind type);
 
     /**
      * Removes tmp port when linking mode ends.

@@ -8,12 +8,10 @@ namespace nebula {
     }
   }
 
-  void Scene::add_gate(Vec2 const rectangle_dimensions,
-                       math::Vec2 const coordinates, u8 const num_in_ports,
-                       u8 const num_out_ports)
+  void Scene::add_gate(Vec2 const dimensions, math::Vec2 const coordinates,
+                       Gate_Kind const kind)
   {
-    Gate new_gate =
-      Gate(rectangle_dimensions, coordinates, num_in_ports, num_out_ports);
+    Gate new_gate = Gate(dimensions, coordinates, kind);
     gates.emplace_back(new_gate);
     for(Port* p: new_gate.in_ports) {
       ports.push_back(p);
@@ -45,7 +43,7 @@ namespace nebula {
   }
 
   void Scene::create_tmp_port(Port* p, Vec2 const coordinates,
-                              port_t const type)
+                              Port_Kind const type)
   {
     Port* tmp_port = new Port(coordinates, type);
     ports.emplace_back(tmp_port);
