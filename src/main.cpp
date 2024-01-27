@@ -18,6 +18,7 @@
 using namespace nebula;
 
 static Handle<rendering::Shader> shader_wire;
+static Handle<rendering::Shader> shader_grid;
 
 [[nodiscard]] static Optional<String> read_file(String const& path)
 {
@@ -96,6 +97,8 @@ static void compile_shaders()
 {
   shader_wire = compile_shader(String("shaders/passthrough.vert"),
                                String("shaders/wire.frag"), String("uv"));
+  shader_grid = compile_shader(String("shaders/grid.vert"),
+                               String("shaders/grid.frag"), String("grid"));
 }
 
 static void keyboard_callback(windowing::Window* const window, Key const key,
@@ -113,6 +116,30 @@ static void framebuffer_resize_callback(windowing::Window* const window,
   rendering::resize_framebuffers(width, height);
   glViewport(0, 0, width, height);
   LOG_INFO("resized framebuffer to {}x{}", width, height);
+}
+
+static void render_grid(math::Mat4 const v_mat, f32 const inv_aspect,
+                        f32 const zoom)
+{
+  Vertex fsq[] = {
+    Vertex{.position = {-1.0f, 1.0f, 0.0f}, .normal = {}, .uv = {0.0f, 1.0f}},
+    Vertex{.position = {-1.0f, -1.0f, 0.0f}, .normal = {}, .uv = {0.0f, 0.0f}},
+    Vertex{.position = {1.0, 1.0f, 0.0f}, .normal = {}, .uv = {1.0f, 1.0f}},
+    Vertex{.position = {1.0f, -1.0f, 0.0f}, .normal = {}, .uv = {1.0f, 0.0f}},
+  };
+  u32 indices[] = {
+    0, 1, 2, 1, 3, 2,
+  };
+  rendering::Draw_Elements_Command cmd =
+    rendering::write_geometry(fsq, indices);
+  cmd.instance_count = 1;
+  rendering::add_draw_command(cmd);
+
+  rendering::bind_shader(shader_grid);
+  rendering::set_uniform_mat4(shader_grid, "v_mat", v_mat);
+  rendering::set_uniform_f32(shader_grid, "inv_aspect", inv_aspect);
+  rendering::set_uniform_f32(shader_grid, "zoom", zoom);
+  rendering::commit_draw();
 }
 
 #define INITIALISE(fn, msg)            \
@@ -155,17 +182,14 @@ int main(int argc, char* argv[])
   rendering::bind_transient_geometry_buffers();
 
   Vertex triangle[] = {
-    Vertex{.position = {0.2f, 0.1f, 0.0f}, .normal = {}, .uv = {1.0f, 1.0f}},
-    Vertex{.position = {-0.2f, 0.1f, 0.0f}, .normal = {}, .uv = {0.0f, 1.0f}},
-    Vertex{.position = {0.2f, -0.1f, 0.0f}, .normal = {}, .uv = {1.0f, 0.0f}},
-    Vertex{.position = {-0.2f, -0.1f, 0.0f}, .normal = {}, .uv = {0.0f, 0.0f}},
+    Vertex{.position = {1.0f, 1.0f, -5.0f}, .normal = {}, .uv = {1.0f, 1.0f}},
+    Vertex{.position = {-1.0f, 1.0f, -5.0f}, .normal = {}, .uv = {0.0f, 1.0f}},
+    Vertex{.position = {1.0f, -1.0f, -5.0f}, .normal = {}, .uv = {1.0f, 0.0f}},
+    Vertex{.position = {-1.0f, -1.0f, -5.0f}, .normal = {}, .uv = {0.0f, 0.0f}},
   };
   u32 indices[] = {
     0, 1, 2, 1, 3, 2,
   };
-  rendering::Draw_Elements_Command cmd =
-    rendering::write_geometry(triangle, indices);
-  cmd.instance_count = 1;
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
 
@@ -184,6 +208,8 @@ int main(int argc, char* argv[])
     math::Mat4 const vp_mat = p_mat * v_mat;
     f32 const zoom = get_zoom(primary_camera);
 
+    render_grid(v_mat, inv_aspect, zoom);
+
     bool const bind_result = rendering::bind_shader(shader_wire);
     if(!bind_result) {
       LOG_ERROR("could not bind 'shader_wire'");
@@ -192,6 +218,9 @@ int main(int argc, char* argv[])
     rendering::set_uniform_f32(shader_wire, "zoom", get_zoom(primary_camera));
     rendering::set_uniform_mat4(shader_wire, "vp_mat", vp_mat);
 
+    rendering::Draw_Elements_Command cmd =
+      rendering::write_geometry(triangle, indices);
+    cmd.instance_count = 1;
     rendering::add_draw_command(cmd);
     rendering::commit_draw();
 
