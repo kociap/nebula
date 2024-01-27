@@ -7,8 +7,8 @@ namespace nebula {
   {
     f32 const horizontal_speed = 0.6f;
     f32 const vertical_speed = 0.6f;
-    position.x += offset.x * horizontal_speed;
-    position.y += offset.y * vertical_speed;
+    position.x -= offset.x * horizontal_speed;
+    position.y -= offset.y * vertical_speed;
   }
 
   void Camera::zoom(f32 const factor)
