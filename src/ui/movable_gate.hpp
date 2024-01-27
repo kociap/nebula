@@ -12,8 +12,8 @@ namespace nebula {
    **/
   struct Movable_Gate {
     Node_Rect rect;
-    List<Port*> in_ports;
-    List<Port*> out_ports;
+    Array<Port*> in_ports;
+    Array<Port*> out_ports;
 
     /**
      * Creates a new visual movable object at the middle of the screen following
@@ -22,7 +22,7 @@ namespace nebula {
      * @param num_out_ports - number of OUT type ports
      * @return pointer to the newly created movable gate structure
      */
-    Movable_Gate(math::Vec2 rectangle_dimensions, math::Vec4 camera_borders,
+    Movable_Gate(math::Vec2 rectangle_dimensions, math::Vec2 coords,
                  u8 num_in_ports, u8 num_out_ports);
 
     /**

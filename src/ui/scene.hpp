@@ -8,7 +8,7 @@ namespace nebula {
     none,
     camera_moving,
     gate_moving,
-    port_connecting,
+    port_linking,
   };
 
   struct Scene {

@@ -3,17 +3,17 @@
 namespace nebula {
 
   void UI::add_movable_gate(Vec2 const rectangle_dimensions,
-                            math::Vec4 const camera_borders,
-                            u8 const num_in_ports, u8 const num_out_ports)
+                            math::Vec2 const coordinates, u8 const num_in_ports,
+                            u8 const num_out_ports)
   {
-    Movable_Gate new_gate = Movable_Gate(rectangle_dimensions, camera_borders,
+    Movable_Gate new_gate = Movable_Gate(rectangle_dimensions, coordinates,
                                          num_in_ports, num_out_ports);
     gates.emplace_back(new_gate);
     for(Port* p: new_gate.in_ports) {
-      ports.emplace_front(p);
+      ports.push_back(p);
     }
     for(Port* p: new_gate.out_ports) {
-      ports.emplace_front(p);
+      ports.push_back(p);
     }
   }
 
@@ -29,9 +29,10 @@ namespace nebula {
 
   Port* UI::check_if_port_clicked(Vec2 const mouse_position)
   {
-    for(Port* p: ports) {
-      if(p->is_under_mouse(mouse_position)) {
-        return p;
+    u32 range = (tmp_port_exists) ? ports.size() - 1 : ports.size();
+    for(u32 i = 0; i < range; i++) {
+      if(ports[i]->is_under_mouse(mouse_position)) {
+        return ports[i];
       }
     }
     return nullptr;
@@ -40,16 +41,13 @@ namespace nebula {
   void UI::add_gates_to_render_loop()
   {
     for(Movable_Gate& mg: gates) {
-      // Draw gate and ports
+      // Draw gate
       mg.add_to_render_loop();
-      // Draw in ports
-      for(Port* p: mg.in_ports) {
-        p->add_to_render_loop();
-      }
-      // Draw out ports
-      for(Port* p: mg.out_ports) {
-        p->add_to_render_loop();
-      }
+    }
+
+    // Draw ports
+    for(Port* p: ports) {
+      p->add_to_render_loop();
     }
   }
 
@@ -58,5 +56,35 @@ namespace nebula {
     for(Port* p: ports) {
       delete p;
     }
+  }
+
+  void UI::create_tmp_port(Port* p, Vec2 const coordinates, port_t const type)
+  {
+    Port* tmp_port = new Port(coordinates, type);
+    ports.emplace_back(tmp_port);
+    p->add_connection(tmp_port);
+    tmp_port->add_connection(p);
+    tmp_port_exists = true;
+  }
+
+  void UI::connect_ports(Port* p1, Port* p2)
+  {
+    remove_tmp_port(p1);
+    p1->add_connection(p2);
+    p2->add_connection(p1);
+  }
+
+  void UI::move_tmp_port(Vec2 const offset)
+  {
+    ports.back()->move(offset);
+  }
+
+  void UI::remove_tmp_port(Port* p)
+  {
+    Port* tmp_port = ports.back();
+    p->remove_connection(tmp_port);
+    ports.pop_back();
+    delete tmp_port;
+    tmp_port_exists = false;
   }
 } // namespace nebula

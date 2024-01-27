@@ -7,7 +7,7 @@
 namespace nebula {
   struct Camera {
     math::Vec3 position;
-    f32 zoom_level = 1.0f;
+    f32 zoom_level = 3.0f;
 
     /**
      * Changes cameras location
