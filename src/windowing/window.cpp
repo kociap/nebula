@@ -11,23 +11,18 @@
 #include <ui/ui.hpp>
 
 namespace nebula::windowing {
-  enum struct window_mode {
-    none,
-    camera_moving,
-    gate_moving,
-    port_connecting,
-  };
-
   struct Window {
-    window_mode mode;
-    UI ui;
-    GLFWwindow* glfw_window; // GLFW window instance
-    Vec2 last_mouse_position; // last mouse position
-    Movable_Gate* currently_moved_gate; // Currently moved rect/gate
-    Port* connected_port;
-    keyboard_callback_t keyboard_callback = nullptr;
-    framebuffer_resize_callback_t framebuffer_resize_callback = nullptr;
-    scroll_callback_t scroll_callback = nullptr;
+    GLFWwindow* glfw_window;
+    keyboard_callback_t keyboard_cb = nullptr;
+    void* keyboard_data = nullptr;
+    mouse_button_callback_t mouse_button_cb = nullptr;
+    void* mouse_button_data = nullptr;
+    scroll_callback_t scroll_cb = nullptr;
+    void* scroll_data = nullptr;
+    cursor_position_callback_t cursor_position_cb = nullptr;
+    void* cursor_position_data = nullptr;
+    framebuffer_resize_callback_t framebuffer_resize_cb = nullptr;
+    void* framebuffer_resize_data = nullptr;
   };
 
   static void keyboard_button_callback(GLFWwindow* glfw_window, int key,
@@ -35,107 +30,57 @@ namespace nebula::windowing {
   {
     (void)scancode;
     (void)mods;
-
     auto* const window =
       reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
-    if(window->keyboard_callback != nullptr) {
-      window->keyboard_callback(window, static_cast<Key>(key),
-                                static_cast<Input_State>(action));
+    if(window->keyboard_cb != nullptr) {
+      window->keyboard_cb(window, static_cast<Key>(key),
+                          static_cast<Input_Action>(action),
+                          window->keyboard_data);
     }
   }
 
-  static void scroll_callback(GLFWwindow* glfw_window, double xoffset,
-                              double yoffset)
-  {
-    auto* const window =
-      reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
-    if(window->scroll_callback != nullptr) {
-      window->scroll_callback(window, xoffset, yoffset);
-    }
-  }
-
-  static void framebuffer_resize_callback(GLFWwindow* glfw_window, int width,
-                                          int height)
+  static void scroll_cb(GLFWwindow* glfw_window, double xoffset, double yoffset)
   {
     auto* const window =
       reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
-    if(window->framebuffer_resize_callback != nullptr) {
-      window->framebuffer_resize_callback(window, width, height);
+    if(window->scroll_cb != nullptr) {
+      window->scroll_cb(window, xoffset, yoffset, window->scroll_data);
     }
   }
 
-  static void mouse_button_callbacks(GLFWwindow* win, int button, int action,
-                                     int mods)
+  static void framebuffer_resize_cb(GLFWwindow* glfw_window, int width,
+                                    int height)
   {
-    auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(win));
-    (void)mods;
-    if(button == GLFW_MOUSE_BUTTON_LEFT) {
-      if(action == GLFW_PRESS) {
-        double x, y;
-        glfwGetCursorPos(win, &x, &y);
-
-        Camera& cam = get_primary_camera();
-        Vec2 const viewport_size = get_framebuffer_size(instance);
-        Vec2 const window_size = get_window_size(instance);
-        Vec2 const scene_position = cam.window_to_scene_position(
-          {static_cast<f32>(x), static_cast<f32>(y)}, window_size,
-          viewport_size);
-
-        instance->currently_moved_gate =
-          instance->ui.check_if_gate_clicked(scene_position);
-        instance->last_mouse_position = scene_position;
-        if(instance->currently_moved_gate != nullptr) {
-          instance->mode = window_mode::gate_moving;
-          return;
-        }
-
-        instance->connected_port =
-          instance->ui.check_if_port_clicked(scene_position);
-        if(instance->connected_port != nullptr) {
-          instance->mode = window_mode::port_connecting;
-          return;
-        }
-
-        instance->mode = window_mode::camera_moving;
-        instance->last_mouse_position = scene_position;
-      } else if(action == GLFW_RELEASE) {
-        instance->currently_moved_gate = nullptr;
-        instance->connected_port = nullptr;
-        instance->mode = window_mode::none;
-      }
+    auto* const window =
+      reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window->framebuffer_resize_cb != nullptr) {
+      window->framebuffer_resize_cb(window, width, height,
+                                    window->framebuffer_resize_data);
     }
   }
 
-  static void cursor_position_callbacks(GLFWwindow* win, double xpos,
-                                        double ypos)
+  static void mouse_button_callbacks(GLFWwindow* const glfw_window, int button,
+                                     int action, int mods)
   {
-    auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(win));
-
-    Camera& cam = get_primary_camera();
-    Vec2 window_position = {static_cast<f32>(xpos), static_cast<f32>(ypos)};
-    Vec2 const viewport_size = get_framebuffer_size(instance);
-    Vec2 const window_size = get_window_size(instance);
-    Vec2 const scene_position =
-      cam.window_to_scene_position(window_position, window_size, viewport_size);
-
-    math::Vec2 offset;
-    offset.x = scene_position.x - instance->last_mouse_position.x;
-    offset.y = scene_position.y - instance->last_mouse_position.y;
-
-    if(instance->mode == window_mode::camera_moving) {
-      cam.move(offset);
-    } else if(instance->mode == window_mode::gate_moving) {
-      instance->currently_moved_gate->move(offset);
-    } else if(instance->mode == window_mode::port_connecting) {
-      // TODO: Implement port connecting
+    ANTON_UNUSED(mods);
+    auto* const window =
+      static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window->mouse_button_cb != nullptr) {
+      window->mouse_button_cb(window, static_cast<Key>(button),
+                              static_cast<Input_Action>(action),
+                              window->mouse_button_data);
     }
-    instance->last_mouse_position.x = scene_position.x;
-    instance->last_mouse_position.y = scene_position.y;
   }
 
-  void add_objects_to_render_loop(Window* window)
+  static void cursor_position_callbacks(GLFWwindow* const glfw_window,
+                                        double const xpos, double const ypos)
   {
-    window->ui.add_gates_to_render_loop();
+    auto* const window =
+      static_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window->cursor_position_cb != nullptr) {
+      window->cursor_position_cb(window, xpos, ypos,
+                                 window->cursor_position_data);
+    }
   }
 
   Window* init()
@@ -149,7 +94,6 @@ namespace nebula::windowing {
     GLFWmonitor* primary_monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode* mode = glfwGetVideoMode(primary_monitor);
 
-    win->currently_moved_gate = nullptr;
     // Create a GLFW window
     win->glfw_window =
       glfwCreateWindow(mode->width, mode->height, "Nebula", nullptr, nullptr);
@@ -159,21 +103,15 @@ namespace nebula::windowing {
       return nullptr;
     }
 
-    win->ui = UI();
-    win->ui.add_movable_gate({0.3f, 0.2f}, {-1.0f, 1.0f, -1.0f, 1.0f}, 2, 1);
-
-    win->mode = window_mode::none;
-
     // Set custom window pointer to this structure
     glfwSetWindowUserPointer(win->glfw_window, win);
 
     // Set callbacks
     glfwSetMouseButtonCallback(win->glfw_window, mouse_button_callbacks);
     glfwSetKeyCallback(win->glfw_window, keyboard_button_callback);
-    glfwSetScrollCallback(win->glfw_window, scroll_callback);
+    glfwSetScrollCallback(win->glfw_window, scroll_cb);
     glfwSetCursorPosCallback(win->glfw_window, cursor_position_callbacks);
-    glfwSetFramebufferSizeCallback(win->glfw_window,
-                                   framebuffer_resize_callback);
+    glfwSetFramebufferSizeCallback(win->glfw_window, framebuffer_resize_cb);
 
     glfwMakeContextCurrent(win->glfw_window);
 
@@ -225,19 +163,47 @@ namespace nebula::windowing {
     return Vec2(width, height);
   }
 
-  void set_keyboard_callback(Window* window, keyboard_callback_t callback)
+  Vec2 get_cursor_position(Window* const window)
   {
-    window->keyboard_callback = callback;
+    double x, y;
+    glfwGetCursorPos(window->glfw_window, &x, &y);
+    return Vec2(x, y);
+  }
+
+  void set_keyboard_callback(Window* window, keyboard_callback_t callback,
+                             void* data)
+  {
+    window->keyboard_data = data;
+    window->keyboard_cb = callback;
+  }
+
+  void set_mouse_button_callback(Window* window,
+                                 mouse_button_callback_t callback, void* data)
+  {
+    window->mouse_button_cb = callback;
+    window->mouse_button_data = data;
+  }
+
+  void set_scroll_callback(Window* window, scroll_callback_t callback,
+                           void* data)
+  {
+    window->scroll_cb = callback;
+    window->scroll_data = data;
+  }
+
+  void set_cursor_position_callback(Window* window,
+                                    cursor_position_callback_t callback,
+                                    void* data)
+  {
+    window->cursor_position_cb = callback;
+    window->cursor_position_data = data;
   }
 
   void set_framebuffer_resize_callback(Window* window,
-                                       framebuffer_resize_callback_t callback)
+                                       framebuffer_resize_callback_t callback,
+                                       void* data)
   {
-    window->framebuffer_resize_callback = callback;
-  }
-
-  void set_scroll_callback(Window* window, scroll_callback_t callback)
-  {
-    window->scroll_callback = callback;
+    window->framebuffer_resize_cb = callback;
+    window->framebuffer_resize_data = data;
   }
 } // namespace nebula::windowing

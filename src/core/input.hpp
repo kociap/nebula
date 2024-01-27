@@ -2,10 +2,15 @@
 
 namespace nebula {
   enum struct Key {
+    mouse_left = 0,
+    mouse_right = 1,
+    mouse_3,
+    mouse_4,
+    mouse_5,
     key_r = 82,
   };
 
-  enum struct Input_State {
+  enum struct Input_Action {
     release,
     press,
     repeat,

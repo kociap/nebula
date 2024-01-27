@@ -4,8 +4,8 @@
 #include <rendering/shader.hpp>
 
 namespace nebula::windowing {
-
   struct Window;
+
   /**
    * Initializes glfw and creates new fullscreen window with
    * callbacks.
@@ -17,11 +17,6 @@ namespace nebula::windowing {
    * @return true if window should close or is nullptr
    */
   [[nodiscard]] bool should_close(Window* window);
-
-  /**
-   * Function to render all objects like movable_rectangles.
-   */
-  void add_objects_to_render_loop(Window* window);
 
   /**
    * Processes all pending events.
@@ -45,17 +40,31 @@ namespace nebula::windowing {
 
   [[nodiscard]] Vec2 get_framebuffer_size(Window* window);
 
-  using keyboard_callback_t = void (*)(Window* window, Key key,
-                                       Input_State state);
-  using framebuffer_resize_callback_t = void (*)(Window* window, i64 width,
-                                                 i64 height);
-  using scroll_callback_t = void (*)(Window* window, f32 x, f32 y);
+  [[nodiscard]] Vec2 get_cursor_position(Window* window);
 
-  void set_keyboard_callback(Window* window, keyboard_callback_t callback);
-  void set_scroll_callback(Window* window, scroll_callback_t callback);
+  using keyboard_callback_t = void (*)(Window* window, Key key,
+                                       Input_Action action, void* data);
+  using mouse_button_callback_t = void (*)(Window* window, Key key,
+                                           Input_Action action, void* data);
+  using scroll_callback_t = void (*)(Window* window, f32 x, f32 y, void* data);
+  using cursor_position_callback_t = void (*)(Window* window, f32 x, f32 y,
+                                              void* data);
+  using framebuffer_resize_callback_t = void (*)(Window* window, i64 width,
+                                                 i64 height, void* data);
+
+  void set_keyboard_callback(Window* window, keyboard_callback_t callback,
+                             void* data);
+  void set_mouse_button_callback(Window* window,
+                                 mouse_button_callback_t callback, void* data);
+  void set_scroll_callback(Window* window, scroll_callback_t callback,
+                           void* data);
+  void set_cursor_position_callback(Window* window,
+                                    cursor_position_callback_t callback,
+                                    void* data);
   void set_framebuffer_resize_callback(Window* window,
-                                       framebuffer_resize_callback_t callback);
-  
+                                       framebuffer_resize_callback_t callback,
+                                       void* data);
+
   /**
    * Destroys window and terminates glfw.
    * @param window - window to destroy.
