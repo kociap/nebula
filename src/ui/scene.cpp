@@ -1,10 +1,16 @@
-#include <ui/ui.hpp>
+#include <ui/scene.hpp>
 
 namespace nebula {
+  Scene::~Scene()
+  {
+    for(Port* p: ports) {
+      delete p;
+    }
+  }
 
-  void UI::add_movable_gate(Vec2 const rectangle_dimensions,
-                            math::Vec2 const coordinates, u8 const num_in_ports,
-                            u8 const num_out_ports)
+  void Scene::add_movable_gate(Vec2 const rectangle_dimensions,
+                               math::Vec2 const coordinates,
+                               u8 const num_in_ports, u8 const num_out_ports)
   {
     Movable_Gate new_gate = Movable_Gate(rectangle_dimensions, coordinates,
                                          num_in_ports, num_out_ports);
@@ -17,7 +23,7 @@ namespace nebula {
     }
   }
 
-  Movable_Gate* UI::check_if_gate_clicked(Vec2 const mouse_position)
+  Movable_Gate* Scene::check_if_gate_clicked(Vec2 const mouse_position)
   {
     for(Movable_Gate& mg: gates) {
       if(mg.is_under_mouse(mouse_position)) {
@@ -27,7 +33,7 @@ namespace nebula {
     return nullptr;
   }
 
-  Port* UI::check_if_port_clicked(Vec2 const mouse_position)
+  Port* Scene::check_if_port_clicked(Vec2 const mouse_position)
   {
     u32 range = (tmp_port_exists) ? ports.size() - 1 : ports.size();
     for(u32 i = 0; i < range; i++) {
@@ -38,7 +44,7 @@ namespace nebula {
     return nullptr;
   }
 
-  void UI::add_gates_to_render_loop()
+  void Scene::add_gates_to_render_loop()
   {
     for(Movable_Gate& mg: gates) {
       // Draw gate
@@ -51,14 +57,8 @@ namespace nebula {
     }
   }
 
-  UI::~UI()
-  {
-    for(Port* p: ports) {
-      delete p;
-    }
-  }
-
-  void UI::create_tmp_port(Port* p, Vec2 const coordinates, port_t const type)
+  void Scene::create_tmp_port(Port* p, Vec2 const coordinates,
+                              port_t const type)
   {
     Port* tmp_port = new Port(coordinates, type);
     ports.emplace_back(tmp_port);
@@ -67,19 +67,19 @@ namespace nebula {
     tmp_port_exists = true;
   }
 
-  void UI::connect_ports(Port* p1, Port* p2)
+  void Scene::connect_ports(Port* p1, Port* p2)
   {
     remove_tmp_port(p1);
     p1->add_connection(p2);
     p2->add_connection(p1);
   }
 
-  void UI::move_tmp_port(Vec2 const offset)
+  void Scene::move_tmp_port(Vec2 const offset)
   {
     ports.back()->move(offset);
   }
 
-  void UI::remove_tmp_port(Port* p)
+  void Scene::remove_tmp_port(Port* p)
   {
     Port* tmp_port = ports.back();
     p->remove_connection(tmp_port);

@@ -88,9 +88,8 @@ target_sources(nebula
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/port.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/port.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/scene.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/scene.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/ui.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/ui.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/window.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/components/camera.cpp"
 )

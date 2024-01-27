@@ -15,7 +15,6 @@
 #include <rendering/shader.hpp>
 #include <shaders/compiler.hpp>
 #include <ui/scene.hpp>
-#include <ui/ui.hpp>
 #include <windowing/window.hpp>
 
 using namespace nebula;
@@ -30,11 +29,6 @@ static void compile_shaders()
   shader_grid = compile_shader(String("shaders/grid.vert"),
                                String("shaders/grid.frag"), String("grid"));
 }
-
-struct Globals {
-  UI ui;
-  Scene scene;
-};
 
 static void keyboard_callback(windowing::Window* const window, Key const key,
                               Input_Action const state, void* data)
@@ -62,7 +56,7 @@ static void mouse_button_callback(windowing::Window* const window,
                                   void* data)
 {
   ANTON_UNUSED(window);
-  auto* const globals = reinterpret_cast<Globals*>(data);
+  auto& scene = *reinterpret_cast<Scene*>(data);
   if(key == Key::mouse_left) {
     if(action == Input_Action::press) {
       Vec2 const cursor_position = windowing::get_cursor_position(window);
@@ -74,53 +68,51 @@ static void mouse_button_callback(windowing::Window* const window,
         cursor_position, window_size, viewport_size);
 
       // Check if connected to another port
-      if(globals->scene.mode == Window_Mode::port_linking) {
-        Port* p = globals->ui.check_if_port_clicked(scene_position);
+      if(scene.mode == Window_Mode::port_linking) {
+        Port* p = scene.check_if_port_clicked(scene_position);
         // Can't connect to the same port
-        if(p == nullptr || p->type == globals->scene.connected_port->type) {
-          globals->ui.remove_tmp_port(globals->scene.connected_port);
+        if(p == nullptr || p->type == scene.connected_port->type) {
+          scene.remove_tmp_port(scene.connected_port);
         } else {
-          globals->ui.connect_ports(globals->scene.connected_port, p);
+          scene.connect_ports(scene.connected_port, p);
         }
         // Quit connecting mode
-        globals->scene.connected_port = nullptr;
-        globals->scene.mode = Window_Mode::none;
+        scene.connected_port = nullptr;
+        scene.mode = Window_Mode::none;
         return;
       }
 
-      globals->scene.connected_port =
-        globals->ui.check_if_port_clicked(scene_position);
-      if(globals->scene.connected_port != nullptr) {
-        globals->scene.mode = Window_Mode::port_linking;
+      scene.connected_port = scene.check_if_port_clicked(scene_position);
+      if(scene.connected_port != nullptr) {
+        scene.mode = Window_Mode::port_linking;
         port_t tmp_port_type;
-        if(globals->scene.connected_port->type == port_t::in) {
+        if(scene.connected_port->type == port_t::in) {
           tmp_port_type = port_t::out;
         } else {
           tmp_port_type = port_t::in;
         }
-        globals->ui.create_tmp_port(globals->scene.connected_port,
-                                    scene_position, tmp_port_type);
+        scene.create_tmp_port(scene.connected_port, scene_position,
+                              tmp_port_type);
         return;
       }
 
-      globals->scene.currently_moved_gate =
-        globals->ui.check_if_gate_clicked(scene_position);
-      globals->scene.last_mouse_position = scene_position;
-      if(globals->scene.currently_moved_gate != nullptr) {
-        globals->scene.mode = Window_Mode::gate_moving;
+      scene.currently_moved_gate = scene.check_if_gate_clicked(scene_position);
+      scene.last_mouse_position = scene_position;
+      if(scene.currently_moved_gate != nullptr) {
+        scene.mode = Window_Mode::gate_moving;
         return;
       }
 
-      globals->scene.mode = Window_Mode::camera_moving;
-      globals->scene.last_mouse_position = scene_position;
+      scene.mode = Window_Mode::camera_moving;
+      scene.last_mouse_position = scene_position;
     } else if(action == Input_Action::release) {
-      if(globals->scene.mode == Window_Mode::port_linking) {
+      if(scene.mode == Window_Mode::port_linking) {
         return;
       }
 
-      globals->scene.currently_moved_gate = nullptr;
-      globals->scene.connected_port = nullptr;
-      globals->scene.mode = Window_Mode::none;
+      scene.currently_moved_gate = nullptr;
+      scene.connected_port = nullptr;
+      scene.mode = Window_Mode::none;
     }
   }
 }
@@ -129,7 +121,7 @@ static void cursor_position_callback(windowing::Window* const window,
                                      f32 const x, f32 const y, void* data)
 {
   ANTON_UNUSED(window);
-  Globals* const globals = reinterpret_cast<Globals*>(data);
+  Scene& scene = *reinterpret_cast<Scene*>(data);
   Camera& cam = get_primary_camera();
   Vec2 const window_position{x, y};
   Vec2 const viewport_size = get_framebuffer_size(window);
@@ -138,19 +130,19 @@ static void cursor_position_callback(windowing::Window* const window,
     cam.window_to_scene_position(window_position, window_size, viewport_size);
 
   math::Vec2 offset;
-  offset.x = scene_position.x - globals->scene.last_mouse_position.x;
-  offset.y = scene_position.y - globals->scene.last_mouse_position.y;
+  offset.x = scene_position.x - scene.last_mouse_position.x;
+  offset.y = scene_position.y - scene.last_mouse_position.y;
 
-  if(globals->scene.mode == Window_Mode::port_linking) {
-    globals->ui.move_tmp_port(offset);
-  } else if(globals->scene.mode == Window_Mode::camera_moving) {
+  if(scene.mode == Window_Mode::port_linking) {
+    scene.move_tmp_port(offset);
+  } else if(scene.mode == Window_Mode::camera_moving) {
     cam.move(offset);
-  } else if(globals->scene.mode == Window_Mode::gate_moving) {
-    globals->scene.currently_moved_gate->move(offset);
+  } else if(scene.mode == Window_Mode::gate_moving) {
+    scene.currently_moved_gate->move(offset);
   }
 
-  globals->scene.last_mouse_position.x = scene_position.x;
-  globals->scene.last_mouse_position.y = scene_position.y;
+  scene.last_mouse_position.x = scene_position.x;
+  scene.last_mouse_position.y = scene_position.y;
 }
 
 static void scroll_callback(windowing::Window* const window, f32 const dx,
@@ -221,15 +213,15 @@ int main(int argc, char* argv[])
   INITIALISE(rendering::initialise_shaders(),
              "initialisation of shaders failed: {}");
 
-  Globals globals;
+  Scene scene;
 
-  windowing::set_keyboard_callback(window, keyboard_callback, &globals);
-  windowing::set_scroll_callback(window, scroll_callback, &globals);
+  windowing::set_keyboard_callback(window, keyboard_callback, &scene);
+  windowing::set_scroll_callback(window, scroll_callback, &scene);
   windowing::set_framebuffer_resize_callback(
-    window, framebuffer_resize_callback, &globals);
+    window, framebuffer_resize_callback, &scene);
   windowing::set_cursor_position_callback(window, cursor_position_callback,
-                                          &globals);
-  windowing::set_mouse_button_callback(window, mouse_button_callback, &globals);
+                                          &scene);
+  windowing::set_mouse_button_callback(window, mouse_button_callback, &scene);
 
   compile_shaders();
 
@@ -238,8 +230,8 @@ int main(int argc, char* argv[])
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
 
-  globals.ui.add_movable_gate({1.5f, 1.5f}, {1.0f, 0.0f}, 2, 1);
-  globals.ui.add_movable_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, 2, 3);
+  scene.add_movable_gate({1.5f, 1.5f}, {1.0f, 0.0f}, 2, 1);
+  scene.add_movable_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, 2, 3);
 
   // Main loop
   while(!windowing::should_close(window)) {
@@ -266,7 +258,7 @@ int main(int argc, char* argv[])
     rendering::set_uniform_f32(shader_wire, "zoom_level", zoom_level);
     rendering::set_uniform_mat4(shader_wire, "vp_mat", vp_mat);
 
-    globals.ui.add_gates_to_render_loop();
+    scene.add_gates_to_render_loop();
 
     rendering::commit_draw();
 

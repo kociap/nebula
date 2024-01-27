@@ -8,7 +8,6 @@
 #include <core/input.hpp>
 
 #include <logging/logging.hpp>
-#include <ui/ui.hpp>
 
 namespace nebula::windowing {
   struct Window {
