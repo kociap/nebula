@@ -51,7 +51,7 @@ FetchContent_MakeAvailable(glfw)
 FetchContent_Declare(
   anton_core
   GIT_REPOSITORY https://github.com/kociap/anton_core.git
-  GIT_TAG 89f26c3947701407acb6e6cb8130db4d22b17c75
+  GIT_TAG 37c01e96da1e7f6a71b1e9c3a31a2fe655198a2a
 )
 FetchContent_MakeAvailable(anton_core)
 
