@@ -26,7 +26,7 @@ namespace nebula {
   Movable_Gate* Scene::check_if_gate_clicked(Vec2 const mouse_position)
   {
     for(Movable_Gate& mg: gates) {
-      if(mg.is_under_mouse(mouse_position)) {
+      if(test_hit(mg, mouse_position)) {
         return &mg;
       }
     }

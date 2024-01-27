@@ -1,7 +1,6 @@
 #pragma once
 
 #include <anton/math/vec2.hpp>
-#include <ui/node_rect.hpp>
 #include <ui/port.hpp>
 
 namespace nebula {
@@ -11,9 +10,16 @@ namespace nebula {
    * current location in the application window and its gates.
    **/
   struct Movable_Gate {
-    Node_Rect rect;
     Array<Port*> in_ports;
     Array<Port*> out_ports;
+    /**
+     * Coordinates of the top left corner of the rect.
+     */
+    math::Vec2 coordinates;
+    /**
+     * Dimensions of the rect. x - width, y - height
+     */
+    math::Vec2 dimensions;
 
     /**
      * Creates a new visual movable object at the middle of the screen following
@@ -31,15 +37,16 @@ namespace nebula {
     void add_to_render_loop() const;
 
     /**
-     * Check whether the object is located at the given mouse location
-     * @param mouse_location - vector, mouse x and y location
-     * @return true if gate is under given location
-     */
-    [[nodiscard]] bool is_under_mouse(math::Vec2 mouse_location) const;
-    /**
      * Changes the location of an object
      * @param offset - vector, offset from previous mouse x and y location
      */
     void move(math::Vec2 offset);
   };
+
+  /**
+   * Test whether a point is within the bounds of a gate.
+   * @param point - x and y coordinates of point to check
+   * @return true if rect is under given point
+   */
+  [[nodiscard]] bool test_hit(Movable_Gate const& gate, math::Vec2 point);
 } // namespace nebula

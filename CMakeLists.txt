@@ -84,8 +84,6 @@ target_sources(nebula
   "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders/compiler.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_gate.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/movable_gate.hpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/node_rect.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/port.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/port.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/scene.cpp"

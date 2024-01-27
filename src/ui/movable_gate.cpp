@@ -2,17 +2,16 @@
 #include <ui/movable_gate.hpp>
 
 namespace nebula {
-  Movable_Gate::Movable_Gate(math::Vec2 const rectangle_dimensions,
-                             math::Vec2 const coords, u8 const num_in_ports,
-                             u8 const num_out_ports)
+  Movable_Gate::Movable_Gate(math::Vec2 const _dimensions,
+                             math::Vec2 const _coordinates,
+                             u8 const num_in_ports, u8 const num_out_ports)
+    : coordinates(_coordinates), dimensions(_dimensions)
   {
     // Center the rectangle on the screen
-    math::Vec2 coordinates;
-    coordinates = coords - (rectangle_dimensions / 2.0f);
-    rect = {coordinates, rectangle_dimensions};
+    coordinates += dimensions / 2.0f;
 
     // Distance between IN ports
-    f32 in_dist = rectangle_dimensions.y / static_cast<f32>(num_in_ports + 1);
+    f32 in_dist = dimensions.y / static_cast<f32>(num_in_ports + 1);
     for(u8 i = 1; i <= num_in_ports; i++) {
       // Create IN ports along the left edge of the gate
       Vec2 port_coordinates = {coordinates.x,
@@ -21,10 +20,10 @@ namespace nebula {
     }
 
     // Distance between OUT ports
-    f32 out_dist = rectangle_dimensions.y / static_cast<f32>(num_out_ports + 1);
+    f32 out_dist = dimensions.y / static_cast<f32>(num_out_ports + 1);
     for(u8 i = 1; i <= num_out_ports; i++) {
       // Create OUT ports along the right edge of the gate
-      Vec2 port_coordinates = {coordinates.x + rectangle_dimensions.x,
+      Vec2 port_coordinates = {coordinates.x + dimensions.x,
                                coordinates.y + out_dist * static_cast<f32>(i)};
       out_ports.emplace_back(new Port(port_coordinates, port_t::out));
     }
@@ -33,19 +32,17 @@ namespace nebula {
   void Movable_Gate::add_to_render_loop() const
   {
     Vertex vert[] = {
-      Vertex{.position = {rect.coordinates.x + rect.dimensions.x,
-                          rect.coordinates.y + rect.dimensions.y, 0.0f},
+      Vertex{.position = {coordinates.x + dimensions.x,
+                          coordinates.y + dimensions.y, 0.0f},
              .normal = {0.4f, 0.4f, 0.7f},
              .uv = {1.0f, 1.0f}},
-      Vertex{.position = {rect.coordinates.x,
-                          rect.coordinates.y + rect.dimensions.y, 0.0f},
+      Vertex{.position = {coordinates.x, coordinates.y + dimensions.y, 0.0f},
              .normal = {0.4f, 0.4f, 0.7f},
              .uv = {0.0f, 1.0f}},
-      Vertex{.position = {rect.coordinates.x + rect.dimensions.x,
-                          rect.coordinates.y, 0.0f},
+      Vertex{.position = {coordinates.x + dimensions.x, coordinates.y, 0.0f},
              .normal = {0.4f, 0.4f, 0.7f},
              .uv = {1.0f, 0.0f}},
-      Vertex{.position = {rect.coordinates.x, rect.coordinates.y, 0.0f},
+      Vertex{.position = {coordinates.x, coordinates.y, 0.0f},
              .normal = {0.4f, 0.4f, 0.7f},
              .uv = {0.0f, 0.0f}},
     };
@@ -59,15 +56,10 @@ namespace nebula {
     rendering::add_draw_command(cmd);
   }
 
-  bool Movable_Gate::is_under_mouse(math::Vec2 const mouse_location) const
-  {
-    return rect.is_under_point(mouse_location);
-  }
-
   void Movable_Gate::move(math::Vec2 const offset)
   {
-    rect.coordinates.x += offset.x;
-    rect.coordinates.y += offset.y;
+    coordinates.x += offset.x;
+    coordinates.y += offset.y;
     // Move ports
     for(Port* p: in_ports) {
       p->move(offset);
@@ -77,4 +69,14 @@ namespace nebula {
     }
   }
 
+  bool test_hit(Movable_Gate const& gate, math::Vec2 const point)
+  {
+    Vec2 const coordinates = gate.coordinates;
+    Vec2 const dimensions = gate.dimensions;
+    bool const left = point.x >= coordinates.x;
+    bool const right = point.x <= coordinates.x + dimensions.x;
+    bool const top = point.y >= coordinates.y;
+    bool const bottom = point.y <= coordinates.y + dimensions.y;
+    return left && right && top && bottom;
+  }
 } // namespace nebula
