@@ -30,8 +30,8 @@ namespace nebula {
   math::Mat4 get_projection_matrix(Camera const& camera,
                                    math::Vec2 const viewport_size)
   {
-    f32 const near_plane = 100.0f;
-    f32 const far_plane = -100.0f;
+    f32 const near_plane = 0.0f;
+    f32 const far_plane = 100.0f;
     f32 const zoom = get_zoom(camera);
     Vec2 const extents = zoom * Vec2(viewport_size.x / viewport_size.y, 1.0f);
     return math::orthographic_rh(-extents.x, extents.x, -extents.y, extents.y,
