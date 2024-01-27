@@ -56,7 +56,7 @@ namespace nebula {
   void Port::remove_connection(Port* old_port)
   {
     List_Iterator<Port*, Port*> it;
-    for(it = connections.begin(); it != connections.end(); it++) {
+    for(it = connections.begin(); it != connections.end(); ++it) {
       if(*it == old_port) {
         connections.erase(it);
         break;
