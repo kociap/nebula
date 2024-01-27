@@ -118,6 +118,18 @@ static void framebuffer_resize_callback(windowing::Window* const window,
   LOG_INFO("resized framebuffer to {}x{}", width, height);
 }
 
+static void scroll_callback(windowing::Window* const window, f32 const dx,
+                            f32 const dy)
+{
+  Camera& primary_camera = get_primary_camera();
+  if(dy < 0.0) {
+    primary_camera.zoom(1.25);
+  } else {
+    primary_camera.zoom(0.8);
+  }
+  LOG_DEBUG("zoom changed: {}", primary_camera.zoom_level);
+}
+
 static void render_grid(math::Mat4 const v_mat, f32 const inv_aspect,
                         f32 const zoom)
 {
@@ -173,6 +185,7 @@ int main(int argc, char* argv[])
              "initialisation of shaders failed: {}");
 
   windowing::set_keyboard_callback(window, keyboard_callback);
+  windowing::set_scroll_callback(window, scroll_callback);
   windowing::set_framebuffer_resize_callback(window,
                                              framebuffer_resize_callback);
 
