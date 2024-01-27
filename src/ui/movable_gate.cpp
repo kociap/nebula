@@ -3,18 +3,12 @@
 
 namespace nebula {
   Movable_Gate::Movable_Gate(math::Vec2 const rectangle_dimensions,
-                             math::Vec4 const camera_borders,
-                             u8 const num_in_ports, u8 const num_out_ports)
+                             math::Vec2 const coords, u8 const num_in_ports,
+                             u8 const num_out_ports)
   {
     // Center the rectangle on the screen
     math::Vec2 coordinates;
-    // Center of the camera - half of rectangle width = x
-    coordinates.x = ((camera_borders.y + camera_borders.x) / (f32)2.0) -
-                    (rectangle_dimensions.x / (f32)2.0);
-    // Center of the camera - half of rectangle height = y
-    coordinates.y = ((camera_borders.z + camera_borders.w) / (f32)2.0) -
-                    (rectangle_dimensions.y / (f32)2.0);
-
+    coordinates = coords - (rectangle_dimensions / 2.0f);
     rect = {coordinates, rectangle_dimensions};
 
     // Distance between IN ports

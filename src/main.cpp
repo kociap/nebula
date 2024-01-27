@@ -62,7 +62,7 @@ static void mouse_button_callback(windowing::Window* const window,
                                   void* data)
 {
   ANTON_UNUSED(window);
-  Globals* const globals = reinterpret_cast<Globals*>(data);
+  auto* const globals = reinterpret_cast<Globals*>(data);
   if(key == Key::mouse_left) {
     if(action == Input_Action::press) {
       Vec2 const cursor_position = windowing::get_cursor_position(window);
@@ -73,6 +73,36 @@ static void mouse_button_callback(windowing::Window* const window,
       Vec2 const scene_position = cam.window_to_scene_position(
         cursor_position, window_size, viewport_size);
 
+      // Check if connected to another port
+      if(globals->scene.mode == Window_Mode::port_linking) {
+        Port* p = globals->ui.check_if_port_clicked(scene_position);
+        // Can't connect to the same port
+        if(p == nullptr || p->type == globals->scene.connected_port->type) {
+          globals->ui.remove_tmp_port(globals->scene.connected_port);
+        } else {
+          globals->ui.connect_ports(globals->scene.connected_port, p);
+        }
+        // Quit connecting mode
+        globals->scene.connected_port = nullptr;
+        globals->scene.mode = Window_Mode::none;
+        return;
+      }
+
+      globals->scene.connected_port =
+        globals->ui.check_if_port_clicked(scene_position);
+      if(globals->scene.connected_port != nullptr) {
+        globals->scene.mode = Window_Mode::port_linking;
+        port_t tmp_port_type;
+        if(globals->scene.connected_port->type == port_t::in) {
+          tmp_port_type = port_t::out;
+        } else {
+          tmp_port_type = port_t::in;
+        }
+        globals->ui.create_tmp_port(globals->scene.connected_port,
+                                    scene_position, tmp_port_type);
+        return;
+      }
+
       globals->scene.currently_moved_gate =
         globals->ui.check_if_gate_clicked(scene_position);
       globals->scene.last_mouse_position = scene_position;
@@ -81,16 +111,13 @@ static void mouse_button_callback(windowing::Window* const window,
         return;
       }
 
-      globals->scene.connected_port =
-        globals->ui.check_if_port_clicked(scene_position);
-      if(globals->scene.connected_port != nullptr) {
-        globals->scene.mode = Window_Mode::port_connecting;
-        return;
-      }
-
       globals->scene.mode = Window_Mode::camera_moving;
       globals->scene.last_mouse_position = scene_position;
     } else if(action == Input_Action::release) {
+      if(globals->scene.mode == Window_Mode::port_linking) {
+        return;
+      }
+
       globals->scene.currently_moved_gate = nullptr;
       globals->scene.connected_port = nullptr;
       globals->scene.mode = Window_Mode::none;
@@ -114,13 +141,14 @@ static void cursor_position_callback(windowing::Window* const window,
   offset.x = scene_position.x - globals->scene.last_mouse_position.x;
   offset.y = scene_position.y - globals->scene.last_mouse_position.y;
 
-  if(globals->scene.mode == Window_Mode::camera_moving) {
+  if(globals->scene.mode == Window_Mode::port_linking) {
+    globals->ui.move_tmp_port(offset);
+  } else if(globals->scene.mode == Window_Mode::camera_moving) {
     cam.move(offset);
   } else if(globals->scene.mode == Window_Mode::gate_moving) {
     globals->scene.currently_moved_gate->move(offset);
-  } else if(globals->scene.mode == Window_Mode::port_connecting) {
-    // TODO: Implement port connecting
   }
+
   globals->scene.last_mouse_position.x = scene_position.x;
   globals->scene.last_mouse_position.y = scene_position.y;
 }
@@ -209,6 +237,9 @@ int main(int argc, char* argv[])
   rendering::bind_transient_geometry_buffers();
 
   glClearColor(0.0, 0.0, 0.0, 0.0);
+
+  globals.ui.add_movable_gate({1.5f, 1.5f}, {1.0f, 0.0f}, 2, 1);
+  globals.ui.add_movable_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, 2, 3);
 
   // Main loop
   while(!windowing::should_close(window)) {

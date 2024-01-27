@@ -12,7 +12,7 @@ namespace nebula {
      * @param num_out_ports - number of OUT type ports
      */
     void add_movable_gate(math::Vec2 rectangle_dimensions,
-                          math::Vec4 camera_borders, u8 num_in_ports,
+                          math::Vec2 coordinates, u8 num_in_ports,
                           u8 num_out_ports);
 
     /**
@@ -30,10 +30,31 @@ namespace nebula {
      */
     void add_gates_to_render_loop();
 
+    /**
+     * Creates temporary port used to render connection.
+     * @param coordinates - scene position
+     * @param type - port_t
+     */
+    void create_tmp_port(Port* p, Vec2 coordinates, port_t type);
+
+    /**
+     * Removes tmp port when linking mode ends.
+     * @param p - port it was connected to
+     */
+    void remove_tmp_port(Port* p);
+
+    /**
+     * Connect port p1 and p2. Remove tmp port.
+     */
+    void connect_ports(Port* p1, Port* p2);
+
+    void move_tmp_port(Vec2 offset);
+
     ~UI();
 
   private:
     List<Movable_Gate> gates; // All gates visible on the screen
-    List<Port*> ports; // All ports visible on the screen
+    Array<Port*> ports; // All ports visible on the screen
+    bool tmp_port_exists = false;
   };
 } // namespace nebula

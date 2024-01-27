@@ -7,6 +7,7 @@ namespace nebula {
 
   struct Port {
   public:
+    port_t type;
     /**
      * Initializes a circle shaped port with specified coordinates and type.
      * @param coordinates - x and y coordinates of the center
@@ -53,6 +54,5 @@ namespace nebula {
     Vec2 coordinates;
     f32 radius;
     List<Port*> connections;
-    port_t type;
   };
 } // namespace nebula

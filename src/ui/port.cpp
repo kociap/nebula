@@ -2,11 +2,13 @@
 #include <ui/port.hpp>
 
 namespace nebula {
+  static void draw_connection(Vec2 cords_1, Vec2 cords_2);
+
   Port::Port(Vec2 const coordinates, port_t const type)
   {
     this->coordinates = coordinates;
     this->type = type;
-    radius = 0.01f; // Adjust this value
+    radius = 0.07f; // Adjust this value
   }
 
   void Port::move(nebula::Vec2 const offset)
@@ -45,6 +47,10 @@ namespace nebula {
     cmd.instance_count = 1;
 
     rendering::add_draw_command(cmd);
+
+    if(type == port_t::in && connections.size() != 0) {
+      draw_connection(coordinates, (*connections.begin())->coordinates);
+    }
   }
 
   void Port::remove_connection(Port* old_port)
@@ -91,4 +97,44 @@ namespace nebula {
     bool const clicked = (distance <= radius);
     return clicked;
   }
+
+  static void draw_connection(Vec2 const cords_1, Vec2 const cords_2)
+  {
+    // Calculate normalized direction vector
+    math::Vec2 direction = {cords_2.x - cords_1.x, cords_2.y - cords_1.y};
+    f32 const length =
+      math::sqrt(direction.x * direction.x + direction.y * direction.y);
+    direction /= length;
+    math::Vec2 const perpendicular = {-direction.y, direction.x};
+    f32 const thickness = 0.04f;
+
+    // Transform vertices using the normalized direction
+    Vertex vert[] = {
+      Vertex{.position = {cords_1.x + thickness * perpendicular.x,
+                          cords_1.y + thickness * perpendicular.y, 0.0f},
+             .normal = {0.5f, 0.8f, 0.5f},
+             .uv = {1.0f, 1.0f}},
+      Vertex{.position = {cords_1.x - thickness * perpendicular.x,
+                          cords_1.y - thickness * perpendicular.y, 0.0f},
+             .normal = {0.5f, 0.8f, 0.5f},
+             .uv = {0.0f, 1.0f}},
+      Vertex{.position = {cords_2.x + thickness * perpendicular.x,
+                          cords_2.y + thickness * perpendicular.y, 0.0f},
+             .normal = {0.5f, 0.8f, 0.5f},
+             .uv = {1.0f, 0.0f}},
+      Vertex{.position = {cords_2.x - thickness * perpendicular.x,
+                          cords_2.y - thickness * perpendicular.y, 0.0f},
+             .normal = {0.5f, 0.8f, 0.5f},
+             .uv = {0.0f, 0.0f}},
+    };
+    u32 indices[] = {
+      0, 1, 2, 1, 3, 2,
+    };
+    rendering::Draw_Elements_Command cmd =
+      rendering::write_geometry(vert, indices);
+    cmd.instance_count = 1;
+
+    rendering::add_draw_command(cmd);
+  }
+
 } // namespace nebula
