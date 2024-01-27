@@ -6,7 +6,7 @@ namespace nebula {
   {
     this->coordinates = coordinates;
     this->type = type;
-    radius = 0.07f; // Adjust this value
+    radius = 0.1f; // Adjust this value
   }
 
   void Port::move(nebula::Vec2 const offset)

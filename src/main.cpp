@@ -37,10 +37,21 @@ static void compile_shaders()
 static void keyboard_callback(windowing::Window* const window, Key const key,
                               Input_Action const state, void* data)
 {
+  auto& scene = *reinterpret_cast<Scene*>(data);
   ANTON_UNUSED(window);
   ANTON_UNUSED(data);
   if(key == Key::key_r && state == Input_Action::release) {
     compile_shaders();
+  } else if((key == Key::key_left_control || key == Key::key_right_control) &&
+            state == Input_Action::press) {
+    if(scene.mode == Window_Mode::none) {
+      scene.mode = Window_Mode::object_delete;
+    }
+  } else if((key == Key::key_left_control || key == Key::key_right_control) &&
+            state == Input_Action::release) {
+    if(scene.mode == Window_Mode::object_delete) {
+      scene.mode = Window_Mode::none;
+    }
   }
 }
 
@@ -88,6 +99,11 @@ static void mouse_button_callback(windowing::Window* const window,
 
       scene.connected_port = scene.check_if_port_clicked(scene_position);
       if(scene.connected_port != nullptr) {
+        if(scene.mode == Window_Mode::object_delete) {
+          scene.connected_port->remove_all_connections();
+          return;
+        }
+
         scene.mode = Window_Mode::port_linking;
         port_t tmp_port_type;
         if(scene.connected_port->type == port_t::in) {
@@ -103,6 +119,10 @@ static void mouse_button_callback(windowing::Window* const window,
       scene.currently_moved_gate = scene.check_if_gate_clicked(scene_position);
       scene.last_mouse_position = scene_position;
       if(scene.currently_moved_gate != nullptr) {
+        if(scene.mode == Window_Mode::object_delete) {
+          scene.delete_gate(scene.currently_moved_gate);
+          return;
+        }
         scene.mode = Window_Mode::gate_moving;
         return;
       }
