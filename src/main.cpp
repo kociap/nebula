@@ -19,15 +19,19 @@
 
 using namespace nebula;
 
-static Handle<rendering::Shader> shader_wire;
+static Handle<rendering::Shader> shader_default;
+static Handle<rendering::Shader> shader_port;
 static Handle<rendering::Shader> shader_grid;
 
 static void compile_shaders()
 {
-  shader_wire = compile_shader(String("shaders/passthrough.vert"),
-                               String("shaders/wire.frag"), String("uv"));
+  shader_default =
+    compile_shader(String("shaders/passthrough.vert"),
+                   String("shaders/default.frag"), String("default"));
   shader_grid = compile_shader(String("shaders/grid.vert"),
                                String("shaders/grid.frag"), String("grid"));
+  shader_port = compile_shader(String("shaders/passthrough.vert"),
+                               String("shaders/port.frag"), String("port"));
 }
 
 static void keyboard_callback(windowing::Window* const window, Key const key,
@@ -250,16 +254,53 @@ int main(int argc, char* argv[])
 
     // render_grid(v_mat, inv_aspect, zoom_level);
 
-    bool const bind_result = rendering::bind_shader(shader_wire);
-    if(!bind_result) {
-      LOG_ERROR("could not bind 'shader_wire'");
+    {
+      bool const bind_result = rendering::bind_shader(shader_default);
+      if(!bind_result) {
+        LOG_ERROR("could not bind 'shader_default'");
+        continue;
+      }
     }
 
-    rendering::set_uniform_f32(shader_wire, "zoom_level", zoom_level);
-    rendering::set_uniform_mat4(shader_wire, "vp_mat", vp_mat);
+    rendering::set_uniform_mat4(shader_default, "vp_mat", vp_mat);
 
-    scene.add_gates_to_render_loop();
+    // Draw order:
+    // 1. gates.
+    // 2. connections.
+    // 3. ports.
 
+    for(Gate const& gate: scene.gates) {
+      rendering::Draw_Elements_Command cmd = prepare_draw(gate);
+      rendering::add_draw_command(cmd);
+    }
+
+    for(Port const* const port: scene.ports) {
+      if(port->type != port_t::out) {
+        continue;
+      }
+
+      for(Port const* const conn: port->connections) {
+        rendering::Draw_Elements_Command cmd =
+          prepare_draw_connection(port->coordinates, conn->coordinates);
+        rendering::add_draw_command(cmd);
+      }
+    }
+    rendering::commit_draw();
+
+    {
+      bool const bind_result = rendering::bind_shader(shader_port);
+      if(!bind_result) {
+        LOG_ERROR("could not bind 'shader_port'");
+        continue;
+      }
+    }
+
+    rendering::set_uniform_mat4(shader_port, "vp_mat", vp_mat);
+
+    for(Port const* const port: scene.ports) {
+      rendering::Draw_Elements_Command cmd = prepare_draw(*port);
+      rendering::add_draw_command(cmd);
+    }
     rendering::commit_draw();
 
     windowing::swap_buffers(window);

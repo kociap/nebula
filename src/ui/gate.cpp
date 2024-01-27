@@ -1,4 +1,3 @@
-#include <rendering/rendering.hpp>
 #include <ui/gate.hpp>
 
 namespace nebula {
@@ -28,33 +27,6 @@ namespace nebula {
     }
   }
 
-  void Gate::add_to_render_loop() const
-  {
-    Vertex vert[] = {
-      Vertex{.position = {coordinates.x + dimensions.x,
-                          coordinates.y + dimensions.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
-             .uv = {1.0f, 1.0f}},
-      Vertex{.position = {coordinates.x, coordinates.y + dimensions.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
-             .uv = {0.0f, 1.0f}},
-      Vertex{.position = {coordinates.x + dimensions.x, coordinates.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
-             .uv = {1.0f, 0.0f}},
-      Vertex{.position = {coordinates.x, coordinates.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
-             .uv = {0.0f, 0.0f}},
-    };
-    u32 indices[] = {
-      0, 1, 2, 1, 3, 2,
-    };
-    rendering::Draw_Elements_Command cmd =
-      rendering::write_geometry(vert, indices);
-    cmd.instance_count = 1;
-
-    rendering::add_draw_command(cmd);
-  }
-
   void Gate::move(math::Vec2 const offset)
   {
     coordinates.x += offset.x;
@@ -77,5 +49,33 @@ namespace nebula {
     bool const top = point.y >= coordinates.y;
     bool const bottom = point.y <= coordinates.y + dimensions.y;
     return left && right && top && bottom;
+  }
+
+  rendering::Draw_Elements_Command prepare_draw(Gate const& gate)
+  {
+    Vertex vert[] = {
+      Vertex{.position = {gate.coordinates.x + gate.dimensions.x,
+                          gate.coordinates.y + gate.dimensions.y, 0.0f},
+             .normal = {0.4f, 0.4f, 0.7f},
+             .uv = {1.0f, 1.0f}},
+      Vertex{.position = {gate.coordinates.x,
+                          gate.coordinates.y + gate.dimensions.y, 0.0f},
+             .normal = {0.4f, 0.4f, 0.7f},
+             .uv = {0.0f, 1.0f}},
+      Vertex{.position = {gate.coordinates.x + gate.dimensions.x,
+                          gate.coordinates.y, 0.0f},
+             .normal = {0.4f, 0.4f, 0.7f},
+             .uv = {1.0f, 0.0f}},
+      Vertex{.position = {gate.coordinates.x, gate.coordinates.y, 0.0f},
+             .normal = {0.4f, 0.4f, 0.7f},
+             .uv = {0.0f, 0.0f}},
+    };
+    u32 indices[] = {
+      0, 1, 2, 1, 3, 2,
+    };
+    rendering::Draw_Elements_Command cmd =
+      rendering::write_geometry(vert, indices);
+    cmd.instance_count = 1;
+    return cmd;
   }
 } // namespace nebula

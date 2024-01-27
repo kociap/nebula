@@ -44,11 +44,6 @@ namespace nebula {
     [[nodiscard]] Port* check_if_port_clicked(Vec2 mouse_position);
 
     /**
-     * Adds all gates and their ports to the render loop.
-     */
-    void add_gates_to_render_loop();
-
-    /**
      * Creates temporary port used to render connection.
      * @param coordinates - scene position
      * @param type - port_t

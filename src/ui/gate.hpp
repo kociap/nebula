@@ -1,6 +1,8 @@
 #pragma once
 
 #include <anton/math/vec2.hpp>
+
+#include <rendering/rendering.hpp>
 #include <ui/port.hpp>
 
 namespace nebula {
@@ -32,11 +34,6 @@ namespace nebula {
          u8 num_out_ports);
 
     /**
-     * Renders the gate.
-     */
-    void add_to_render_loop() const;
-
-    /**
      * Changes the location of an object
      * @param offset - vector, offset from previous mouse x and y location
      */
@@ -49,4 +46,6 @@ namespace nebula {
    * @return true if rect is under given point
    */
   [[nodiscard]] bool test_hit(Gate const& gate, math::Vec2 point);
+
+  [[nodiscard]] rendering::Draw_Elements_Command prepare_draw(Gate const& gate);
 } // namespace nebula

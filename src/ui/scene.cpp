@@ -44,19 +44,6 @@ namespace nebula {
     return nullptr;
   }
 
-  void Scene::add_gates_to_render_loop()
-  {
-    for(Gate& mg: gates) {
-      // Draw gate
-      mg.add_to_render_loop();
-    }
-
-    // Draw ports
-    for(Port* p: ports) {
-      p->add_to_render_loop();
-    }
-  }
-
   void Scene::create_tmp_port(Port* p, Vec2 const coordinates,
                               port_t const type)
   {

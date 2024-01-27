@@ -1,12 +1,16 @@
 #pragma once
 
 #include <core/types.hpp>
+#include <rendering/rendering.hpp>
 
 namespace nebula {
   enum struct port_t { in, out };
 
   struct Port {
   public:
+    List<Port*> connections;
+    Vec2 coordinates;
+    f32 radius;
     port_t type;
     /**
      * Initializes a circle shaped port with specified coordinates and type.
@@ -49,10 +53,9 @@ namespace nebula {
     [[nodiscard]] Vec2 get_coordinates() const;
 
     [[nodiscard]] bool is_under_mouse(Vec2 mouse_position) const;
-
-  private:
-    Vec2 coordinates;
-    f32 radius;
-    List<Port*> connections;
   };
+
+  [[nodiscard]] rendering::Draw_Elements_Command prepare_draw(Port const& port);
+  [[nodiscard]] rendering::Draw_Elements_Command
+  prepare_draw_connection(Vec2 cords_1, Vec2 cords_2);
 } // namespace nebula
