@@ -51,8 +51,10 @@ namespace nebula::windowing {
                                        Input_State state);
   using framebuffer_resize_callback_t = void (*)(Window* window, i64 width,
                                                  i64 height);
+  using scroll_callback_t = void (*)(Window* window, f32 x, f32 y);
 
   void set_keyboard_callback(Window* window, keyboard_callback_t callback);
+  void set_scroll_callback(Window* window, scroll_callback_t callback);
   void set_framebuffer_resize_callback(Window* window,
                                        framebuffer_resize_callback_t callback);
 

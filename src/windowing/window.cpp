@@ -16,6 +16,7 @@ namespace nebula::windowing {
     Movable_Rect* currently_moved_rectangle; // Currently moved rect/gate
     keyboard_callback_t keyboard_callback = nullptr;
     framebuffer_resize_callback_t framebuffer_resize_callback = nullptr;
+    scroll_callback_t scroll_callback = nullptr;
   };
 
   /**
@@ -38,6 +39,16 @@ namespace nebula::windowing {
     if(window->keyboard_callback != nullptr) {
       window->keyboard_callback(window, static_cast<Key>(key),
                                 static_cast<Input_State>(action));
+    }
+  }
+
+  static void scroll_callback(GLFWwindow* glfw_window, double xoffset,
+                              double yoffset)
+  {
+    auto* const window =
+      reinterpret_cast<Window*>(glfwGetWindowUserPointer(glfw_window));
+    if(window->scroll_callback != nullptr) {
+      window->scroll_callback(window, xoffset, yoffset);
     }
   }
 
@@ -80,23 +91,6 @@ namespace nebula::windowing {
         get_primary_camera().is_moving = false;
       }
     }
-  }
-
-  // Function to handle mouse scroll events
-  static void scroll_callback(GLFWwindow* window, double xoffset,
-                              double yoffset)
-  {
-    (void)xoffset;
-
-    auto* instance = static_cast<Window*>(glfwGetWindowUserPointer(window));
-
-    Camera& primary_camera = get_primary_camera();
-    if(yoffset < 0.0) {
-      primary_camera.zoom(2);
-    } else {
-      primary_camera.zoom(0.5);
-    }
-    LOG_DEBUG("zoom changed: {}", primary_camera.zoom_level);
   }
 
   static void cursor_position_callbacks(GLFWwindow* win, double xpos,
@@ -172,10 +166,10 @@ namespace nebula::windowing {
     // Set callbacks
     glfwSetMouseButtonCallback(win->glfw_window, mouse_button_callbacks);
     glfwSetKeyCallback(win->glfw_window, keyboard_button_callback);
+    glfwSetScrollCallback(win->glfw_window, scroll_callback);
     glfwSetCursorPosCallback(win->glfw_window, cursor_position_callbacks);
     glfwSetFramebufferSizeCallback(win->glfw_window,
                                    framebuffer_resize_callback);
-    glfwSetScrollCallback(win->glfw_window, scroll_callback);
 
     glfwMakeContextCurrent(win->glfw_window);
 
@@ -237,4 +231,10 @@ namespace nebula::windowing {
   {
     window->framebuffer_resize_callback = callback;
   }
+
+  void set_scroll_callback(Window* window, scroll_callback_t callback)
+  {
+    window->scroll_callback = callback;
+  }
+
 } // namespace nebula::windowing
