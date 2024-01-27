@@ -58,7 +58,7 @@ FetchContent_MakeAvailable(anton_core)
 # Dear ImGui
 FetchContent_Declare(
   imgui
-  GIT_REPOSITORY git@github.com:ocornut/imgui.git
+  GIT_REPOSITORY https://github.com/ocornut/imgui.git
   GIT_TAG eb42e164dde71877c894b8fee4a555a738c0406b
 )
 FetchContent_MakeAvailable(imgui)
