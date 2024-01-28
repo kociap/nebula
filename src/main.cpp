@@ -76,9 +76,8 @@ static void framebuffer_resize_callback(windowing::Window* const window,
 {
   ANTON_UNUSED(window);
   ANTON_UNUSED(data);
-  rendering::resize_framebuffers(width, height);
   glViewport(0, 0, width, height);
-  LOG_INFO("resized framebuffer to {}x{}", width, height);
+  LOG_INFO("resized window to {}x{}", width, height);
 }
 
 static void mouse_button_callback(windowing::Window* const window,
@@ -355,14 +354,7 @@ int main(int argc, char* argv[])
 
     windowing::poll_events();
 
-    rendering::Framebuffer* primary_fb = rendering::get_primary_framebuffer();
-    primary_fb->bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    Vec2 const viewport_size = primary_fb->size();
-    render_scene(scene, viewport_size);
-
-    rendering::bind_default_framebuffer();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Vec2 const window_size = windowing::get_framebuffer_size(window);
 
     // We are using the ImGuiWindowFlags_NoDocking flag to make the parent
     // window not dockable into, because it would be confusing to have two
@@ -372,7 +364,7 @@ int main(int argc, char* argv[])
 
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos({0.0f, 0.0f});
-    ImGui::SetNextWindowSize({viewport_size.x, viewport_size.y});
+    ImGui::SetNextWindowSize({window_size.x, window_size.y});
     ImGui::SetNextWindowViewport(viewport->ID);
     window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
@@ -391,8 +383,16 @@ int main(int argc, char* argv[])
                      ImGuiDockNodeFlags_PassthruCentralNode);
 
     ImGui::Begin("Viewport");
+    ImVec2 const im_viewport_size = ImGui::GetContentRegionAvail();
+    Vec2 const viewport_size{im_viewport_size.x, im_viewport_size.y};
+    rendering::resize_framebuffers(viewport_size.x, viewport_size.y);
+    rendering::Framebuffer* const primary_fb =
+      rendering::get_primary_framebuffer();
+    primary_fb->bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    render_scene(scene, viewport_size);
     u32 texture = primary_fb->get_color_texture(0);
-    ImGui::Image((void*)(u64)texture, ImVec2(viewport_size.x, viewport_size.y));
+    ImGui::Image((void*)(u64)texture, im_viewport_size);
     ImGui::End();
 
     ImGui::Begin("Toolbar");
@@ -406,6 +406,8 @@ int main(int argc, char* argv[])
     // Close the dock window.
     ImGui::End();
 
+    rendering::bind_default_framebuffer();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

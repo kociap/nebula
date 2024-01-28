@@ -211,9 +211,9 @@ namespace nebula::rendering {
   {
     // TODO: This should be a transaction as creating framebuffers might fail
     //       and we'll be left without framebuffers at all.
-    destroy_framebuffers();
-    Expected<void, Error> result = create_framebuffers(width, height);
-    ANTON_UNUSED(result);
+    back_postprocess_fb.resize(width, height);
+    front_postprocess_fb.resize(width, height);
+    primary_fb.resize(width, height);
   }
 
   void bind_draw_buffers()
