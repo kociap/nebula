@@ -76,7 +76,6 @@ static void framebuffer_resize_callback(windowing::Window* const window,
 {
   ANTON_UNUSED(window);
   ANTON_UNUSED(data);
-  glViewport(0, 0, width, height);
   LOG_INFO("resized window to {}x{}", width, height);
 }
 
@@ -294,6 +293,24 @@ static void render_scene(Scene& scene, Vec2 const viewport_size)
   rendering::commit_draw();
 }
 
+static void render_viewport(Scene& scene)
+{
+  ImGui::SetNextWindowSize({200, 200}, ImGuiCond_FirstUseEver);
+  ImGui::Begin("Viewport");
+  ImVec2 const im_viewport_size = ImGui::GetContentRegionAvail();
+  Vec2 const viewport_size{im_viewport_size.x, im_viewport_size.y};
+  rendering::resize_framebuffers(viewport_size.x, viewport_size.y);
+  glViewport(0, 0, viewport_size.x, viewport_size.y);
+  rendering::Framebuffer* const primary_fb =
+    rendering::get_primary_framebuffer();
+  primary_fb->bind();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  render_scene(scene, viewport_size);
+  u32 texture = primary_fb->get_color_texture(0);
+  ImGui::Image((void*)(u64)texture, im_viewport_size);
+  ImGui::End();
+}
+
 #define INITIALISE(fn, msg)            \
   {                                    \
     Expected<void, Error> result = fn; \
@@ -356,25 +373,22 @@ int main(int argc, char* argv[])
 
     Vec2 const window_size = windowing::get_framebuffer_size(window);
 
-    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent
-    // window not dockable into, because it would be confusing to have two
-    // docking targets within each others.
-    ImGuiWindowFlags window_flags =
-      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos({0.0f, 0.0f});
     ImGui::SetNextWindowSize({window_size.x, window_size.y});
     ImGui::SetNextWindowViewport(viewport->ID);
-    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-    window_flags |=
-      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-    window_flags |= ImGuiWindowFlags_NoBackground; // Pass-through background
-
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent
+    // window not dockable into, because it would be confusing to have two
+    // docking targets within each others.
+    ImGuiWindowFlags const window_flags =
+      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking |
+      ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+      ImGuiWindowFlags_NoBackground;
     ImGui::Begin("Main Dock", nullptr, window_flags);
     ImGui::PopStyleVar(3);
 
@@ -382,19 +396,7 @@ int main(int argc, char* argv[])
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f),
                      ImGuiDockNodeFlags_PassthruCentralNode);
 
-    ImGui::SetNextWindowSize({200, 200}, ImGuiCond_FirstUseEver);
-    ImGui::Begin("Viewport");
-    ImVec2 const im_viewport_size = ImGui::GetContentRegionAvail();
-    Vec2 const viewport_size{im_viewport_size.x, im_viewport_size.y};
-    rendering::resize_framebuffers(viewport_size.x, viewport_size.y);
-    rendering::Framebuffer* const primary_fb =
-      rendering::get_primary_framebuffer();
-    primary_fb->bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    render_scene(scene, viewport_size);
-    u32 texture = primary_fb->get_color_texture(0);
-    ImGui::Image((void*)(u64)texture, im_viewport_size);
-    ImGui::End();
+    render_viewport(scene);
 
     ImGui::Begin("Toolbar");
     if(ImGui::Button("Button")) {
@@ -407,6 +409,7 @@ int main(int argc, char* argv[])
     // Close the dock window.
     ImGui::End();
 
+    glViewport(0, 0, window_size.x, window_size.y);
     rendering::bind_default_framebuffer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ImGui::Render();
