@@ -138,6 +138,18 @@ static void mouse_button_callback(windowing::Window* const window,
       scene.connected_port = nullptr;
       scene.mode = Window_Mode::none;
     }
+  } else if(key == Key::mouse_right) {
+    Vec2 const cursor_position = windowing::get_cursor_position(window);
+
+    Camera& cam = get_primary_camera();
+    Vec2 const viewport_size = get_framebuffer_size(window);
+    Vec2 const window_size = get_window_size(window);
+    Vec2 const scene_position =
+      cam.window_to_scene_position(cursor_position, window_size, viewport_size);
+    Port* p = scene.check_if_port_clicked(scene_position);
+    if(p != nullptr) {
+      p->remove_all_connections();
+    }
   }
 }
 
