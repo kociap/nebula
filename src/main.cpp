@@ -24,6 +24,9 @@
 
 using namespace nebula;
 
+bool is_draged_from_menu = 0;
+Gate_Kind last_menu_gate_choice = Gate_Kind::GATES_COUNT;
+
 void initialise_imgui(windowing::Window* const window)
 {
   ImGui::CreateContext();
@@ -337,6 +340,60 @@ static void render_viewport(Scene& scene)
   ImGui::Image((void*)(u64)texture, im_viewport_size);
   ImGui::End();
 }
+constexpr const char* gateToString(Gate_Kind gate)
+{
+  const char* gateStrings[] = {"AND Gate", "OR Gate",  "XOR Gate", "XNOR Gate",
+                               "NOT Gate", "NOR Gate", "NAND Gate", "Clock",
+                               "Switch", "Button", "Current Source"};
+
+  return (static_cast<int>(gate) >= 0 &&
+          static_cast<int>(gate) < static_cast<int>(Gate_Kind::GATES_COUNT))
+           ? gateStrings[static_cast<int>(gate)]
+           : "Unknown gate type";
+}
+void create_menu_window()
+{
+  ImGui::Begin("Window with menu bar and button toolbar", nullptr,
+               ImGuiWindowFlags_MenuBar);
+  if(ImGui::BeginMenuBar()) {
+    // Menu bar goes here...
+    ImGui::EndMenuBar();
+  }
+
+  u8 number_of_gate_types = static_cast<int>(Gate_Kind::GATES_COUNT);
+  for(int i = 0; i < number_of_gate_types; ++i) {
+    Gate_Kind gate = static_cast<Gate_Kind>(i);
+    const char* gateString = gateToString(gate);
+
+    ImGui::Selectable(gateString);
+    ImGuiDragDropFlags src_flags = 0;
+    src_flags |=
+      ImGuiDragDropFlags_SourceNoDisableHover; // Keep the source displayed as hovered
+    src_flags |=
+      ImGuiDragDropFlags_SourceNoHoldToOpenOthers; // Because our dragging is local,
+    //we disable the feature of opening foreign treenodes/tabs while dragging
+    //src_flags |= ImGuiDragDropFlags_SourceNoPreviewTooltip; // Hide the tooltip
+    if(ImGui::BeginDragDropSource(src_flags)) {
+      if(!(src_flags & ImGuiDragDropFlags_SourceNoPreviewTooltip))
+        ImGui::Text("Moving \"%s\"", gateString);
+      ImGui::SetDragDropPayload("DND_DEMO_NAME", &i, sizeof(int));
+      ImGui::EndDragDropSource();
+
+      // last_button_id = i;
+      last_menu_gate_choice = gate;
+      is_draged_from_menu = 1;
+    }
+  }
+
+  // This is just to differentiate the regions, you might add a solid rectangle
+  // to act as the toolbar background or something fancier instead.
+  ImGui::Separator();
+  ImGui::BeginChild("WindowContents");
+  // Window contents go here...
+
+  ImGui::EndChild();
+  ImGui::End();
+}
 
 #define INITIALISE(fn, msg)            \
   {                                    \
@@ -387,8 +444,6 @@ int main(int argc, char* argv[])
 
   glClearColor(0.1, 0.1, 0.1, 1.0);
 
-  scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
-  scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
 
   bool run_evaluation = false;
   bool single_step_evaluation = false;
@@ -461,10 +516,23 @@ int main(int argc, char* argv[])
     ImGui::End();
 
     glViewport(0, 0, window_size.x, window_size.y);
+    create_menu_window();
+
+
     rendering::bind_default_framebuffer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    ImGuiMouseButton left_button = 0;
+    /*
+    If mouse is dragged from the manu and released then add gate
+    */
+    if(ImGui::IsMouseReleased(left_button) && is_draged_from_menu) {
+      //later change to gate that was pressed
+      scene.add_gate({1.5f, 1.5f}, scene.last_mouse_position, last_menu_gate_choice);
+      is_draged_from_menu = 0;
+    }
 
     windowing::swap_buffers(window);
   }

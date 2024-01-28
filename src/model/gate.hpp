@@ -27,6 +27,8 @@ namespace nebula {
 
     // One output gates.
     e_input,
+
+    GATES_COUNT, // 
   };
 
   struct Evaluation_State {
