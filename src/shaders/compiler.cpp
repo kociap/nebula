@@ -6,6 +6,17 @@
 #include <logging/logging.hpp>
 
 namespace nebula {
+  /**
+   * @brief Reads the content of a file and returns it as a string.
+   *
+   * This function opens the file specified by the given path, reads its content, and returns
+   * the content as a string. If the file cannot be opened or an error occurs during the reading
+   * process, an empty optional string is returned.
+   *
+   * @param path The path to the file to be read.
+   * @return An optional string containing the content of the file, or an empty optional if
+   *         the file cannot be opened or an error occurs.
+   */
   [[nodiscard]] static Optional<String> read_file(String const& path)
   {
     fs::Input_File_Stream file(path);

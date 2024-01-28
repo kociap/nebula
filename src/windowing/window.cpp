@@ -10,25 +10,47 @@
 #include <logging/logging.hpp>
 
 namespace nebula::windowing {
+  /**
+   * @brief The Window struct represents a GLFW window along with associated callbacks and data.
+   */
   struct Window {
-    GLFWwindow* glfw_window;
-    keyboard_callback_t keyboard_cb = nullptr;
-    void* keyboard_data = nullptr;
-    mouse_button_callback_t mouse_button_cb = nullptr;
-    void* mouse_button_data = nullptr;
-    scroll_callback_t scroll_cb = nullptr;
-    void* scroll_data = nullptr;
-    cursor_position_callback_t cursor_position_cb = nullptr;
-    void* cursor_position_data = nullptr;
-    framebuffer_resize_callback_t framebuffer_resize_cb = nullptr;
-    void* framebuffer_resize_data = nullptr;
+    GLFWwindow* glfw_window; /**< The GLFW window handle. */
+    keyboard_callback_t keyboard_cb =
+      nullptr; /**< The keyboard callback function. */
+    void* keyboard_data =
+      nullptr; /**< Additional data passed to the keyboard callback. */
+    mouse_button_callback_t mouse_button_cb =
+      nullptr; /**< The mouse button callback function. */
+    void* mouse_button_data =
+      nullptr; /**< Additional data passed to the mouse button callback. */
+    scroll_callback_t scroll_cb = nullptr; /**< The scroll callback function. */
+    void* scroll_data =
+      nullptr; /**< Additional data passed to the scroll callback. */
+    cursor_position_callback_t cursor_position_cb =
+      nullptr; /**< The cursor position callback function. */
+    void* cursor_position_data =
+      nullptr; /**< Additional data passed to the cursor position callback. */
+    framebuffer_resize_callback_t framebuffer_resize_cb =
+      nullptr; /**< The framebuffer resize callback function. */
+    void* framebuffer_resize_data =
+      nullptr; /**< Additional data passed to the framebuffer resize callback. */
   };
 
-  void* get_native_handle(Window* const window)
-  {
-    return window->glfw_window;
-  }
+    void* get_native_handle(Window* const window)
+    {
+        return window->glfw_window;
+    }
 
+
+  /**
+   * @brief Callback for handling keyboard button events.
+   *
+   * @param glfw_window The GLFW window.
+   * @param key The pressed key.
+   * @param scancode The scancode of the key.
+   * @param action The action (press, release, repeat).
+   * @param mods Modifier keys.
+   */
   static void keyboard_button_callback(GLFWwindow* glfw_window, int key,
                                        int scancode, int action, int mods)
   {
@@ -43,6 +65,13 @@ namespace nebula::windowing {
     }
   }
 
+  /**
+   * @brief Callback for handling mouse scroll events.
+   *
+   * @param glfw_window The GLFW window.
+   * @param xoffset The horizontal scroll offset.
+   * @param yoffset The vertical scroll offset.
+   */
   static void scroll_cb(GLFWwindow* glfw_window, double xoffset, double yoffset)
   {
     auto* const window =
@@ -52,6 +81,13 @@ namespace nebula::windowing {
     }
   }
 
+  /**
+   * @brief Callback for handling framebuffer resize events.
+   *
+   * @param glfw_window The GLFW window.
+   * @param width The new width of the framebuffer.
+   * @param height The new height of the framebuffer.
+   */
   static void framebuffer_resize_cb(GLFWwindow* glfw_window, int width,
                                     int height)
   {
@@ -63,6 +99,14 @@ namespace nebula::windowing {
     }
   }
 
+  /**
+   * @brief Callback for handling mouse button events.
+   *
+   * @param glfw_window The GLFW window.
+   * @param button The pressed mouse button.
+   * @param action The action (press or release).
+   * @param mods Modifier keys.
+   */
   static void mouse_button_callbacks(GLFWwindow* const glfw_window, int button,
                                      int action, int mods)
   {
@@ -76,6 +120,13 @@ namespace nebula::windowing {
     }
   }
 
+  /**
+   * @brief Callback for handling cursor position events.
+   *
+   * @param glfw_window The GLFW window.
+   * @param xpos The x-coordinate of the cursor position.
+   * @param ypos The y-coordinate of the cursor position.
+   */
   static void cursor_position_callbacks(GLFWwindow* const glfw_window,
                                         double const xpos, double const ypos)
   {

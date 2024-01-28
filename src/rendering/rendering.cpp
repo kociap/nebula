@@ -14,15 +14,22 @@
 #include <rendering/opengl.hpp>
 
 namespace nebula::rendering {
+  /**
+   * @brief Represents the format information for a texture.
+   *
+   * The Texture_Format structure encapsulates various properties of a texture,
+   * including dimensions, internal format, pixel format, pixel type, filtering,
+   * mip levels, and swizzle mask.
+   */
   struct Texture_Format {
-    u32 width;
-    u32 height;
-    u32 sized_internal_format;
-    u32 pixel_format;
-    u32 pixel_type;
-    u32 filter;
-    i32 mip_levels;
-    i32 swizzle_mask[4];
+    u32 width; /**< Width of the texture. */
+    u32 height; /**< Height of the texture. */
+    u32 sized_internal_format; /**< Internal format of the texture. */
+    u32 pixel_format; /**< Pixel format of the texture. */
+    u32 pixel_type; /**< Pixel type of the texture. */
+    u32 filter; /**< Filtering mode of the texture. */
+    i32 mip_levels; /**< Number of mip levels for the texture. */
+    i32 swizzle_mask[4]; /**< Swizzle mask for texture channels. */
   };
 
   [[nodiscard]] static bool operator==(Texture_Format const& lhs,
@@ -38,10 +45,13 @@ namespace nebula::rendering {
     return !(lhs == rhs);
   }
 
+  /**
+   * @brief Represents a GPU buffer, including its handle, mapped pointer, and size.
+   */
   struct GPU_Buffer {
-    u32 handle;
-    void* mapped;
-    i64 size;
+    u32 handle; /**< GPU buffer handle. */
+    void* mapped; /**< Mapped pointer to the GPU buffer. */
+    i64 size; /**< Size of the GPU buffer. */
   };
 
   static GPU_Buffer gpu_vertex_buffer;
@@ -57,6 +67,16 @@ namespace nebula::rendering {
   static Framebuffer front_postprocess_fb;
   static Framebuffer back_postprocess_fb;
 
+  /**
+   * @brief Creates a GPU buffer with the specified size and flags.
+   *
+   * This function creates a GPU buffer with the given size and flags, and returns
+   * a GPU_Buffer structure containing the handle, mapped pointer, and size.
+   *
+   * @param size - Size of the GPU buffer in bytes.
+   * @param flags - Flags specifying buffer properties.
+   * @return GPU_Buffer structure representing the created GPU buffer.
+   */
   [[nodiscard]] static GPU_Buffer create_gpu_buffer(i64 const size,
                                                     u32 const flags)
   {
@@ -73,6 +93,12 @@ namespace nebula::rendering {
     return buffer;
   }
 
+  /**
+   * @brief Creates GPU buffers for vertex, element, and draw command data.
+   *
+   * This function creates GPU buffers for vertex data, element data, and draw
+   * command data. The buffers are created with specific sizes and flags.
+   */
   static void create_buffers()
   {
     constexpr u32 buffer_flags = GL_DYNAMIC_STORAGE_BIT | GL_MAP_COHERENT_BIT |
@@ -100,6 +126,16 @@ namespace nebula::rendering {
       gpu_draw_cmd_buffer.size / sizeof(Draw_Elements_Command);
   }
 
+  /**
+   * @brief Creates framebuffers for rendering with the specified width and height.
+   *
+   * This function creates primary, back postprocess, and front postprocess framebuffers
+   * with the given width and height.
+   *
+   * @param width - Width of the framebuffers.
+   * @param height - Height of the framebuffers.
+   * @return Expected<void, Error> indicating success or failure.
+   */
   [[nodiscard]] static Expected<void, Error>
   create_framebuffers(i64 const width, i64 const height)
   {
@@ -141,6 +177,11 @@ namespace nebula::rendering {
     return expected_value;
   }
 
+  /**
+   * @brief Destroys the created framebuffers.
+   *
+   * This function deletes the primary, back postprocess, and front postprocess framebuffers.
+   */
   static void destroy_framebuffers()
   {
     back_postprocess_fb.delete_framebuffer();

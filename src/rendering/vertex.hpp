@@ -7,9 +7,15 @@
 #include <core/types.hpp>
 
 namespace nebula {
+  /**
+   * @brief Represents a vertex in 3D space.
+   *
+   * This structure holds information about a vertex, including its position,
+   * normal, and texture coordinates.
+   */
   struct Vertex {
-    math::Vec3 position;
-    math::Vec3 normal;
-    math::Vec2 uv;
+    math::Vec3 position; /**< Position of the vertex in 3D space. */
+    math::Vec3 normal; /**< Normal vector at the vertex. */
+    math::Vec2 uv; /**< Texture coordinates of the vertex. */
   };
 } // namespace nebula

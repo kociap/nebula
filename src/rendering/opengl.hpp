@@ -5,9 +5,18 @@
 #include <core/types.hpp>
 namespace nebula::opengl {
   // OpenGL 4.5 Core required constants.
+  /**
+   * @brief Minimum required number of color attachments for OpenGL 4.5 Core.
+   */
   constexpr i32 min_color_attachments = 8;
+  /**
+   * @brief Minimum required number of textures per stage for OpenGL 4.5 Core.
+   */
   constexpr i32 min_textures_per_stage = 16;
 
+  /**
+   * @brief Enumeration of sized internal formats for OpenGL textures.
+   */
   enum class Sized_Internal_Format : u32 {
     // unsigned normalized
     r8 = GL_R8,
@@ -78,25 +87,78 @@ namespace nebula::opengl {
     stencil_index16 = GL_STENCIL_INDEX16, // Not required
   };
 
+  /**
+   * @brief Enumeration of buffer masks for framebuffer operations.
+   */
   enum class Buffer_Mask : u32 {
     color_buffer_bit = GL_COLOR_BUFFER_BIT,
     depth_buffer_bit = GL_DEPTH_BUFFER_BIT,
     stencil_buffer_bit = GL_STENCIL_BUFFER_BIT,
   };
 
+  /**
+   * @brief Buffer mask constant for color buffer operations.
+   */
   constexpr Buffer_Mask color_buffer_bit = Buffer_Mask::color_buffer_bit;
+  /**
+   * @brief Buffer mask constant for depth buffer operations.
+   */
   constexpr Buffer_Mask depth_buffer_bit = Buffer_Mask::depth_buffer_bit;
+  /**
+   * @brief Buffer mask constant for stencil buffer operations.
+   */
   constexpr Buffer_Mask stencil_buffer_bit = Buffer_Mask::stencil_buffer_bit;
 
+  /**
+   * @brief Retrieves the maximum number of texture image units supported by the GPU.
+   *
+   * @return The maximum number of texture image units.
+   */
   [[nodiscard]] i32 get_max_texture_image_units();
+  /**
+   * @brief Retrieves the maximum number of combined texture units supported by the GPU.
+   *
+   * @return The maximum number of combined texture units.
+   */
   [[nodiscard]] i32 get_max_combined_texture_units();
+  /**
+   * @brief Retrieves the maximum number of combined texture units supported by the GPU.
+   *
+   * @return The maximum number of combined texture units.
+   */
   [[nodiscard]] i32 get_max_renderbuffer_size();
+  /**
+   * @brief Retrieves the maximum number of color attachments supported by the GPU.
+   *
+   * @return The maximum number of color attachments.
+   */
   [[nodiscard]] i32 get_max_color_attachments();
+  /**
+   * @brief Retrieves the maximum number of draw buffers supported by the GPU.
+   *
+   * @return The maximum number of draw buffers.
+   */
   [[nodiscard]] i32 get_max_draw_buffers();
+  /**
+   * @brief Retrieves the alignment requirement for uniform buffer offset.
+   *
+   * @return The alignment requirement for uniform buffer offset.
+   */
   [[nodiscard]] i32 get_uniform_buffer_offset_alignment();
+  /**
+   * @brief Retrieves the minimum alignment for mapping buffer data.
+   *
+   * @return The minimum alignment for mapping buffer data.
+   */
   [[nodiscard]] i32 get_min_map_buffer_alignment();
 
+  /**
+   * @brief Installs a debug callback for OpenGL debugging purposes.
+   */
   void install_debug_callback();
+  /**
+   * @brief Loads OpenGL constants required for compatibility and feature detection.
+   */
   void load_constants();
 } // namespace nebula::opengl
 
