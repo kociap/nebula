@@ -10,19 +10,37 @@
 #include <glad/glad.h>
 
 namespace nebula::rendering {
+  /**
+   * @brief Represents a shader stage, such as vertex, fragment, or geometry shader.
+   */
   struct Shader_Stage {
-    anton::String name;
-    Handle<Shader_Stage> handle;
-    u32 gl_handle = 0;
+    anton::String name; /**< Name of the shader stage. */
+    Handle<Shader_Stage>
+      handle; /**< Handle to uniquely identify the shader stage. */
+    u32 gl_handle = 0; /**< OpenGL handle for the shader stage. */
   };
 
+  /**
+   * @brief Represents a shader program consisting of multiple shader stages.
+   */
   struct Shader {
-    anton::Flat_Hash_Map<u64, i32> uniform_cache;
-    anton::String name;
-    Handle<Shader> handle;
-    u32 gl_handle = 0;
+    anton::Flat_Hash_Map<u64, i32>
+      uniform_cache; /**< Cache for storing uniform locations. */
+    anton::String name; /**< Name of the shader program. */
+    Handle<Shader>
+      handle; /**< Handle to uniquely identify the shader program. */
+    u32 gl_handle = 0; /**< OpenGL handle for the shader program. */
   };
 
+  /**
+   * @brief Builds a uniform cache for a Shader.
+   *
+   * This function builds a uniform cache for the specified Shader by querying active
+   * uniforms and their locations from the OpenGL program. The information is stored in
+   * the Shader's uniform cache, associating uniform names with their corresponding locations.
+   *
+   * @param shader - Pointer to the Shader for which the uniform cache is to be built.
+   */
   static void build_uniform_cache(Shader* shader)
   {
     i32 active_uniforms;
@@ -65,6 +83,15 @@ namespace nebula::rendering {
     delete_obj(shader_stages);
   }
 
+  /**
+   * @brief Finds a Shader_Stage by its handle.
+   *
+   * This function searches for a Shader_Stage with the specified handle in the global collection
+   * of shader stages. If found, a pointer to the Shader_Stage is returned; otherwise, nullptr is returned.
+   *
+   * @param handle - Handle of the Shader_Stage to find.
+   * @return Pointer to the found Shader_Stage, or nullptr if not found.
+   */
   [[nodiscard]] static Shader_Stage*
   find_shader_stage(Handle<Shader_Stage> const handle)
   {
@@ -78,6 +105,15 @@ namespace nebula::rendering {
     }
   }
 
+  /**
+   * @brief Finds a Shader by its handle.
+   *
+   * This function searches for a Shader with the specified handle in the global collection
+   * of shaders. If found, a pointer to the Shader is returned; otherwise, nullptr is returned.
+   *
+   * @param handle - Handle of the Shader to find.
+   * @return Pointer to the found Shader, or nullptr if not found.
+   */
   [[nodiscard]] static Shader* find_shader(Handle<Shader> const handle)
   {
     auto r = anton::find_if(
