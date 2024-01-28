@@ -63,9 +63,37 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(imgui)
 
+# ImGui has no CMakeLists. Create target manually.
+set(IMGUI_SRC_DIR "${CMAKE_BINARY_DIR}/_deps/imgui-src")
+add_library(dear-imgui)
+set_target_properties(dear-imgui PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
+target_link_libraries(dear-imgui anton_core glad glfw)
+target_include_directories(dear-imgui
+  PRIVATE
+  "${IMGUI_SRC_DIR}"
+  "${IMGUI_SRC_DIR}/backends"
+)
+target_compile_options(dear-imgui PRIVATE ${NEBULA_COMPILE_FLAGS})
+target_sources(dear-imgui
+  PRIVATE
+  "${IMGUI_SRC_DIR}/imconfig.h"
+  "${IMGUI_SRC_DIR}/imgui.cpp"
+  "${IMGUI_SRC_DIR}/imgui_demo.cpp"
+  "${IMGUI_SRC_DIR}/imgui_draw.cpp"
+  "${IMGUI_SRC_DIR}/imgui.h"
+  "${IMGUI_SRC_DIR}/imgui_internal.h"
+  "${IMGUI_SRC_DIR}/imgui_tables.cpp"
+  "${IMGUI_SRC_DIR}/imgui_widgets.cpp"
+  "${IMGUI_SRC_DIR}/imstb_rectpack.h"
+  "${IMGUI_SRC_DIR}/imstb_textedit.h"
+  "${IMGUI_SRC_DIR}/imstb_truetype.h"
+  "${IMGUI_SRC_DIR}/backends/imgui_impl_glfw.cpp"
+  "${IMGUI_SRC_DIR}/backends/imgui_impl_glfw.h"
+)
+
 add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
 set_target_properties(nebula PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
-target_link_libraries(nebula anton_core glad glfw)
+target_link_libraries(nebula anton_core glad glfw dear-imgui)
 target_include_directories(nebula PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 target_compile_options(nebula PRIVATE ${NEBULA_COMPILE_FLAGS})
 target_sources(nebula
