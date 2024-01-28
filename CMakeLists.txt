@@ -51,7 +51,7 @@ FetchContent_MakeAvailable(glfw)
 FetchContent_Declare(
   anton_core
   GIT_REPOSITORY https://github.com/kociap/anton_core.git
-  GIT_TAG 37c01e96da1e7f6a71b1e9c3a31a2fe655198a2a
+  GIT_TAG 3a566d3d2bed07bf2f308e20fb0eb933bb52de7b
 )
 FetchContent_MakeAvailable(anton_core)
 
@@ -69,7 +69,7 @@ add_library(dear-imgui)
 set_target_properties(dear-imgui PROPERTIES CXX_STANDARD 20 CXX_EXTENSIONS OFF)
 target_link_libraries(dear-imgui anton_core glad glfw)
 target_include_directories(dear-imgui
-  PRIVATE
+  PUBLIC
   "${IMGUI_SRC_DIR}"
   "${IMGUI_SRC_DIR}/backends"
 )
@@ -89,6 +89,8 @@ target_sources(dear-imgui
   "${IMGUI_SRC_DIR}/imstb_truetype.h"
   "${IMGUI_SRC_DIR}/backends/imgui_impl_glfw.cpp"
   "${IMGUI_SRC_DIR}/backends/imgui_impl_glfw.h"
+  "${IMGUI_SRC_DIR}/backends/imgui_impl_opengl3.cpp"
+  "${IMGUI_SRC_DIR}/backends/imgui_impl_opengl3.h"
 )
 
 add_executable(nebula "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")

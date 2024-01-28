@@ -32,6 +32,8 @@ namespace nebula::windowing {
    */
   void swap_buffers(Window* window);
 
+  [[nodiscard]] void* get_native_handle(Window* window);
+
   /**
    * Returns window dimensions ( width, height )
    * @return Vec2{width, height}

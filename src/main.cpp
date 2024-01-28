@@ -17,7 +17,22 @@
 #include <ui/scene.hpp>
 #include <windowing/window.hpp>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 using namespace nebula;
+
+void initialise_imgui(windowing::Window* const window)
+{
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  GLFWwindow* glfw_handle =
+    reinterpret_cast<GLFWwindow*>(get_native_handle(window));
+  ImGui_ImplGlfw_InitForOpenGL(glfw_handle, true);
+  ImGui_ImplOpenGL3_Init();
+}
 
 static Handle<rendering::Shader> shader_default;
 static Handle<rendering::Shader> shader_port;
@@ -219,6 +234,67 @@ static void render_grid(math::Mat4 const v_mat, f32 const inv_aspect,
   rendering::commit_draw();
 }
 
+static void render_scene(Scene& scene, Vec2 const viewport_size)
+{
+  Camera& primary_camera = get_primary_camera();
+  f32 const inv_aspect = viewport_size.y / viewport_size.x;
+  math::Mat4 const v_mat = get_view_matrix(primary_camera);
+  math::Mat4 const p_mat = get_projection_matrix(primary_camera, viewport_size);
+  math::Mat4 const vp_mat = p_mat * v_mat;
+  f32 const zoom_level = get_zoom(primary_camera);
+
+  // render_grid(v_mat, inv_aspect, zoom_level);
+
+  {
+    bool const bind_result = rendering::bind_shader(shader_default);
+    if(!bind_result) {
+      LOG_ERROR("could not bind 'shader_default'");
+      return;
+    }
+  }
+
+  rendering::set_uniform_mat4(shader_default, "vp_mat", vp_mat);
+
+  // Draw order:
+  // 1. gates.
+  // 2. connections.
+  // 3. ports.
+
+  for(Gate const& gate: scene.gates) {
+    rendering::Draw_Elements_Command cmd = prepare_draw(gate);
+    rendering::add_draw_command(cmd);
+  }
+
+  for(Port const* const port: scene.ports) {
+    if(port->type != Port_Kind::out) {
+      continue;
+    }
+
+    for(Port const* const conn: port->connections) {
+      rendering::Draw_Elements_Command cmd =
+        prepare_draw_connection(port->coordinates, conn->coordinates);
+      rendering::add_draw_command(cmd);
+    }
+  }
+  rendering::commit_draw();
+
+  {
+    bool const bind_result = rendering::bind_shader(shader_port);
+    if(!bind_result) {
+      LOG_ERROR("could not bind 'shader_port'");
+      return;
+    }
+  }
+
+  rendering::set_uniform_mat4(shader_port, "vp_mat", vp_mat);
+
+  for(Port const* const port: scene.ports) {
+    rendering::Draw_Elements_Command cmd = prepare_draw(*port);
+    rendering::add_draw_command(cmd);
+  }
+  rendering::commit_draw();
+}
+
 #define INITIALISE(fn, msg)            \
   {                                    \
     Expected<void, Error> result = fn; \
@@ -259,6 +335,8 @@ int main(int argc, char* argv[])
                                           &scene);
   windowing::set_mouse_button_callback(window, mouse_button_callback, &scene);
 
+  initialise_imgui(window);
+
   compile_shaders();
 
   rendering::bind_draw_buffers();
@@ -271,73 +349,72 @@ int main(int argc, char* argv[])
 
   // Main loop
   while(!windowing::should_close(window)) {
-    rendering::bind_default_framebuffer();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui::NewFrame();
 
+    windowing::poll_events();
+
+    rendering::Framebuffer* primary_fb = rendering::get_primary_framebuffer();
+    primary_fb->bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Vec2 const viewport_size = primary_fb->size();
+    render_scene(scene, viewport_size);
+
+    rendering::bind_default_framebuffer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Camera& primary_camera = get_primary_camera();
-    Vec2 const viewport_size = windowing::get_framebuffer_size(window);
-    f32 const inv_aspect = viewport_size.y / viewport_size.x;
-    math::Mat4 const v_mat = get_view_matrix(primary_camera);
-    math::Mat4 const p_mat =
-      get_projection_matrix(primary_camera, viewport_size);
-    math::Mat4 const vp_mat = p_mat * v_mat;
-    f32 const zoom_level = get_zoom(primary_camera);
+    // We are using the ImGuiWindowFlags_NoDocking flag to make the parent
+    // window not dockable into, because it would be confusing to have two
+    // docking targets within each others.
+    ImGuiWindowFlags window_flags =
+      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
-    // render_grid(v_mat, inv_aspect, zoom_level);
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos({0.0f, 0.0f});
+    ImGui::SetNextWindowSize({viewport_size.x, viewport_size.y});
+    ImGui::SetNextWindowViewport(viewport->ID);
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |=
+      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    window_flags |= ImGuiWindowFlags_NoBackground; // Pass-through background
 
-    {
-      bool const bind_result = rendering::bind_shader(shader_default);
-      if(!bind_result) {
-        LOG_ERROR("could not bind 'shader_default'");
-        continue;
-      }
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("Main Dock", nullptr, window_flags);
+    ImGui::PopStyleVar(3);
+
+    ImGuiID dockspace_id = ImGui::GetID("_MainDock");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f),
+                     ImGuiDockNodeFlags_PassthruCentralNode);
+
+    ImGui::Begin("Viewport");
+    u32 texture = primary_fb->get_color_texture(0);
+    ImGui::Image((void*)(u64)texture, ImVec2(viewport_size.x, viewport_size.y));
+    ImGui::End();
+
+    ImGui::Begin("Toolbar");
+    if(ImGui::Button("Button")) {
+      LOG_INFO("Button clicked");
     }
+    ImGui::End();
 
-    rendering::set_uniform_mat4(shader_default, "vp_mat", vp_mat);
+    // ImGui::ShowDemoWindow();
 
-    // Draw order:
-    // 1. gates.
-    // 2. connections.
-    // 3. ports.
+    // Close the dock window.
+    ImGui::End();
 
-    for(Gate const& gate: scene.gates) {
-      rendering::Draw_Elements_Command cmd = prepare_draw(gate);
-      rendering::add_draw_command(cmd);
-    }
-
-    for(Port const* const port: scene.ports) {
-      if(port->type != Port_Kind::out) {
-        continue;
-      }
-
-      for(Port const* const conn: port->connections) {
-        rendering::Draw_Elements_Command cmd =
-          prepare_draw_connection(port->coordinates, conn->coordinates);
-        rendering::add_draw_command(cmd);
-      }
-    }
-    rendering::commit_draw();
-
-    {
-      bool const bind_result = rendering::bind_shader(shader_port);
-      if(!bind_result) {
-        LOG_ERROR("could not bind 'shader_port'");
-        continue;
-      }
-    }
-
-    rendering::set_uniform_mat4(shader_port, "vp_mat", vp_mat);
-
-    for(Port const* const port: scene.ports) {
-      rendering::Draw_Elements_Command cmd = prepare_draw(*port);
-      rendering::add_draw_command(cmd);
-    }
-    rendering::commit_draw();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     windowing::swap_buffers(window);
-    windowing::poll_events();
   }
+
+  ImGui_ImplGlfw_Shutdown();
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui::DestroyContext();
 
   rendering::teardown_shaders();
   rendering::teardown();

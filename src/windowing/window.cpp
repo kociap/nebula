@@ -24,6 +24,11 @@ namespace nebula::windowing {
     void* framebuffer_resize_data = nullptr;
   };
 
+  void* get_native_handle(Window* const window)
+  {
+    return window->glfw_window;
+  }
+
   static void keyboard_button_callback(GLFWwindow* glfw_window, int key,
                                        int scancode, int action, int mods)
   {

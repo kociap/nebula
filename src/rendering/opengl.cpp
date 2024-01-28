@@ -129,7 +129,8 @@ namespace nebula::opengl {
     } break;
 
     case GL_DEBUG_SEVERITY_NOTIFICATION: {
-      LOG_INFO(stringified_message);
+      // TODO: Temporarily disabled because of ImGui spam.
+      // LOG_INFO(stringified_message);
     } break;
 
     default:
