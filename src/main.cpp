@@ -382,6 +382,7 @@ int main(int argc, char* argv[])
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f),
                      ImGuiDockNodeFlags_PassthruCentralNode);
 
+    ImGui::SetNextWindowSize({200, 200}, ImGuiCond_FirstUseEver);
     ImGui::Begin("Viewport");
     ImVec2 const im_viewport_size = ImGui::GetContentRegionAvail();
     Vec2 const viewport_size{im_viewport_size.x, im_viewport_size.y};
