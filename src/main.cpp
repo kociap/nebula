@@ -24,8 +24,15 @@
 
 using namespace nebula;
 
-bool is_draged_from_menu = 0;
-Gate_Kind last_menu_gate_choice = Gate_Kind::GATES_COUNT;
+namespace {
+  bool is_draged_from_menu = 0;
+  Gate_Kind last_menu_gate_choice = Gate_Kind::e_count;
+  bool run_evaluation = false;
+  bool single_step_evaluation = false;
+  i64 evaluation_frequency = 1;
+  i64 frame_counter = 0;
+  Vec2 const gate_default_size{0.6f, 0.5f};
+} // namespace
 
 void initialise_imgui(windowing::Window* const window)
 {
@@ -340,58 +347,71 @@ static void render_viewport(Scene& scene)
   ImGui::Image((void*)(u64)texture, im_viewport_size);
   ImGui::End();
 }
-constexpr const char* gateToString(Gate_Kind gate)
-{
-  const char* gateStrings[] = {"AND Gate", "OR Gate",  "XOR Gate", "XNOR Gate",
-                               "NOT Gate", "NOR Gate", "NAND Gate", "Clock",
-                               "Switch", "Button", "Current Source"};
 
-  return (static_cast<int>(gate) >= 0 &&
-          static_cast<int>(gate) < static_cast<int>(Gate_Kind::GATES_COUNT))
-           ? gateStrings[static_cast<int>(gate)]
-           : "Unknown gate type";
-}
-void create_menu_window()
+[[nodiscard]] static char const* gateToString(Gate_Kind kind)
 {
-  ImGui::Begin("Window with menu bar and button toolbar", nullptr,
-               ImGuiWindowFlags_MenuBar);
-  if(ImGui::BeginMenuBar()) {
-    // Menu bar goes here...
-    ImGui::EndMenuBar();
+  switch(kind) {
+  case Gate_Kind::e_and:
+    return "AND";
+  case Gate_Kind::e_or:
+    return "OR";
+  case Gate_Kind::e_xor:
+    return "XOR";
+  case Gate_Kind::e_nand:
+    return "NAND";
+  case Gate_Kind::e_nor:
+    return "NOR";
+  case Gate_Kind::e_xnor:
+    return "XNOR";
+  case Gate_Kind::e_not:
+    return "NOT";
+  case Gate_Kind::e_input:
+    return "INPUT";
+  case Gate_Kind::e_count:
+    ANTON_UNREACHABLE("count is not a valid enumeration");
+  }
+}
+
+void display_toolbar()
+{
+  ImGui::Begin("Toolbar", nullptr,
+               ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove |
+                 ImGuiWindowFlags_NoTitleBar);
+  if(ImGui::Button("Toggle evaluation")) {
+    run_evaluation = !run_evaluation;
+  }
+  if(ImGui::Button("Single step evaluation")) {
+    single_step_evaluation = true;
   }
 
-  u8 number_of_gate_types = static_cast<int>(Gate_Kind::GATES_COUNT);
+  ImGui::Separator();
+
+  ImGui::BeginChild("Gates");
+  u8 number_of_gate_types = static_cast<int>(Gate_Kind::e_count);
   for(int i = 0; i < number_of_gate_types; ++i) {
     Gate_Kind gate = static_cast<Gate_Kind>(i);
     const char* gateString = gateToString(gate);
 
     ImGui::Selectable(gateString);
     ImGuiDragDropFlags src_flags = 0;
-    src_flags |=
-      ImGuiDragDropFlags_SourceNoDisableHover; // Keep the source displayed as hovered
-    src_flags |=
-      ImGuiDragDropFlags_SourceNoHoldToOpenOthers; // Because our dragging is local,
-    //we disable the feature of opening foreign treenodes/tabs while dragging
-    //src_flags |= ImGuiDragDropFlags_SourceNoPreviewTooltip; // Hide the tooltip
+    // Keep the source displayed as hovered.
+    src_flags |= ImGuiDragDropFlags_SourceNoDisableHover;
+    // Because our dragging is local, we disable the feature of opening foreign
+    // treenodes/tabs while dragging.
+    src_flags |= ImGuiDragDropFlags_SourceNoHoldToOpenOthers;
     if(ImGui::BeginDragDropSource(src_flags)) {
       if(!(src_flags & ImGuiDragDropFlags_SourceNoPreviewTooltip))
         ImGui::Text("Moving \"%s\"", gateString);
       ImGui::SetDragDropPayload("DND_DEMO_NAME", &i, sizeof(int));
       ImGui::EndDragDropSource();
 
-      // last_button_id = i;
       last_menu_gate_choice = gate;
-      is_draged_from_menu = 1;
+      is_draged_from_menu = true;
     }
   }
-
-  // This is just to differentiate the regions, you might add a solid rectangle
-  // to act as the toolbar background or something fancier instead.
-  ImGui::Separator();
-  ImGui::BeginChild("WindowContents");
-  // Window contents go here...
-
   ImGui::EndChild();
+
+  // Close the toolbar.
   ImGui::End();
 }
 
@@ -444,12 +464,6 @@ int main(int argc, char* argv[])
 
   glClearColor(0.1, 0.1, 0.1, 1.0);
 
-
-  bool run_evaluation = false;
-  bool single_step_evaluation = false;
-  i64 evaluation_frequency = 1;
-  i64 frame_counter = 0;
-
   // Main loop
   while(!windowing::should_close(window)) {
     frame_counter += 1;
@@ -496,28 +510,18 @@ int main(int argc, char* argv[])
     render_viewport(scene);
 
     f32 display_size_y = ImGui::GetIO().DisplaySize.y;
-    ImGui::SetNextWindowPos({0.0, 0.0}, ImGuiCond_Always, {0.0, 0.0});
-    ImGui::SetNextWindowPos({0.0, display_size_y}, ImGuiCond_Always,
-                            {0.0f, 1.0f});
+    ImGui::SetNextWindowPos({0.0, 0.0}, ImGuiCond_FirstUseEver, {0.0, 0.0});
+    // ImGui::SetNextWindowPos({0.0, display_size_y}, ImGuiCond_FirstUseEver,
+    //                         {0.0f, 1.0f});
     ImGui::SetNextWindowSizeConstraints({FLT_MIN, display_size_y},
                                         {FLT_MAX, display_size_y});
-    ImGui::Begin("Toolbar", nullptr, ImGuiWindowFlags_NoCollapse);
-    if(ImGui::Button("Toggle evaluation")) {
-      run_evaluation = !run_evaluation;
-    }
-    if(ImGui::Button("Single step evaluation")) {
-      single_step_evaluation = true;
-    }
-    ImGui::End();
 
-    // ImGui::ShowDemoWindow();
+    display_toolbar();
 
     // Close the dock window.
     ImGui::End();
 
     glViewport(0, 0, window_size.x, window_size.y);
-    create_menu_window();
-
 
     rendering::bind_default_framebuffer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -530,7 +534,8 @@ int main(int argc, char* argv[])
     */
     if(ImGui::IsMouseReleased(left_button) && is_draged_from_menu) {
       //later change to gate that was pressed
-      scene.add_gate({1.5f, 1.5f}, scene.last_mouse_position, last_menu_gate_choice);
+      scene.add_gate(gate_default_size, scene.last_mouse_position,
+                     last_menu_gate_choice);
       is_draged_from_menu = 0;
     }
 
