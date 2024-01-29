@@ -4,6 +4,8 @@
 #include <rendering/rendering.hpp>
 
 namespace nebula {
+  struct Gate;
+
   /**
    * @brief Enumeration representing different kinds of ports.
    *
@@ -18,10 +20,12 @@ namespace nebula {
    * The Port structure represents a circle-shaped port with specified coordinates and type (IN/OUT).
    */
   struct Port {
-    List<Port*> connections; ///< List of ports connected to this port.
-    Vec2 coordinates; ///< Coordinates of the center of the port.
-    f32 radius; ///< Radius of the port.
-    Port_Kind type; ///< Type of the port (IN or OUT).
+    List<Port*> connections;
+    // Coordinates of the center of the port.
+    Vec2 coordinates;
+    f32 radius;
+    Port_Kind kind;
+    Gate* gate = nullptr;
 
     /**
      * @brief Initializes a circle-shaped port with specified coordinates and type.
@@ -29,7 +33,7 @@ namespace nebula {
      * @param coordinates The x and y coordinates of the center of the port.
      * @param type The type of the port (IN or OUT).
      */
-    Port(Vec2 coordinates, Port_Kind type);
+    Port(Vec2 coordinates, Port_Kind type, Gate* gate);
 
     /**
      * @brief Moves the port by the given offset.

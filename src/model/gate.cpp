@@ -1,4 +1,4 @@
-#include <ui/gate.hpp>
+#include <model/gate.hpp>
 
 namespace nebula {
   Gate::Gate(math::Vec2 const _dimensions, math::Vec2 const _coordinates,
@@ -9,21 +9,22 @@ namespace nebula {
     i32 const in_count = kind == Gate_Kind::e_not ? 1 : 2;
 
     // Distance between IN ports
-    f32 in_dist = dimensions.y / static_cast<f32>(in_count + 1);
-    for(u8 i = 1; i <= in_count; i++) {
+    f32 const in_space = dimensions.y / static_cast<f32>(in_count);
+    for(u8 i = 0; i < in_count; i++) {
       // Create IN ports along the left edge of the gate
-      Vec2 port_coordinates = {coordinates.x,
-                               coordinates.y + in_dist * static_cast<f32>(i)};
-      in_ports.emplace_back(new Port(port_coordinates, Port_Kind::in));
+      f32 const voffset = (i + 0.5f) * in_space;
+      Vec2 port_coordinates = {coordinates.x, coordinates.y + voffset};
+      in_ports.emplace_back(new Port(port_coordinates, Port_Kind::in, this));
     }
 
     // Distance between OUT ports
-    f32 out_dist = dimensions.y / static_cast<f32>(out_count + 1);
-    for(u8 i = 1; i <= out_count; i++) {
+    f32 const out_space = dimensions.y / static_cast<f32>(out_count);
+    for(u8 i = 0; i < out_count; i++) {
       // Create OUT ports along the right edge of the gate
+      f32 const voffset = (i + 0.5f) * out_space;
       Vec2 port_coordinates = {coordinates.x + dimensions.x,
-                               coordinates.y + out_dist * static_cast<f32>(i)};
-      out_ports.emplace_back(new Port(port_coordinates, Port_Kind::out));
+                               coordinates.y + voffset};
+      out_ports.emplace_back(new Port(port_coordinates, Port_Kind::out, this));
     }
   }
 
@@ -53,21 +54,24 @@ namespace nebula {
 
   rendering::Draw_Elements_Command prepare_draw(Gate const& gate)
   {
+    math::Vec3 const green{0.498f, 1.0f, 0.0f};
+    math::Vec3 const red{1.0f, 0.0f, 0.2235f};
+    math::Vec3 const color = gate.evaluation.value ? green : red;
     Vertex vert[] = {
       Vertex{.position = {gate.coordinates.x + gate.dimensions.x,
                           gate.coordinates.y + gate.dimensions.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
+             .normal = color,
              .uv = {1.0f, 1.0f}},
       Vertex{.position = {gate.coordinates.x,
                           gate.coordinates.y + gate.dimensions.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
+             .normal = color,
              .uv = {0.0f, 1.0f}},
       Vertex{.position = {gate.coordinates.x + gate.dimensions.x,
                           gate.coordinates.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
+             .normal = color,
              .uv = {1.0f, 0.0f}},
       Vertex{.position = {gate.coordinates.x, gate.coordinates.y, 0.0f},
-             .normal = {0.4f, 0.4f, 0.7f},
+             .normal = color,
              .uv = {0.0f, 0.0f}},
     };
     u32 indices[] = {

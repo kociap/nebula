@@ -2,8 +2,8 @@
 
 #include <anton/math/vec2.hpp>
 
+#include <model/port.hpp>
 #include <rendering/rendering.hpp>
-#include <ui/port.hpp>
 
 namespace nebula {
   /**
@@ -15,15 +15,23 @@ namespace nebula {
    */
   enum struct Gate_Kind : u8 {
     // Two input gates.
-    e_and, ///< Two-input AND gate.
-    e_or, ///< Two-input OR gate.
-    e_xor, ///< Two-input XOR gate.
-    e_nand, ///< Two-input NAND gate.
-    e_nor, ///< Two-input NOR gate.
-    e_xnor, ///< Two-input XNOR gate.
+    e_and,
+    e_or,
+    e_xor,
+    e_nand,
+    e_nor,
+    e_xnor,
 
     // One input gates.
-    e_not, ///< One-input NOT gate.
+    e_not,
+
+    // One output gates.
+    e_input,
+  };
+
+  struct Evaluation_State {
+    bool prev_value = false;
+    bool value = false;
   };
 
   /**
@@ -33,8 +41,8 @@ namespace nebula {
    * application window and its gates.
    */
   struct Gate {
-    Array<Port*> in_ports; ///< Array of input ports associated with the gate.
-    Array<Port*> out_ports; ///< Array of output ports associated with the gate.
+    Array<Port*> in_ports;
+    Array<Port*> out_ports;
 
     /**
      * @brief Coordinates of the top-left corner of the rectangle.
@@ -47,7 +55,9 @@ namespace nebula {
      */
     math::Vec2 dimensions;
 
-    Gate_Kind kind; ///< The kind of logic gate.
+    Gate_Kind kind;
+
+    Evaluation_State evaluation;
 
     /**
      * @brief Constructs a new gate.

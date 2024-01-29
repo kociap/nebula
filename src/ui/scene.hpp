@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/types.hpp>
-#include <ui/gate.hpp>
+#include <model/gate.hpp>
 
 namespace nebula {
   /**

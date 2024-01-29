@@ -45,7 +45,7 @@ namespace nebula {
   void Scene::create_tmp_port(Port* p, Vec2 const coordinates,
                               Port_Kind const type)
   {
-    Port* tmp_port = new Port(coordinates, type);
+    Port* tmp_port = new Port(coordinates, type, nullptr);
     ports.emplace_back(tmp_port);
     p->add_connection(tmp_port);
     tmp_port->add_connection(p);

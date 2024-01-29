@@ -9,6 +9,7 @@
 #include <components/camera.hpp>
 #include <core/input.hpp>
 #include <core/types.hpp>
+#include <evaluator/evaluator.hpp>
 #include <logging/logging.hpp>
 #include <rendering/framebuffer.hpp>
 #include <rendering/rendering.hpp>
@@ -106,7 +107,7 @@ static void mouse_button_callback(windowing::Window* const window,
       if(scene.mode == Window_Mode::port_linking) {
         Port* p = scene.check_if_port_clicked(scene_position);
         // Can't connect to the same port
-        if(p == nullptr || p->type == scene.connected_port->type) {
+        if(p == nullptr || p->kind == scene.connected_port->kind) {
           scene.remove_tmp_port(scene.connected_port);
         } else {
           scene.connect_ports(scene.connected_port, p);
@@ -126,7 +127,7 @@ static void mouse_button_callback(windowing::Window* const window,
 
         scene.mode = Window_Mode::port_linking;
         Port_Kind tmp_port_type;
-        if(scene.connected_port->type == Port_Kind::in) {
+        if(scene.connected_port->kind == Port_Kind::in) {
           tmp_port_type = Port_Kind::out;
         } else {
           tmp_port_type = Port_Kind::in;
@@ -275,7 +276,7 @@ static void render_scene(Scene& scene, Vec2 const viewport_size)
   }
 
   for(Port const* const port: scene.ports) {
-    if(port->type != Port_Kind::out) {
+    if(port->kind != Port_Kind::out) {
       continue;
     }
 
@@ -386,16 +387,31 @@ int main(int argc, char* argv[])
 
   glClearColor(0.1, 0.1, 0.1, 1.0);
 
-  scene.add_gate({1.5f, 1.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
-  scene.add_gate({1.5f, 1.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
+  scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
+  scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
+
+  bool run_evaluation = false;
+  bool single_step_evaluation = false;
+  i64 evaluation_frequency = 1;
+  i64 frame_counter = 0;
 
   // Main loop
   while(!windowing::should_close(window)) {
+    frame_counter += 1;
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 
     windowing::poll_events();
+
+    if(single_step_evaluation) {
+      evaluate(scene.gates);
+      single_step_evaluation = false;
+    } else if(run_evaluation) {
+      if(frame_counter % evaluation_frequency == 0) {
+        evaluate(scene.gates);
+      }
+    }
 
     Vec2 const window_size = windowing::get_framebuffer_size(window);
 
@@ -431,8 +447,11 @@ int main(int argc, char* argv[])
     ImGui::SetNextWindowSizeConstraints({FLT_MIN, display_size_y},
                                         {FLT_MAX, display_size_y});
     ImGui::Begin("Toolbar", nullptr, ImGuiWindowFlags_NoCollapse);
-    if(ImGui::Button("Button")) {
-      LOG_INFO("Button clicked");
+    if(ImGui::Button("Toggle evaluation")) {
+      run_evaluation = !run_evaluation;
+    }
+    if(ImGui::Button("Single step evaluation")) {
+      single_step_evaluation = true;
     }
     ImGui::End();
 
