@@ -63,10 +63,15 @@ namespace nebula {
 
   rendering::Draw_Elements_Command prepare_draw(Gate const& gate)
   {
-    // math::Vec3 const green{0.498f, 1.0f, 0.0f};
-    // math::Vec3 const red{1.0f, 0.0f, 0.2235f};
-    // math::Vec3 const color = gate.evaluation.value ? green : red;
-    math::Vec3 const color = gate_colors[static_cast<int>(gate.kind)];
+    // TODO: change color scheme for evaluation phase
+
+    // if (run_evaluation) {
+      // math::Vec3 const green{0.498f, 1.0f, 0.0f};
+      // math::Vec3 const red{1.0f, 0.0f, 0.2235f};
+      // math::Vec3 const color = gate.evaluation.value ? green : red;
+    // } else {
+      math::Vec3 const color = gate_colors[static_cast<int>(gate.kind)];
+    // }
     Vertex vert[] = {
       Vertex{.position = {gate.coordinates.x + gate.dimensions.x,
                           gate.coordinates.y + gate.dimensions.y, 0.0f},
