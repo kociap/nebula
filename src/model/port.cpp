@@ -52,7 +52,7 @@ namespace nebula {
 
   bool Port::is_under_mouse(Vec2 const point) const
   {
-    return math::length_squared(point) <= radius * radius;
+    return math::length_squared(point - coordinates) <= radius * radius;
   }
 
   rendering::Draw_Elements_Command prepare_draw(Port const& port)
