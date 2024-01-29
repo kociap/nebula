@@ -270,8 +270,8 @@ static void render_scene(Scene& scene, Vec2 const viewport_size)
   // 2. connections.
   // 3. ports.
 
-  for(Gate const& gate: scene.gates) {
-    rendering::Draw_Elements_Command cmd = prepare_draw(gate);
+  for(Gate const* gate: scene.gates) {
+    rendering::Draw_Elements_Command cmd = prepare_draw(*gate);
     rendering::add_draw_command(cmd);
   }
 
@@ -389,10 +389,11 @@ int main(int argc, char* argv[])
 
   scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
   scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
+  scene.add_gate({0.55f, 0.5f}, {0.0f, 0.0f}, Gate_Kind::e_input);
 
   bool run_evaluation = false;
   bool single_step_evaluation = false;
-  i64 evaluation_frequency = 1;
+  i64 evaluation_frequency = 2;
   i64 frame_counter = 0;
 
   // Main loop

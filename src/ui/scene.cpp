@@ -6,26 +6,29 @@ namespace nebula {
     for(Port* p: ports) {
       delete p;
     }
+    for(Gate* g: gates) {
+      delete g;
+    }
   }
 
   void Scene::add_gate(Vec2 const dimensions, math::Vec2 const coordinates,
                        Gate_Kind const kind)
   {
-    Gate new_gate = Gate(dimensions, coordinates, kind);
+    Gate* new_gate = new Gate(dimensions, coordinates, kind);
     gates.emplace_back(new_gate);
-    for(Port* p: new_gate.in_ports) {
+    for(Port* p: new_gate->in_ports) {
       ports.push_back(p);
     }
-    for(Port* p: new_gate.out_ports) {
+    for(Port* p: new_gate->out_ports) {
       ports.push_back(p);
     }
   }
 
   Gate* Scene::check_if_gate_clicked(Vec2 const mouse_position)
   {
-    for(Gate& mg: gates) {
-      if(test_hit(mg, mouse_position)) {
-        return &mg;
+    for(Gate* mg: gates) {
+      if(test_hit(*mg, mouse_position)) {
+        return mg;
       }
     }
     return nullptr;
@@ -105,10 +108,11 @@ namespace nebula {
 
     // Remove gate from gates list
     for(auto it = gates.begin(); it != gates.end(); ++it) {
-      if(&(*it) == gate) {
+      if((*it) == gate) {
         gates.erase(it);
         break;
       }
     }
+    delete gate;
   }
 } // namespace nebula

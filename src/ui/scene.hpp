@@ -27,7 +27,7 @@ namespace nebula {
       nullptr; ///< Pointer to the gate currently being moved.
     Port* connected_port =
       nullptr; ///< Pointer to the port being connected during linking.
-    List<Gate> gates; ///< List of all gates visible on the screen.
+    List<Gate*> gates; ///< List of all gates visible on the screen.
     Array<Port*> ports; ///< Array of all ports visible on the screen.
     Vec2 viewport_size = {1920, 1080};
 

@@ -6,7 +6,11 @@ namespace nebula {
     : coordinates(_coordinates), dimensions(_dimensions), kind(_kind)
   {
     i32 const out_count = 1;
-    i32 const in_count = kind == Gate_Kind::e_not ? 1 : 2;
+    i32 in_count = (kind == Gate_Kind::e_not) ? 1 : 2;
+    if(kind == Gate_Kind::e_input) {
+      in_count = 0;
+      evaluation.value = true;
+    }
 
     // Distance between IN ports
     f32 const in_space = dimensions.y / static_cast<f32>(in_count);
