@@ -46,14 +46,14 @@ namespace nebula {
      * window size and viewport size.
      *
      * @param win_position - Position on the screen where the click occurred.
-     * @param win_size - Window width and height.
      * @param viewport_size - Size of the viewport within the window.
+     * @param framebuffer_size - Size of the framebuffer
      *
      * @return Scene coordinates corresponding to the clicked location in the window.
      */
     [[nodiscard]] Vec2 window_to_scene_position(Vec2 win_position,
-                                                Vec2 win_size,
-                                                Vec2 viewport_size) const;
+                                                Vec2 viewport_size,
+                                                Vec2 framebuffer_size) const;
   };
 
   /**
