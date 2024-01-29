@@ -61,12 +61,12 @@ static void keyboard_callback(windowing::Window* const window, Key const key,
   } else if((key == Key::key_left_control || key == Key::key_right_control) &&
             state == Input_Action::press) {
     if(scene.mode == Window_Mode::none) {
-      scene.mode = Window_Mode::object_delete;
+      scene.set_window_mode(Window_Mode::object_delete);
     }
   } else if((key == Key::key_left_control || key == Key::key_right_control) &&
             state == Input_Action::release) {
     if(scene.mode == Window_Mode::object_delete) {
-      scene.mode = Window_Mode::none;
+      scene.set_window_mode(Window_Mode::none);
     }
   }
 }
@@ -86,6 +86,9 @@ static void mouse_button_callback(windowing::Window* const window,
 {
   ANTON_UNUSED(window);
   auto& scene = *reinterpret_cast<Scene*>(data);
+  if(scene.mode == Window_Mode::evaluation_mode) {
+    return;
+  }
   if(key == Key::mouse_left) {
     if(action == Input_Action::press) {
       Vec2 cursor_position = windowing::get_cursor_position(window);
@@ -114,7 +117,7 @@ static void mouse_button_callback(windowing::Window* const window,
         }
         // Quit connecting mode
         scene.connected_port = nullptr;
-        scene.mode = Window_Mode::none;
+        scene.set_window_mode(Window_Mode::none);
         return;
       }
 
@@ -125,7 +128,7 @@ static void mouse_button_callback(windowing::Window* const window,
           return;
         }
 
-        scene.mode = Window_Mode::port_linking;
+        scene.set_window_mode(Window_Mode::port_linking);
         Port_Kind tmp_port_type;
         if(scene.connected_port->kind == Port_Kind::in) {
           tmp_port_type = Port_Kind::out;
@@ -144,11 +147,11 @@ static void mouse_button_callback(windowing::Window* const window,
           scene.delete_gate(scene.currently_moved_gate);
           return;
         }
-        scene.mode = Window_Mode::gate_moving;
+        scene.set_window_mode(Window_Mode::gate_moving);
         return;
       }
 
-      scene.mode = Window_Mode::camera_moving;
+      scene.set_window_mode(Window_Mode::camera_moving);
       scene.last_mouse_position = scene_position;
     } else if(action == Input_Action::release) {
       if(scene.mode == Window_Mode::port_linking) {
@@ -157,7 +160,7 @@ static void mouse_button_callback(windowing::Window* const window,
 
       scene.currently_moved_gate = nullptr;
       scene.connected_port = nullptr;
-      scene.mode = Window_Mode::none;
+      scene.set_window_mode(Window_Mode::none);
     }
   } else if(key == Key::mouse_right) {
     Vec2 const cursor_position = windowing::get_cursor_position(window);
@@ -390,7 +393,6 @@ int main(int argc, char* argv[])
   scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
   scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
 
-  bool run_evaluation = false;
   bool single_step_evaluation = false;
   i64 evaluation_frequency = 1;
   i64 frame_counter = 0;
@@ -407,7 +409,7 @@ int main(int argc, char* argv[])
     if(single_step_evaluation) {
       evaluate(scene.gates);
       single_step_evaluation = false;
-    } else if(run_evaluation) {
+    } else if(scene.mode == Window_Mode::evaluation_mode) {
       if(frame_counter % evaluation_frequency == 0) {
         evaluate(scene.gates);
       }
@@ -448,7 +450,7 @@ int main(int argc, char* argv[])
                                         {FLT_MAX, display_size_y});
     ImGui::Begin("Toolbar", nullptr, ImGuiWindowFlags_NoCollapse);
     if(ImGui::Button("Toggle evaluation")) {
-      run_evaluation = !run_evaluation;
+      scene.toggle_evaluation_mode();
     }
     if(ImGui::Button("Single step evaluation")) {
       single_step_evaluation = true;
