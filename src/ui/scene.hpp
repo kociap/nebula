@@ -29,6 +29,7 @@ namespace nebula {
       nullptr; ///< Pointer to the port being connected during linking.
     List<Gate> gates; ///< List of all gates visible on the screen.
     Array<Port*> ports; ///< Array of all ports visible on the screen.
+    Vec2 viewport_size = {1920, 1080};
 
   private:
     bool tmp_port_exists =

@@ -48,16 +48,18 @@ namespace nebula {
   }
 
   [[nodiscard]] Vec2
-  Camera::window_to_scene_position(Vec2 const win_position, Vec2 const win_size,
-                                   Vec2 const viewport_size) const
+  Camera::window_to_scene_position(Vec2 const win_position,
+                                   Vec2 const viewport_size,
+                                   Vec2 const framebuffer_size) const
   {
     Vec2 const extents =
-      zoom_level * Vec2(viewport_size.x / viewport_size.y, 1.0f);
+      zoom_level * Vec2(framebuffer_size.x / framebuffer_size.y, 1.0f);
     Vec2 scene_position;
-    scene_position.x =
-      position.x - extents.x + win_position.x * (2 * extents.x / win_size.x);
+    scene_position.x = position.x - extents.x +
+                       win_position.x * (2 * extents.x / viewport_size.x);
     scene_position.y =
-      position.y - extents.y + win_position.y * (2 * extents.y / win_size.y);
+      position.y - extents.y +
+      (viewport_size.y - win_position.y) * (2 * extents.y / viewport_size.y);
     return scene_position;
   }
 
