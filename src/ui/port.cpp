@@ -6,7 +6,7 @@ namespace nebula {
   {
     this->coordinates = coordinates;
     this->type = type;
-    radius = 0.1f; // Adjust this value
+    radius = 0.15f; // Adjust this value
   }
 
   void Port::move(nebula::Vec2 const offset)
@@ -56,7 +56,7 @@ namespace nebula {
     f32 const distance =
       math::sqrt(math::pow(mouse_position.x - coordinates.x, 2) +
                  math::pow(mouse_position.y - coordinates.y, 2));
-    bool const clicked = (distance <= radius);
+    bool const clicked = (distance <= radius * 1.2); // Make it easier to hit
     return clicked;
   }
 

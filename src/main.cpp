@@ -91,11 +91,14 @@ static void mouse_button_callback(windowing::Window* const window,
 
       Camera& cam = get_primary_camera();
       Vec2 const window_size = get_window_size(window);
-      Vec2 const framebuffer_size = get_framebuffer_size(window);
-      cursor_position -= window_size - scene.viewport_size;
+      Vec2 framebuffer_size = get_framebuffer_size(window);
+      cursor_position -= window_size - scene.viewport_size - 10; // margin
+
       if(cursor_position.x < 0 || cursor_position.y < 0) {
         return;
       }
+      framebuffer_size.x =
+        framebuffer_size.y * (scene.viewport_size.x / scene.viewport_size.y);
       Vec2 const scene_position = cam.window_to_scene_position(
         cursor_position, scene.viewport_size, framebuffer_size);
 
@@ -178,16 +181,18 @@ static void cursor_position_callback(windowing::Window* const window,
   Vec2 cursor_position = {x, y};
   Camera& cam = get_primary_camera();
   Vec2 const window_size = get_window_size(window);
-  Vec2 const viewport_size = get_framebuffer_size(window);
-  cursor_position -= window_size - scene.viewport_size;
+  Vec2 framebuffer_size = get_framebuffer_size(window);
+  cursor_position -= window_size - scene.viewport_size - 10;
   if(cursor_position.x < 0 || cursor_position.y < 0) {
     return;
   }
+  framebuffer_size.x =
+    framebuffer_size.y * (scene.viewport_size.x / scene.viewport_size.y);
   Vec2 const scene_position = cam.window_to_scene_position(
-    cursor_position, scene.viewport_size, viewport_size);
+    cursor_position, scene.viewport_size, framebuffer_size);
 
-  math::Vec2 offset =
-    (scene_position - scene.last_mouse_position) * viewport_size / window_size;
+  math::Vec2 offset = (scene_position - scene.last_mouse_position) *
+                      framebuffer_size / window_size;
 
   if(scene.mode == Window_Mode::port_linking) {
     scene.move_tmp_port(offset);
@@ -301,16 +306,24 @@ static void render_scene(Scene& scene, Vec2 const viewport_size)
 
 static void render_viewport(Scene& scene)
 {
+  i8 const margin = 10;
   ImVec2 display_size = ImGui::GetIO().DisplaySize;
-  ImGui::SetNextWindowSize({800, display_size.y}, ImGuiCond_FirstUseEver);
-  ImGui::SetNextWindowSizeConstraints({FLT_MIN, display_size.y},
-                                      {FLT_MAX, display_size.y});
+  // Leave margin
+  display_size.x -= margin;
+  display_size.y -= margin;
+  ImGui::SetNextWindowSize({display_size.x, display_size.y},
+                           ImGuiCond_FirstUseEver);
+  ImGui::SetNextWindowSizeConstraints({display_size.x, display_size.y},
+                                      {display_size.x, display_size.y});
   ImGui::SetNextWindowPos(display_size, ImGuiCond_Always, {1.0f, 1.0f});
-  ImGui::SetNextWindowPos({display_size.x, 0.0}, ImGuiCond_Always,
+  ImGui::SetNextWindowPos({display_size.x, margin}, ImGuiCond_Always,
                           {1.0f, 0.0f});
-  ImGui::Begin("Viewport");
+  ImGui::Begin("Viewport", nullptr,
+               ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar |
+                 ImGuiWindowFlags_NoBringToFrontOnFocus);
   ImVec2 const im_viewport_size = ImGui::GetWindowSize();
-  Vec2 const viewport_size{im_viewport_size.x, im_viewport_size.y};
+  Vec2 const viewport_size{im_viewport_size.x - margin,
+                           im_viewport_size.y - margin};
   rendering::resize_framebuffers(viewport_size.x, viewport_size.y);
   glViewport(0, 0, viewport_size.x, viewport_size.y);
   rendering::Framebuffer* const primary_fb =
@@ -417,7 +430,7 @@ int main(int argc, char* argv[])
                             {0.0f, 1.0f});
     ImGui::SetNextWindowSizeConstraints({FLT_MIN, display_size_y},
                                         {FLT_MAX, display_size_y});
-    ImGui::Begin("Toolbar");
+    ImGui::Begin("Toolbar", nullptr, ImGuiWindowFlags_NoCollapse);
     if(ImGui::Button("Button")) {
       LOG_INFO("Button clicked");
     }
