@@ -11,12 +11,11 @@ namespace nebula {
   void Scene::add_gate(Vec2 const dimensions, math::Vec2 const coordinates,
                        Gate_Kind const kind)
   {
-    Gate new_gate = Gate(dimensions, coordinates, kind);
-    gates.emplace_back(new_gate);
-    for(Port* p: new_gate.in_ports) {
+    Gate& gate = *gates.emplace_back(dimensions, coordinates, kind);
+    for(Port* p: gate.in_ports) {
       ports.push_back(p);
     }
-    for(Port* p: new_gate.out_ports) {
+    for(Port* p: gate.out_ports) {
       ports.push_back(p);
     }
   }
