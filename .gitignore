@@ -13,6 +13,7 @@ personal/
 *.log
 *.toc
 *.pdf
+*.out
 
 # Dear ImGui
 imgui.ini
