@@ -144,10 +144,11 @@ namespace nebula {
 
   Port* test_hit_ports(Scene& scene, Vec2 const point)
   {
-    for(Port* port: scene.ports) {
-      bool const hit = test_hit(*port, point);
-      if(hit) {
-        return port;
+    i64 const range =
+      (scene.tmp_port_exists) ? scene.ports.size() - 1 : scene.ports.size();
+    for(i64 i = 0; i < range; i++) {
+      if(test_hit(*scene.ports[i], point)) {
+        return scene.ports[i];
       }
     }
     return nullptr;

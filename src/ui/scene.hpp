@@ -26,8 +26,6 @@ namespace nebula {
     List<Gate> gates;
     Array<Port*> ports;
     Vec2 viewport_size = {1920, 1080};
-
-  private:
     bool tmp_port_exists = false;
 
   public:
