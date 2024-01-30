@@ -348,7 +348,7 @@ static void render_viewport(Scene& scene)
   ImGui::End();
 }
 
-[[nodiscard]] static char const* gateToString(Gate_Kind kind)
+[[nodiscard]] static char const* gate_to_string(Gate_Kind kind)
 {
   switch(kind) {
   case Gate_Kind::e_and:
@@ -369,6 +369,9 @@ static void render_viewport(Scene& scene)
     return "INPUT";
   case Gate_Kind::e_count:
     ANTON_UNREACHABLE("count is not a valid enumeration");
+    // CI complains about control reaching the end of a non-void function.
+    // Suppress with return.
+    return "INVALID";
   }
 }
 
@@ -390,7 +393,7 @@ void display_toolbar()
   u8 number_of_gate_types = static_cast<int>(Gate_Kind::e_count);
   for(int i = 0; i < number_of_gate_types; ++i) {
     Gate_Kind gate = static_cast<Gate_Kind>(i);
-    const char* gateString = gateToString(gate);
+    const char* gateString = gate_to_string(gate);
 
     ImGui::Selectable(gateString);
     ImGuiDragDropFlags src_flags = 0;
