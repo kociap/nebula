@@ -369,10 +369,10 @@ static void render_viewport(Scene& scene)
     return "INPUT";
   case Gate_Kind::e_count:
     ANTON_UNREACHABLE("count is not a valid enumeration");
-    // CI complains about control reaching the end of a non-void function.
-    // Suppress with return.
-    return "INVALID";
   }
+  // CI complains about control reaching the end of a non-void function.
+  // Suppress with return.
+  return "INVALID";
 }
 
 void display_toolbar()
