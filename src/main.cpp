@@ -26,11 +26,11 @@
 using namespace nebula;
 
 namespace {
-  bool is_draged_from_menu = 0;
+  bool is_draged_from_menu = false;
   Gate_Kind last_menu_gate_choice = Gate_Kind::e_count;
   bool run_evaluation = false;
   bool single_step_evaluation = false;
-  i64 evaluation_frequency = 1;
+  i64 evaluation_frequency = 1; // TODO: Frequency switching button (1,2,4,8,16)
   i64 frame_counter = 0;
   Vec2 const gate_default_size{0.6f, 0.5f};
 } // namespace
@@ -95,6 +95,7 @@ static void mouse_button_callback(windowing::Window* const window,
                                   Key const key, Input_Action const action,
                                   void* data)
 {
+  // TODO: do not allow linking, port creating and deleting in evaluation mode
   ANTON_UNUSED(window);
   auto& scene = *reinterpret_cast<Scene*>(data);
   if(scene.mode == Window_Mode::evaluation_mode) {
@@ -371,6 +372,8 @@ static void display_viewport(Scene& scene)
     return "NOT";
   case Gate_Kind::e_input:
     return "INPUT";
+  case Gate_Kind::e_clock:
+    return "CLOCK";
   case Gate_Kind::e_count:
     ANTON_UNREACHABLE("count is not a valid enumeration");
   }
@@ -410,6 +413,7 @@ void display_toolbar()
       if(!(src_flags & ImGuiDragDropFlags_SourceNoPreviewTooltip))
         ImGui::Text("Moving \"%s\"", gateString);
       ImGui::SetDragDropPayload("DND_DEMO_NAME", &i, sizeof(int));
+      // TODO: remove camera movement when drag and drop
       ImGui::EndDragDropSource();
 
       last_menu_gate_choice = gate;
