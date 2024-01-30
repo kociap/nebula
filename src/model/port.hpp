@@ -14,6 +14,8 @@ namespace nebula {
    */
   enum struct Port_Kind { in, out };
 
+  [[nodiscard]] Port_Kind invert_port_kind(Port_Kind kind);
+
   /**
    * @brief Port structure.
    *
@@ -67,16 +69,15 @@ namespace nebula {
      * @return The coordinates of the port.
      */
     [[nodiscard]] Vec2 get_coordinates() const;
-
-    /**
-     * @brief Checks if the port is under the specified mouse position.
-     *
-     * @param mouse_position The x and y coordinates of the mouse position.
-     * @return True if the port is under the mouse, false otherwise.
-     */
-    [[nodiscard]] bool is_under_mouse(Vec2 mouse_position) const;
   };
 
+  /**
+   * @brief Checks if the port is under the specified mouse position.
+   *
+   * @param mouse_position The x and y coordinates of the mouse position.
+   * @return True if the port is under the mouse, false otherwise.
+   */
+  [[nodiscard]] bool test_hit(Port const& port, Vec2 point);
   /**
    * @brief Prepares draw command for rendering a port.
    *
@@ -100,5 +101,4 @@ namespace nebula {
    */
   [[nodiscard]] rendering::Draw_Elements_Command
   prepare_draw_connection(Vec2 cords_1, Vec2 cords_2);
-
 } // namespace nebula

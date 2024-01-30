@@ -12,8 +12,8 @@ namespace nebula {
     camera_moving, ///< Moving the camera mode.
     gate_moving, ///< Moving a gate mode.
     port_linking, ///< Linking ports mode.
-    object_delete, ///< Deleting objects mode.
-    evaluation_mode, ///< Evaluating mode.
+    // object_delete, ///< Deleting objects mode.
+    // evaluation_mode, ///< Evaluating mode.
   };
 
   /**
@@ -123,5 +123,19 @@ namespace nebula {
 
     void set_window_mode(Window_Mode mode);
   };
+
+  // test_hit_gates
+  //
+  // Parameters:
+  // point - world position point.
+  //
+  [[nodiscard]] Gate* test_hit_gates(Scene& scene, Vec2 point);
+
+  // test_hit_ports
+  //
+  // Parameters:
+  // point - world position point.
+  //
+  [[nodiscard]] Port* test_hit_ports(Scene& scene, Vec2 point);
 
 } // namespace nebula

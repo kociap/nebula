@@ -107,5 +107,4 @@ namespace nebula {
    * @return Reference to the primary camera.
    */
   Camera& get_primary_camera();
-
 } // namespace nebula
