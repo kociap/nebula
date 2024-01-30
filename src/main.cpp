@@ -496,10 +496,7 @@ int main(int argc, char* argv[])
 
   if(input_file != "") {
     Save::loadFromFile(input_file, scene);
-  } else {
-    scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
-    scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
-  }
+  } 
 
   // Main loop
   while(!windowing::should_close(window)) {
