@@ -1,0 +1,133 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+
+\geometry{a4paper, margin=1in}
+
+\begin{document}
+
+\section*{Logical Gates}
+
+\subsection*{NOT Gate}
+
+The NOT gate, also known as an inverter, is a fundamental logic gate with a single input and a single output. It produces the logical complement of its input.
+
+\[
+\begin{array}{|c|c|}
+\hline
+\text{Input (A)} & \text{Output (Y)} \\
+\hline
+0 & 1 \\
+1 & 0 \\
+\hline
+\end{array}
+\]
+
+\subsection*{AND Gate}
+
+The AND gate has two inputs and one output. It produces a high output (1) only if both of its inputs are high.
+
+\[
+\begin{array}{|cc|c|}
+\hline
+\text{Input A} & \text{Input B} & \text{Output Y} \\
+\hline
+0 & 0 & 0 \\
+0 & 1 & 0 \\
+1 & 0 & 0 \\
+1 & 1 & 1 \\
+\hline
+\end{array}
+\]
+
+\subsection*{OR Gate}
+
+The OR gate has two inputs and one output. It produces a high output (1) if at least one of its inputs is high.
+
+\[
+\begin{array}{|cc|c|}
+\hline
+\text{Input A} & \text{Input B} & \text{Output Y} \\
+\hline
+0 & 0 & 0 \\
+0 & 1 & 1 \\
+1 & 0 & 1 \\
+1 & 1 & 1 \\
+\hline
+\end{array}
+\]
+
+\subsection*{NAND Gate}
+
+The NAND gate is a combination of the NOT and AND gates. It produces the opposite of the AND gate's output.
+
+\[
+\begin{array}{|cc|c|}
+\hline
+\text{Input A} & \text{Input B} & \text{Output Y} \\
+\hline
+0 & 0 & 1 \\
+0 & 1 & 1 \\
+1 & 0 & 1 \\
+1 & 1 & 0 \\
+\hline
+\end{array}
+\]
+
+\subsection*{XOR Gate}
+
+The XOR gate, or exclusive OR gate, has two inputs and one output. It produces a high output (1) only if the number of high inputs is odd.
+
+\[
+\begin{array}{|cc|c|}
+\hline
+\text{Input A} & \text{Input B} & \text{Output Y} \\
+\hline
+0 & 0 & 0 \\
+0 & 1 & 1 \\
+1 & 0 & 1 \\
+1 & 1 & 0 \\
+\hline
+\end{array}
+\]
+
+\subsection*{NOR Gate}
+
+The NOR gate is a combination of the NOT and OR gates. It produces the opposite of the OR gate's output.
+
+\[
+\begin{array}{|cc|c|}
+\hline
+\text{Input A} & \text{Input B} & \text{Output Y} \\
+\hline
+0 & 0 & 1 \\
+0 & 1 & 0 \\
+1 & 0 & 0 \\
+1 & 1 & 0 \\
+\hline
+\end{array}
+\]
+
+\subsection*{XNOR Gate}
+
+The XNOR gate, or exclusive NOR gate, has two inputs and one output. It produces a high output (1) only if both inputs are equal.
+\[
+\begin{array}{|cc|c|}
+\hline
+\text{Input A} & \text{Input B} & \text{Output Y} \\
+\hline
+0 & 0 & 1 \\
+0 & 1 & 0 \\
+1 & 0 & 0 \\
+1 & 1 & 1 \\
+\hline
+\end{array}
+\]
+
+\end{document}
+
+
+\end{document}
+
