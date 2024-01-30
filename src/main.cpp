@@ -408,7 +408,14 @@ void display_toolbar()
     Gate_Kind gate = static_cast<Gate_Kind>(i);
     const char* gateString = gate_to_string(gate);
 
-    ImGui::Selectable(gateString);
+    // ImGui::Selectable(gateString);
+    // ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(float(gate_colors[i].r),float(gate_colors[i].g),float(gate_colors[i].b),1.0f));
+    
+    // ImGui::PushStyleColor(ImGui::Button(gateString), ImVec4((float)gate_colors[i].r,(float)gate_colors[i].g,(float)gate_colors[i].b,1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4((float)gate_colors[i].r,(float)gate_colors[i].g,(float)gate_colors[i].b,1.0f));
+    ImGui::Button(gateString);
+
+    ImGui::PopStyleColor();
     ImGuiDragDropFlags src_flags = 0;
     // Keep the source displayed as hovered.
     src_flags |= ImGuiDragDropFlags_SourceNoDisableHover;
@@ -445,6 +452,9 @@ int main(int argc, char* argv[])
 {
   (void)argc;
   (void)argv;
+
+  //initialise gate colors
+  gate_colors_init();
 
   windowing::Window* window = windowing::init();
   if(window == nullptr) {

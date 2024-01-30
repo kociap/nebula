@@ -4,6 +4,7 @@
 
 #include <model/port.hpp>
 #include <rendering/rendering.hpp>
+#include <logging/logging.hpp>
 
 namespace nebula {
   /**
@@ -37,6 +38,42 @@ namespace nebula {
     bool prev_value = false;
     bool value = false;
   };
+
+// #ifndef colors
+// #define colors
+  inline math::Vec3 gate_colors[static_cast<int>(Gate_Kind::GATES_COUNT)];// = green{0.498f, 1.0f, 0.0f};
+
+  inline void check_if_in_range_0_to_1(f32 &color, f32 number) {
+    while (number > 1.f) {
+      number = number - math::floor(number);
+    }
+    color = number;
+  }
+
+  inline void gate_colors_init() {
+    u8 number_of_gate_types = static_cast<int>(Gate_Kind::GATES_COUNT);
+    i64 density = math::ceil(math::cbrt(number_of_gate_types));
+    for(int i = 0; i < number_of_gate_types; ++i) {
+      f32 red,green,blue,number1,number2,number3 = 0;
+      red = static_cast<f32>(i % density) / density;
+      green = static_cast<f32>((i / density) % density) / density;
+      blue = static_cast<f32>((i / (density * density)) % density) / density;
+
+      // number1 = (f32)(i)/number_of_gate_types;
+      // number2 = (f32)((number_of_gate_types/2)+i)/number_of_gate_types; 
+      // number3 = (f32)((number_of_gate_types)+i)/number_of_gate_types;
+      // LOG_DEBUG("numbers i: {} r,g,b: {},{},{}", i, number1,number2,number3);
+
+      // check_if_in_range_0_to_1(red, number1);
+      // check_if_in_range_0_to_1(green, number2);
+      // check_if_in_range_0_to_1(blue, number3);
+
+      LOG_DEBUG("i: {} r,g,b: {},{},{}", i, red,green,blue);
+
+      gate_colors[i] = {red, green, blue};
+    }
+  }
+// #endif
 
   /**
    * @brief Gate structure.
