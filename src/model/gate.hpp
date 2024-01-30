@@ -39,10 +39,33 @@ namespace nebula {
     bool value = false;
   };
 
-// #ifndef colors
-// #define colors
-  inline math::Vec3 gate_colors[static_cast<int>(Gate_Kind::e_count)];// = green{0.498f, 1.0f, 0.0f};
+  /**
+   * @brief global_evaluation_phase
+   * Current state of the aplication.
+   */
+  inline bool global_evaluation_phase = false;  
 
+  /**
+   * @brief set_get_evaluation_phase
+   * Gets current state of the aplication from main.
+   */
+  inline void set_get_evaluation_phase(bool run_evaluation) {
+    global_evaluation_phase = run_evaluation;
+  }
+
+  /**
+   * @brief gate_colors
+   * Variable responsible for holding all gate colors.
+   */
+  inline math::Vec3 gate_colors[static_cast<int>(Gate_Kind::e_count)];
+
+  /**
+   * @brief check_if_in_range_0_to_1
+   * 
+   * @param color Color which value will be set tu number.
+   * @param number The number to set given color to.
+   * Makes number in range 0 - 1.
+   */
   inline void check_if_in_range_0_to_1(f32 &color, f32 number) {
     while (number > 1.f) {
       number = number - math::floor(number);
@@ -50,20 +73,21 @@ namespace nebula {
     color = number;
   }
 
+  /**
+   * @brief gate_colors_init
+   * Initialises color palette for gates.
+   */
   inline void gate_colors_init() {
     u8 number_of_gate_types = static_cast<int>(Gate_Kind::e_count);
     i64 density = math::ceil(math::cbrt(number_of_gate_types));
     for(int i = 0; i < number_of_gate_types; ++i) {
-      f32 red,green,blue,number1,number2,number3 = 0;
+      f32 red,green,blue = 0;
       red = static_cast<f32>(i % density) / density;
       green = static_cast<f32>((i / density) % density) / density;
       blue = static_cast<f32>((i / (density * density)) % density) / density;
-      // LOG_DEBUG("i: {} r,g,b: {},{},{}", i, red,green,blue);
-
       gate_colors[i] = {red, green, blue};
     }
   }
-// #endif
 
   /**
    * @brief Gate structure.

@@ -395,6 +395,7 @@ void display_toolbar()
                  ImGuiWindowFlags_NoTitleBar);
   if(ImGui::Button("Toggle evaluation")) {
     run_evaluation = !run_evaluation;
+    set_get_evaluation_phase(run_evaluation);
   }
   if(ImGui::Button("Single step evaluation")) {
     single_step_evaluation = true;
@@ -408,14 +409,10 @@ void display_toolbar()
     Gate_Kind gate = static_cast<Gate_Kind>(i);
     const char* gateString = gate_to_string(gate);
 
-    // ImGui::Selectable(gateString);
-    // ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(float(gate_colors[i].r),float(gate_colors[i].g),float(gate_colors[i].b),1.0f));
-    
-    // ImGui::PushStyleColor(ImGui::Button(gateString), ImVec4((float)gate_colors[i].r,(float)gate_colors[i].g,(float)gate_colors[i].b,1.0f));
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4((float)gate_colors[i].r,(float)gate_colors[i].g,(float)gate_colors[i].b,1.0f));
     ImGui::Button(gateString);
-
     ImGui::PopStyleColor();
+
     ImGuiDragDropFlags src_flags = 0;
     // Keep the source displayed as hovered.
     src_flags |= ImGuiDragDropFlags_SourceNoDisableHover;
@@ -569,7 +566,6 @@ int main(int argc, char* argv[])
     If mouse is dragged from the manu and released then add gate
     */
     if(ImGui::IsMouseReleased(left_button) && is_draged_from_menu) {
-      //later change to gate that was pressed
       scene.add_gate(gate_default_size, scene.last_mouse_position,
                      last_menu_gate_choice);
       is_draged_from_menu = 0;

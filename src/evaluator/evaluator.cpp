@@ -74,6 +74,8 @@ namespace nebula {
         gate.evaluation.value = !gate.evaluation.value;
         gate.evaluation.prev_value = !gate.evaluation.prev_value;
       } break;
+      default:
+        break;
       }
     }
   }
