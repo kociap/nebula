@@ -9,8 +9,8 @@ namespace nebula {
   /**
    * @brief Enumeration representing different kinds of ports.
    *
-   * The Port_Kind enumeration represents the types of ports, categorized as input (in) or
-   * output (out).
+   * The Port_Kind enumeration represents the types of ports, categorized as
+   * input (in) or output (out).
    */
   enum struct Port_Kind { in, out };
 
@@ -19,7 +19,8 @@ namespace nebula {
   /**
    * @brief Port structure.
    *
-   * The Port structure represents a circle-shaped port with specified coordinates and type (IN/OUT).
+   * The Port structure represents a circle-shaped port with specified
+   * coordinates and type (IN/OUT).
    */
   struct Port {
     List<Port*> connections;
@@ -40,7 +41,8 @@ namespace nebula {
     /**
      * @brief Moves the port by the given offset.
      *
-     * @param offset The vector representing the offset from the previous gate position.
+     * @param offset The vector representing the offset from the previous gate
+     * position.
      */
     void move(Vec2 offset);
 
@@ -81,8 +83,8 @@ namespace nebula {
   /**
    * @brief Prepares draw command for rendering a port.
    *
-   * This function prepares a draw command for rendering the specified port. The draw
-   * command includes information necessary to render the port.
+   * This function prepares a draw command for rendering the specified port. The
+   * draw command includes information necessary to render the port.
    *
    * @param port The port to prepare the draw command for.
    * @return A rendering::Draw_Elements_Command for rendering the port.
@@ -92,8 +94,9 @@ namespace nebula {
   /**
    * @brief Prepares draw command for rendering a connection between two points.
    *
-   * This function prepares a draw command for rendering a connection between two points.
-   * The draw command includes information necessary to render the connection.
+   * This function prepares a draw command for rendering a connection between
+   * two points. The draw command includes information necessary to render the
+   * connection.
    *
    * @param cords_1 The coordinates of the first point.
    * @param cords_2 The coordinates of the second point.

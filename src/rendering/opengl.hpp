@@ -109,56 +109,16 @@ namespace nebula::opengl {
    */
   constexpr Buffer_Mask stencil_buffer_bit = Buffer_Mask::stencil_buffer_bit;
 
-  /**
-   * @brief Retrieves the maximum number of texture image units supported by the GPU.
-   *
-   * @return The maximum number of texture image units.
-   */
   [[nodiscard]] i32 get_max_texture_image_units();
-  /**
-   * @brief Retrieves the maximum number of combined texture units supported by the GPU.
-   *
-   * @return The maximum number of combined texture units.
-   */
   [[nodiscard]] i32 get_max_combined_texture_units();
-  /**
-   * @brief Retrieves the maximum number of combined texture units supported by the GPU.
-   *
-   * @return The maximum number of combined texture units.
-   */
   [[nodiscard]] i32 get_max_renderbuffer_size();
-  /**
-   * @brief Retrieves the maximum number of color attachments supported by the GPU.
-   *
-   * @return The maximum number of color attachments.
-   */
   [[nodiscard]] i32 get_max_color_attachments();
-  /**
-   * @brief Retrieves the maximum number of draw buffers supported by the GPU.
-   *
-   * @return The maximum number of draw buffers.
-   */
   [[nodiscard]] i32 get_max_draw_buffers();
-  /**
-   * @brief Retrieves the alignment requirement for uniform buffer offset.
-   *
-   * @return The alignment requirement for uniform buffer offset.
-   */
   [[nodiscard]] i32 get_uniform_buffer_offset_alignment();
-  /**
-   * @brief Retrieves the minimum alignment for mapping buffer data.
-   *
-   * @return The minimum alignment for mapping buffer data.
-   */
   [[nodiscard]] i32 get_min_map_buffer_alignment();
 
-  /**
-   * @brief Installs a debug callback for OpenGL debugging purposes.
-   */
   void install_debug_callback();
-  /**
-   * @brief Loads OpenGL constants required for compatibility and feature detection.
-   */
+
   void load_constants();
 } // namespace nebula::opengl
 

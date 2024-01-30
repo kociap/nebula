@@ -70,10 +70,14 @@ namespace nebula {
       case Gate_Kind::e_input: {
         // Nothing to do.
       } break;
+
       case Gate_Kind::e_clock: {
         gate.evaluation.value = !gate.evaluation.value;
         gate.evaluation.prev_value = !gate.evaluation.prev_value;
       } break;
+
+      case Gate_Kind::e_count:
+        ANTON_UNREACHABLE("count is invalid");
       }
     }
   }

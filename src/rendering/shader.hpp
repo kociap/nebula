@@ -17,8 +17,8 @@ namespace nebula::rendering {
    * @brief Enumeration representing the kinds of shader stages.
    */
   enum struct Shader_Stage_Kind {
-    vertex, /**< Vertex shader stage. */
-    fragment, /**< Fragment shader stage. */
+    vertex,
+    fragment,
   };
 
   /**
@@ -49,13 +49,14 @@ namespace nebula::rendering {
   /**
    * @brief Compiles a shader stage from source code.
    *
-   * This function compiles a shader stage with the given name, type, and source code.
+   * This function compiles a shader stage with the given name, type, and source
+   * code.
    *
    * @param name - Name of the shader stage.
    * @param type - Type of the shader stage (e.g., vertex or fragment).
    * @param source - Source code of the shader stage.
-   * @return Expected<Handle<Shader_Stage>, String> containing the handle to the compiled shader stage on success,
-   *         or an error message on failure.
+   * @return Expected<Handle<Shader_Stage>, String> containing the handle to the
+   *         compiled shader stage on success, or an error message on failure.
    */
   [[nodiscard]] Expected<Handle<Shader_Stage>, String>
   compile_shader_stage(String name, Shader_Stage_Kind type,
@@ -66,7 +67,8 @@ namespace nebula::rendering {
    * This function creates a shader program with the given name.
    *
    * @param name - Name of the shader program.
-   * @return Handle<Shader> representing the handle to the created shader program.
+   * @return Handle<Shader> representing the handle to the created shader
+   * program.
    */
   [[nodiscard]] Handle<Shader> create_shader(String name);
   /**
@@ -86,14 +88,16 @@ namespace nebula::rendering {
    * This function links a shader program, finalizing the compilation process.
    *
    * @param shader - Handle to the shader program.
-   * @return Expected<void, String> containing an error message on failure or success otherwise.
+   * @return Expected<void, String> containing an error message on failure or
+   * success otherwise.
    */
   [[nodiscard]] Expected<void, String> link_shader(Handle<Shader> shader);
 
   /**
    * @brief Binds a shader for use during draw operations.
    *
-   * This function binds the specified shader for use during subsequent draw operations.
+   * This function binds the specified shader for use during subsequent draw
+   * operations.
    *
    * @param handle - Handle to the shader program.
    * @return True if the binding is successful, false otherwise.
@@ -103,7 +107,8 @@ namespace nebula::rendering {
   /**
    * @brief Sets an integer uniform in the shader.
    *
-   * This function sets the value of an integer uniform in the specified shader program.
+   * This function sets the value of an integer uniform in the specified shader
+   * program.
    *
    * @param handle - Handle to the shader program.
    * @param name - Name of the uniform.
@@ -113,7 +118,8 @@ namespace nebula::rendering {
   /**
    * @brief Sets an unsigned integer uniform in the shader.
    *
-   * This function sets the value of an unsigned integer uniform in the specified shader program.
+   * This function sets the value of an unsigned integer uniform in the
+   * specified shader program.
    *
    * @param handle - Handle to the shader program.
    * @param name - Name of the uniform.
@@ -123,7 +129,8 @@ namespace nebula::rendering {
   /**
    * @brief Sets a floating-point uniform in the shader.
    *
-   * This function sets the value of a floating-point uniform in the specified shader program.
+   * This function sets the value of a floating-point uniform in the specified
+   * shader program.
    *
    * @param handle - Handle to the shader program.
    * @param name - Name of the uniform.
@@ -133,7 +140,8 @@ namespace nebula::rendering {
   /**
    * @brief Sets a 2D vector uniform in the shader.
    *
-   * This function sets the value of a 2D vector uniform in the specified shader program.
+   * This function sets the value of a 2D vector uniform in the specified shader
+   * program.
    *
    * @param handle - Handle to the shader program.
    * @param name - Name of the uniform.
@@ -144,7 +152,8 @@ namespace nebula::rendering {
   /**
    * @brief Sets a 3D vector uniform in the shader.
    *
-   * This function sets the value of a 3D vector uniform in the specified shader program.
+   * This function sets the value of a 3D vector uniform in the specified shader
+   * program.
    *
    * @param handle - Handle to the shader program.
    * @param name - Name of the uniform.
@@ -155,7 +164,8 @@ namespace nebula::rendering {
   /**
    * @brief Sets a 4D vector uniform in the shader.
    *
-   * This function sets the value of a 4D vector uniform in the specified shader program.
+   * This function sets the value of a 4D vector uniform in the specified shader
+   * program.
    *
    * @param handle - Handle to the shader program.
    * @param name - Name of the uniform.
@@ -166,7 +176,8 @@ namespace nebula::rendering {
   /**
    * @brief Sets a 4x4 matrix uniform in the shader.
    *
-   * This function sets the value of a 4x4 matrix uniform in the specified shader program.
+   * This function sets the value of a 4x4 matrix uniform in the specified
+   * shader program.
    *
    * @param handle - Handle to the shader program.
    * @param name - Name of the uniform.

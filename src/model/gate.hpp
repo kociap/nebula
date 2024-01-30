@@ -9,9 +9,10 @@ namespace nebula {
   /**
    * @brief Enumeration representing different kinds of logic gates.
    *
-   * The Gate_Kind enumeration represents various types of logic gates, categorized based
-   * on the number of inputs they accept. Two-input gates include AND, OR, XOR, NAND, NOR, and XNOR,
-   * while one-input gates include NOT.
+   * The Gate_Kind enumeration represents various types of logic gates,
+   * categorized based on the number of inputs they accept. Two-input gates
+   * include AND, OR, XOR, NAND, NOR, and XNOR, while one-input gates include
+   * NOT.
    */
   enum struct Gate_Kind : u8 {
     // Two input gates.
@@ -41,8 +42,8 @@ namespace nebula {
   /**
    * @brief Gate structure.
    *
-   * The Gate structure holds information about an object's current location in the
-   * application window and its gates.
+   * The Gate structure holds information about an object's current location in
+   * the application window and its gates.
    */
   struct Gate {
     Array<Port*> in_ports;
@@ -66,8 +67,8 @@ namespace nebula {
     /**
      * @brief Constructs a new gate.
      *
-     * Creates a new visual movable object at the specified location with the specified dimensions
-     * and logic gate kind.
+     * Creates a new visual movable object at the specified location with the
+     * specified dimensions and logic gate kind.
      *
      * @param dimensions The dimensions of the gate (width and height).
      * @param coordinates The coordinates of the top-left corner of the gate.
@@ -78,10 +79,11 @@ namespace nebula {
     /**
      * @brief Moves the gate to a new location.
      *
-     * Changes the location of the gate based on the provided offset from the previous
-     * mouse x and y location.
+     * Changes the location of the gate based on the provided offset from the
+     * previous mouse x and y location.
      *
-     * @param offset The vector representing the offset from the previous mouse x and y location.
+     * @param offset The vector representing the offset from the previous mouse
+     * x and y location.
      */
     void move(math::Vec2 offset);
   };
@@ -89,20 +91,21 @@ namespace nebula {
   /**
    * @brief Tests whether a point is within the bounds of a gate.
    *
-   * This function checks if the given point (x and y coordinates) is within the bounds
-   * of the specified gate.
+   * This function checks if the given point (x and y coordinates) is within the
+   * bounds of the specified gate.
    *
    * @param gate The gate to check.
    * @param point The x and y coordinates of the point to check.
-   * @return True if the point is within the bounds of the gate, false otherwise.
+   * @return True if the point is within the bounds of the gate, false
+   * otherwise.
    */
   [[nodiscard]] bool test_hit(Gate const& gate, math::Vec2 point);
 
   /**
    * @brief Prepares draw command for rendering a gate.
    *
-   * This function prepares a draw command for rendering the specified gate. The draw
-   * command includes information necessary to render the gate.
+   * This function prepares a draw command for rendering the specified gate. The
+   * draw command includes information necessary to render the gate.
    *
    * @param gate The gate to prepare the draw command for.
    * @return A rendering::Draw_Elements_Command for rendering the gate.
