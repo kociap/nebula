@@ -39,11 +39,11 @@ namespace nebula::windowing {
   void swap_buffers(Window* window);
 
   /**
-  * @brief Retrieves the native handle of the GLFW window.
-  *
-  * @param window The window for which to retrieve the native handle.
-  * @return A pointer to the native window handle.
-  */
+   * @brief Retrieves the native handle of the GLFW window.
+   *
+   * @param window The window for which to retrieve the native handle.
+   * @return A pointer to the native window handle.
+   */
   [[nodiscard]] void* get_native_handle(Window* window);
 
   /**
@@ -69,6 +69,8 @@ namespace nebula::windowing {
    * @return A Vec2 representing the cursor position.
    */
   [[nodiscard]] Vec2 get_cursor_position(Window* window);
+
+  [[nodiscard]] Input_Action get_key(Window* window, Key key);
 
   using keyboard_callback_t = void (*)(Window* window, Key key,
                                        Input_Action action, void* data);

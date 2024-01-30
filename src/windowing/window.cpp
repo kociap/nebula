@@ -36,11 +36,10 @@ namespace nebula::windowing {
       nullptr; /**< Additional data passed to the framebuffer resize callback. */
   };
 
-    void* get_native_handle(Window* const window)
-    {
-        return window->glfw_window;
-    }
-
+  void* get_native_handle(Window* const window)
+  {
+    return window->glfw_window;
+  }
 
   /**
    * @brief Callback for handling keyboard button events.
@@ -223,6 +222,12 @@ namespace nebula::windowing {
     double x, y;
     glfwGetCursorPos(window->glfw_window, &x, &y);
     return Vec2(x, y);
+  }
+
+  Input_Action get_key(Window* window, Key key)
+  {
+    auto const action = glfwGetKey(window->glfw_window, static_cast<i32>(key));
+    return static_cast<Input_Action>(action);
   }
 
   void set_keyboard_callback(Window* window, keyboard_callback_t callback,

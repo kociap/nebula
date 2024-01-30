@@ -79,12 +79,12 @@ static void keyboard_callback(windowing::Window* const window, Key const key,
   ANTON_UNUSED(data);
   if(key == Key::key_r && state == Input_Action::release) {
     compile_shaders();
-  } else if((key == Key::key_left_control || key == Key::key_right_control) &&
+  } else if((key == Key::key_lctrl || key == Key::key_rctrl) &&
             state == Input_Action::press) {
     if(scene.mode == Window_Mode::none) {
       // scene.set_window_mode(Window_Mode::object_delete);
     }
-  } else if((key == Key::key_left_control || key == Key::key_right_control) &&
+  } else if((key == Key::key_lctrl || key == Key::key_rctrl) &&
             state == Input_Action::release) {
     // if(scene.mode == Window_Mode::object_delete) {
     //   scene.set_window_mode(Window_Mode::none);
@@ -119,7 +119,6 @@ static void mouse_button_callback(windowing::Window* const window,
                                   Key const key, Input_Action const action,
                                   void* data)
 {
-  // TODO: do not allow linking, port creating and deleting in evaluation mode
   ANTON_UNUSED(window);
   auto& scene = *reinterpret_cast<Scene*>(data);
 
@@ -136,32 +135,41 @@ static void mouse_button_callback(windowing::Window* const window,
     if(action == Input_Action::press && key == Key::mouse_left) {
       // Allow modification of the system only when not running evaluation.
       if(!run_evaluation) {
-        scene.connected_port = test_hit_ports(scene, scene_position);
-        if(scene.connected_port != nullptr) {
+        Port* const port = test_hit_ports(scene, scene_position);
+        if(port != nullptr) {
+          Input_Action const lctrl = windowing::get_key(window, Key::key_lctrl);
+          // LCTRL + LMB deletes connections.
+          if(lctrl == Input_Action::press) {
+            port->remove_all_connections();
+            return;
+          }
+
           scene.set_window_mode(Window_Mode::port_linking);
-          Port_Kind const tmp_port_kind =
-            invert_port_kind(scene.connected_port->kind);
-          scene.create_tmp_port(scene.connected_port, scene_position,
-                                tmp_port_kind);
+          Port_Kind const tmp_port_kind = invert_port_kind(port->kind);
+          scene.create_tmp_port(port, scene_position, tmp_port_kind);
+          scene.connected_port = port;
+          return;
+        }
+      }
+
+      Gate* const gate = test_hit_gates(scene, scene_position);
+      if(gate != nullptr) {
+        Input_Action const lctrl = windowing::get_key(window, Key::key_lctrl);
+        // LCTRL + LMB deletes gates.
+        if(lctrl == Input_Action::press) {
+          // TODO: SEGFAULT on delete.
+          // scene.delete_gate(gate);
           return;
         }
 
-        scene.currently_moved_gate = test_hit_gates(scene, scene_position);
-        if(scene.currently_moved_gate != nullptr) {
-          scene.set_window_mode(Window_Mode::gate_moving);
-          return;
-        }
+        scene.set_window_mode(Window_Mode::gate_moving);
+        return;
       }
 
       // Move camera regardless of where we click.
       scene.set_window_mode(Window_Mode::camera_moving);
     } else if(action == Input_Action::press && key == Key::mouse_right) {
-      Port* p = test_hit_ports(scene, scene_position);
-      if(p != nullptr) {
-        p->remove_all_connections();
-        return;
-      }
-      Gate* g = scene.check_if_gate_clicked(scene_position);
+      Gate* const g = test_hit_gates(scene, scene_position);
       if(g != nullptr && g->kind == Gate_Kind::e_input) {
         g->evaluation = {!g->evaluation.prev_value, !g->evaluation.value};
         return;
