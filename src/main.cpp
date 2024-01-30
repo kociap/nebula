@@ -6,9 +6,11 @@
 #include <anton/filesystem.hpp>
 #include <anton/optional.hpp>
 
+#include "persistence/persistence.hpp"
 #include <components/camera.hpp>
 #include <core/input.hpp>
 #include <core/types.hpp>
+#include <cstring>
 #include <evaluator/evaluator.hpp>
 #include <logging/logging.hpp>
 #include <rendering/framebuffer.hpp>
@@ -390,8 +392,23 @@ int main(int argc, char* argv[])
 
   glClearColor(0.1, 0.1, 0.1, 1.0);
 
-  scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
-  scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
+  std::string input_file = "";
+  std::string output_file = "";
+
+  for(int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "-l" && i + 1 < argc) {
+      input_file = argv[i + 1];
+    } else if(std::string(argv[i]) == "-s" && i + 1 < argc) {
+      output_file = argv[i + 1];
+    }
+  }
+
+  if(input_file != "") {
+    Save::loadFromFile(input_file, scene);
+  } else {
+    scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
+    scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
+  }
 
   bool single_step_evaluation = false;
   i64 evaluation_frequency = 1;
@@ -469,6 +486,9 @@ int main(int argc, char* argv[])
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     windowing::swap_buffers(window);
+  }
+  if(output_file != "") {
+    Save::saveToFile(output_file, scene);
   }
 
   ImGui_ImplGlfw_Shutdown();
