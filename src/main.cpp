@@ -170,7 +170,7 @@ static void mouse_button_callback(windowing::Window* const window,
       scene.connected_port = nullptr;
       scene.mode = Window_Mode::none;
     }
-  } else if(key == Key::mouse_right) {
+  } else if(key == Key::mouse_right && action == Input_Action::press) {
     Vec2 const cursor_position = windowing::get_cursor_position(window);
 
     Camera& cam = get_primary_camera();
@@ -181,6 +181,12 @@ static void mouse_button_callback(windowing::Window* const window,
     Port* p = scene.check_if_port_clicked(scene_position);
     if(p != nullptr) {
       p->remove_all_connections();
+      return;
+    }
+    Gate* g = scene.check_if_gate_clicked(scene_position);
+    if(g != nullptr && g->kind == Gate_Kind::e_input) {
+      g->evaluation = {!g->evaluation.prev_value, !g->evaluation.value};
+      return;
     }
   }
 }
