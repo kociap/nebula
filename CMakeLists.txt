@@ -130,4 +130,6 @@ target_sources(nebula
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/scene.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/window.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/components/camera.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/persistence/persistence.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/persistence/persistence.hpp"
 )

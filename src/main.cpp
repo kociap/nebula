@@ -17,6 +17,8 @@
 #include <shaders/compiler.hpp>
 #include <ui/scene.hpp>
 #include <windowing/window.hpp>
+#include <cstring>
+#include "persistence/persistence.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -481,6 +483,24 @@ int main(int argc, char* argv[])
 
   glClearColor(0.1, 0.1, 0.1, 1.0);
 
+  std::string input_file = "";
+  std::string output_file = "";
+
+  for(int i = 1; i < argc; ++i) {
+    if(std::string(argv[i]) == "-l" && i + 1 < argc) {
+      input_file = argv[i + 1];
+    } else if(std::string(argv[i]) == "-s" && i + 1 < argc) {
+      output_file = argv[i + 1];
+    }
+  }
+
+  if(input_file != "") {
+    Save::loadFromFile(input_file, scene);
+  } else {
+    scene.add_gate({0.55f, 0.5f}, {1.0f, 0.0f}, Gate_Kind::e_and);
+    scene.add_gate({0.55f, 0.5f}, {-1.0f, 0.0f}, Gate_Kind::e_not);
+  }
+
   // Main loop
   while(!windowing::should_close(window)) {
     frame_counter += 1;
@@ -566,6 +586,10 @@ int main(int argc, char* argv[])
     }
 
     windowing::swap_buffers(window);
+  }
+
+   if(output_file != "") {
+    Save::saveToFile(output_file, scene);
   }
 
   ImGui_ImplGlfw_Shutdown();
