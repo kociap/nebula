@@ -27,6 +27,10 @@ namespace nebula {
 
     // One output gates.
     e_input,
+    e_clock,
+    // TODO: add Led type gate ( 0 out, 1 in ) just showing red or green color
+    // Number of enumerations.
+    e_count,
   };
 
   struct Evaluation_State {

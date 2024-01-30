@@ -23,8 +23,19 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_internal.h>
 
 using namespace nebula;
+
+namespace {
+  bool is_draged_from_menu = false;
+  Gate_Kind last_menu_gate_choice = Gate_Kind::e_count;
+  bool run_evaluation = false;
+  bool single_step_evaluation = false;
+  i64 evaluation_frequency = 1; // TODO: Frequency switching button (1,2,4,8,16)
+  i64 frame_counter = 0;
+  Vec2 const gate_default_size{0.6f, 0.5f};
+} // namespace
 
 void initialise_imgui(windowing::Window* const window)
 {
@@ -86,6 +97,7 @@ static void mouse_button_callback(windowing::Window* const window,
                                   Key const key, Input_Action const action,
                                   void* data)
 {
+  // TODO: do not allow linking, port creating and deleting in evaluation mode
   ANTON_UNUSED(window);
   auto& scene = *reinterpret_cast<Scene*>(data);
   if(scene.mode == Window_Mode::evaluation_mode) {
@@ -164,7 +176,7 @@ static void mouse_button_callback(windowing::Window* const window,
       scene.connected_port = nullptr;
       scene.set_window_mode(Window_Mode::none);
     }
-  } else if(key == Key::mouse_right) {
+  } else if(key == Key::mouse_right && action == Input_Action::press) {
     Vec2 const cursor_position = windowing::get_cursor_position(window);
 
     Camera& cam = get_primary_camera();
@@ -175,6 +187,12 @@ static void mouse_button_callback(windowing::Window* const window,
     Port* p = scene.check_if_port_clicked(scene_position);
     if(p != nullptr) {
       p->remove_all_connections();
+      return;
+    }
+    Gate* g = scene.check_if_gate_clicked(scene_position);
+    if(g != nullptr && g->kind == Gate_Kind::e_input) {
+      g->evaluation = {!g->evaluation.prev_value, !g->evaluation.value};
+      return;
     }
   }
 }
@@ -310,7 +328,7 @@ static void render_scene(Scene& scene, Vec2 const viewport_size)
   rendering::commit_draw();
 }
 
-static void render_viewport(Scene& scene)
+static void display_viewport(Scene& scene)
 {
   i8 const margin = 10;
   ImVec2 display_size = ImGui::GetIO().DisplaySize;
@@ -340,6 +358,79 @@ static void render_viewport(Scene& scene)
   scene.viewport_size = viewport_size;
   u32 texture = primary_fb->get_color_texture(0);
   ImGui::Image((void*)(u64)texture, im_viewport_size);
+  ImGui::End();
+}
+
+[[nodiscard]] static char const* gate_to_string(Gate_Kind kind)
+{
+  switch(kind) {
+  case Gate_Kind::e_and:
+    return "AND";
+  case Gate_Kind::e_or:
+    return "OR";
+  case Gate_Kind::e_xor:
+    return "XOR";
+  case Gate_Kind::e_nand:
+    return "NAND";
+  case Gate_Kind::e_nor:
+    return "NOR";
+  case Gate_Kind::e_xnor:
+    return "XNOR";
+  case Gate_Kind::e_not:
+    return "NOT";
+  case Gate_Kind::e_input:
+    return "INPUT";
+  case Gate_Kind::e_clock:
+    return "CLOCK";
+  case Gate_Kind::e_count:
+    ANTON_UNREACHABLE("count is not a valid enumeration");
+  }
+  // CI complains about control reaching the end of a non-void function.
+  // Suppress with return.
+  return "INVALID";
+}
+
+void display_toolbar()
+{
+  ImGui::Begin("Toolbar", nullptr,
+               ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove |
+                 ImGuiWindowFlags_NoTitleBar);
+  if(ImGui::Button("Toggle evaluation")) {
+    run_evaluation = !run_evaluation;
+  }
+  if(ImGui::Button("Single step evaluation")) {
+    single_step_evaluation = true;
+  }
+
+  ImGui::Separator();
+
+  ImGui::BeginChild("Gates");
+  u8 number_of_gate_types = static_cast<int>(Gate_Kind::e_count);
+  for(int i = 0; i < number_of_gate_types; ++i) {
+    Gate_Kind gate = static_cast<Gate_Kind>(i);
+    const char* gateString = gate_to_string(gate);
+
+    ImGui::Selectable(gateString);
+    ImGuiDragDropFlags src_flags = 0;
+    // Keep the source displayed as hovered.
+    src_flags |= ImGuiDragDropFlags_SourceNoDisableHover;
+    // Because our dragging is local, we disable the feature of opening foreign
+    // treenodes/tabs while dragging.
+    src_flags |= ImGuiDragDropFlags_SourceNoHoldToOpenOthers;
+    if(ImGui::BeginDragDropSource(src_flags)) {
+      if(!(src_flags & ImGuiDragDropFlags_SourceNoPreviewTooltip))
+        ImGui::Text("Moving \"%s\"", gateString);
+      ImGui::SetDragDropPayload("DND_DEMO_NAME", &i, sizeof(int));
+      // TODO: remove camera movement when drag and drop
+      ImGui::EndDragDropSource();
+
+      last_menu_gate_choice = gate;
+      is_draged_from_menu = true;
+    }
+  }
+  ImGui::EndChild();
+
+  // Close the toolbar.
   ImGui::End();
 }
 
@@ -392,6 +483,7 @@ int main(int argc, char* argv[])
 
   glClearColor(0.1, 0.1, 0.1, 1.0);
 
+
   std::string input_file = "";
   std::string output_file = "";
 
@@ -413,6 +505,7 @@ int main(int argc, char* argv[])
   bool single_step_evaluation = false;
   i64 evaluation_frequency = 1;
   i64 frame_counter = 0;
+
 
   // Main loop
   while(!windowing::should_close(window)) {
@@ -453,7 +546,9 @@ int main(int argc, char* argv[])
     ImGui::Begin("Main Dock", nullptr, window_flags);
     ImGui::PopStyleVar(3);
 
+    // Dock the toolbar and the viewport side-by-side.
     ImGuiID dockspace_id = ImGui::GetID("_MainDock");
+
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f),
                      ImGuiDockNodeFlags_PassthruCentralNode);
 
@@ -471,19 +566,50 @@ int main(int argc, char* argv[])
     }
     if(ImGui::Button("Single step evaluation")) {
       single_step_evaluation = true;
-    }
-    ImGui::End();
 
-    // ImGui::ShowDemoWindow();
+    ImGuiDockNodeFlags const dockspace_flags =
+      ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoTabBar;
+    static bool first_time_dock = true;
+    if(first_time_dock) {
+      first_time_dock = false;
+      ImGui::DockBuilderAddNode(dockspace_id,
+                                dockspace_flags | ImGuiDockNodeFlags_DockSpace);
+      ImGui::DockBuilderSetNodePos(dockspace_id, ImGui::GetWindowPos());
+      ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowSize());
+      ImGuiID node_a;
+      ImGuiID node_b;
+      ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.2f, &node_a,
+                                  &node_b);
+      ImGui::DockBuilderDockWindow("Toolbar", node_a);
+      ImGui::DockBuilderDockWindow("Viewport", node_b);
+    } else {
+      ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+    }
+
+    display_viewport(scene);
+    display_toolbar();
 
     // Close the dock window.
     ImGui::End();
 
     glViewport(0, 0, window_size.x, window_size.y);
+
     rendering::bind_default_framebuffer();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    ImGuiMouseButton left_button = 0;
+    /*
+    If mouse is dragged from the manu and released then add gate
+    */
+    if(ImGui::IsMouseReleased(left_button) && is_draged_from_menu) {
+      //later change to gate that was pressed
+      scene.add_gate(gate_default_size, scene.last_mouse_position,
+                     last_menu_gate_choice);
+      is_draged_from_menu = 0;
+    }
 
     windowing::swap_buffers(window);
   }

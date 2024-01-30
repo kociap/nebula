@@ -6,7 +6,16 @@ namespace nebula {
     : coordinates(_coordinates), dimensions(_dimensions), kind(_kind)
   {
     i32 const out_count = 1;
-    i32 const in_count = kind == Gate_Kind::e_not ? 1 : 2;
+    i32 in_count;
+    if(kind == Gate_Kind::e_input || kind == Gate_Kind::e_clock) {
+      in_count = 0;
+      evaluation.prev_value = true;
+      evaluation.value = true;
+    } else if(kind == Gate_Kind::e_not) {
+      in_count = 1;
+    } else {
+      in_count = 2;
+    }
 
     // Distance between IN ports
     f32 const in_space = dimensions.y / static_cast<f32>(in_count);
@@ -54,6 +63,8 @@ namespace nebula {
 
   rendering::Draw_Elements_Command prepare_draw(Gate const& gate)
   {
+    // TODO: green and red in evaluation mode and unique color for each type
+    //       in create mode.
     math::Vec3 const green{0.498f, 1.0f, 0.0f};
     math::Vec3 const red{1.0f, 0.0f, 0.2235f};
     math::Vec3 const color = gate.evaluation.value ? green : red;
