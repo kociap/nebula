@@ -162,6 +162,7 @@ static void mouse_button_callback(windowing::Window* const window,
           return;
         }
 
+        scene.currently_moved_gate = gate;
         scene.set_window_mode(Window_Mode::gate_moving);
         return;
       }
