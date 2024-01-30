@@ -93,6 +93,7 @@ namespace nebula {
   rendering::Draw_Elements_Command prepare_draw_connection(Vec2 const cords_1,
                                                            Vec2 const cords_2)
   {
+    // TODO: make it 'greener' when port output is true
     // Calculate normalized direction vector
     math::Vec2 direction = {cords_2.x - cords_1.x, cords_2.y - cords_1.y};
     f32 const length =

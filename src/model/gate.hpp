@@ -27,6 +27,7 @@ namespace nebula {
 
     // One output gates.
     e_input,
+    e_clock,
 
     // Number of enumerations.
     e_count,
