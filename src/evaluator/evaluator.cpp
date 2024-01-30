@@ -75,14 +75,9 @@ namespace nebula {
         gate.evaluation.value = !gate.evaluation.value;
         gate.evaluation.prev_value = !gate.evaluation.prev_value;
       } break;
-<<<<<<< HEAD
-      default:
-        break;
-=======
 
       case Gate_Kind::e_count:
         ANTON_UNREACHABLE("count is invalid");
->>>>>>> 698048a (code documentation finalisation, final touch-ups)
       }
     }
   }
