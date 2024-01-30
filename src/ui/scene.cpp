@@ -34,7 +34,7 @@ namespace nebula {
   {
     u32 range = (tmp_port_exists) ? ports.size() - 1 : ports.size();
     for(u32 i = 0; i < range; i++) {
-      if(ports[i]->is_under_mouse(mouse_position)) {
+      if(test_hit(*ports[i], mouse_position)) {
         return ports[i];
       }
     }
@@ -113,21 +113,44 @@ namespace nebula {
 
   void Scene::toggle_evaluation_mode()
   {
-    if(mode == Window_Mode::evaluation_mode) {
-      mode = Window_Mode::none;
-      return;
-    }
-    if(mode == Window_Mode::port_linking) {
-      remove_tmp_port(connected_port);
-    }
-    mode = Window_Mode::evaluation_mode;
+    // if(mode == Window_Mode::evaluation_mode) {
+    //   mode = Window_Mode::none;
+    //   return;
+    // }
+    // if(mode == Window_Mode::port_linking) {
+    //   remove_tmp_port(connected_port);
+    // }
+    // mode = Window_Mode::evaluation_mode;
   }
 
   void Scene::set_window_mode(Window_Mode _mode)
   {
-    if(mode == Window_Mode::evaluation_mode) {
-      return;
-    }
+    // if(mode == Window_Mode::evaluation_mode) {
+    //   return;
+    // }
     mode = _mode;
+  }
+
+  Gate* test_hit_gates(Scene& scene, Vec2 const point)
+  {
+    for(Gate& gate: scene.gates) {
+      bool const hit = test_hit(gate, point);
+      if(hit) {
+        return &gate;
+      }
+    }
+    return nullptr;
+  }
+
+  Port* test_hit_ports(Scene& scene, Vec2 const point)
+  {
+    i64 const range =
+      (scene.tmp_port_exists) ? scene.ports.size() - 1 : scene.ports.size();
+    for(i64 i = 0; i < range; i++) {
+      if(test_hit(*scene.ports[i], point)) {
+        return scene.ports[i];
+      }
+    }
+    return nullptr;
   }
 } // namespace nebula

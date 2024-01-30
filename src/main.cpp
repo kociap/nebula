@@ -16,6 +16,7 @@
 #include <rendering/shader.hpp>
 #include <shaders/compiler.hpp>
 #include <ui/scene.hpp>
+#include <ui/viewport.hpp>
 #include <windowing/window.hpp>
 
 #include <imgui.h>
@@ -33,9 +34,18 @@ namespace {
   i64 evaluation_frequency = 1; // TODO: Frequency switching button (1,2,4,8,16)
   i64 frame_counter = 0;
   Vec2 const gate_default_size{0.6f, 0.5f};
+  Vec2 viewport_position;
+  Vec2 viewport_size;
 } // namespace
 
-void initialise_imgui(windowing::Window* const window)
+[[nodiscard]] static bool is_within_viewport(Vec2 const point)
+{
+  Vec2 const p = point - viewport_position;
+  return p.x >= 0 && p.y >= 0 && p.x <= viewport_size.x &&
+         p.y <= viewport_size.y;
+}
+
+static void initialise_imgui(windowing::Window* const window)
 {
   ImGui::CreateContext();
   ImGuiIO& io = ImGui::GetIO();
@@ -69,16 +79,16 @@ static void keyboard_callback(windowing::Window* const window, Key const key,
   ANTON_UNUSED(data);
   if(key == Key::key_r && state == Input_Action::release) {
     compile_shaders();
-  } else if((key == Key::key_left_control || key == Key::key_right_control) &&
+  } else if((key == Key::key_lctrl || key == Key::key_rctrl) &&
             state == Input_Action::press) {
     if(scene.mode == Window_Mode::none) {
-      scene.set_window_mode(Window_Mode::object_delete);
+      // scene.set_window_mode(Window_Mode::object_delete);
     }
-  } else if((key == Key::key_left_control || key == Key::key_right_control) &&
+  } else if((key == Key::key_lctrl || key == Key::key_rctrl) &&
             state == Input_Action::release) {
-    if(scene.mode == Window_Mode::object_delete) {
-      scene.set_window_mode(Window_Mode::none);
-    }
+    // if(scene.mode == Window_Mode::object_delete) {
+    //   scene.set_window_mode(Window_Mode::none);
+    // }
   }
 }
 
@@ -91,107 +101,106 @@ static void framebuffer_resize_callback(windowing::Window* const window,
   LOG_INFO("resized window to {}x{}", width, height);
 }
 
+[[nodiscard]] static Vec2 unproject_point(Vec2 const cursor_pos)
+{
+  Vec2 const vp_cursor_pos = {cursor_pos.x - viewport_position.x,
+                              viewport_size.y -
+                                (cursor_pos.y - viewport_position.y)};
+  Camera& camera = get_primary_camera();
+  math::Mat4 const inv_view = math::inverse(get_view_matrix(camera));
+  math::Mat4 const inv_projection =
+    math::inverse(get_projection_matrix(camera, viewport_size));
+  Vec2 const scene_position =
+    unproject_viewport(vp_cursor_pos, inv_projection, inv_view, viewport_size);
+  return scene_position;
+}
+
 static void mouse_button_callback(windowing::Window* const window,
                                   Key const key, Input_Action const action,
                                   void* data)
 {
-  // TODO: do not allow linking, port creating and deleting in evaluation mode
   ANTON_UNUSED(window);
   auto& scene = *reinterpret_cast<Scene*>(data);
-  if(scene.mode == Window_Mode::evaluation_mode) {
-    return;
-  }
-  if(key == Key::mouse_left) {
-    if(action == Input_Action::press) {
-      Vec2 cursor_position = windowing::get_cursor_position(window);
 
-      Camera& cam = get_primary_camera();
-      Vec2 const window_size = get_window_size(window);
-      Vec2 framebuffer_size = get_framebuffer_size(window);
-      cursor_position -= window_size - scene.viewport_size - 10; // margin
+  switch(scene.mode) {
+  case Window_Mode::none: {
+    Vec2 const cursor_pos = windowing::get_cursor_position(window);
+    if(!is_within_viewport(cursor_pos)) {
+      return;
+    }
 
-      if(cursor_position.x < 0 || cursor_position.y < 0) {
-        return;
-      }
-      framebuffer_size.x =
-        framebuffer_size.y * (scene.viewport_size.x / scene.viewport_size.y);
-      Vec2 const scene_position = cam.window_to_scene_position(
-        cursor_position, scene.viewport_size, framebuffer_size);
+    Vec2 const scene_position = unproject_point(cursor_pos);
+    scene.last_mouse_position = scene_position;
 
-      // Check if connected to another port
-      if(scene.mode == Window_Mode::port_linking) {
-        Port* p = scene.check_if_port_clicked(scene_position);
-        // Can't connect to the same port
-        if(p == nullptr || p->kind == scene.connected_port->kind) {
-          scene.remove_tmp_port(scene.connected_port);
-        } else {
-          scene.connect_ports(scene.connected_port, p);
+    if(action == Input_Action::press && key == Key::mouse_left) {
+      // Allow modification of the system only when not running evaluation.
+      if(!run_evaluation) {
+        Port* const port = test_hit_ports(scene, scene_position);
+        if(port != nullptr) {
+          Input_Action const lctrl = windowing::get_key(window, Key::key_lctrl);
+          // LCTRL + LMB deletes connections.
+          if(lctrl == Input_Action::press) {
+            port->remove_all_connections();
+            return;
+          }
+
+          scene.set_window_mode(Window_Mode::port_linking);
+          Port_Kind const tmp_port_kind = invert_port_kind(port->kind);
+          scene.create_tmp_port(port, scene_position, tmp_port_kind);
+          scene.connected_port = port;
+          return;
         }
-        // Quit connecting mode
-        scene.connected_port = nullptr;
-        scene.set_window_mode(Window_Mode::none);
-        return;
       }
 
-      scene.connected_port = scene.check_if_port_clicked(scene_position);
-      if(scene.connected_port != nullptr) {
-        if(scene.mode == Window_Mode::object_delete) {
-          scene.connected_port->remove_all_connections();
+      Gate* const gate = test_hit_gates(scene, scene_position);
+      if(gate != nullptr) {
+        Input_Action const lctrl = windowing::get_key(window, Key::key_lctrl);
+        // LCTRL + LMB deletes gates.
+        if(lctrl == Input_Action::press) {
+          // TODO: SEGFAULT on delete.
+          // scene.delete_gate(gate);
           return;
         }
 
-        scene.set_window_mode(Window_Mode::port_linking);
-        Port_Kind tmp_port_type;
-        if(scene.connected_port->kind == Port_Kind::in) {
-          tmp_port_type = Port_Kind::out;
-        } else {
-          tmp_port_type = Port_Kind::in;
-        }
-        scene.create_tmp_port(scene.connected_port, scene_position,
-                              tmp_port_type);
-        return;
-      }
-
-      scene.currently_moved_gate = scene.check_if_gate_clicked(scene_position);
-      scene.last_mouse_position = scene_position;
-      if(scene.currently_moved_gate != nullptr) {
-        if(scene.mode == Window_Mode::object_delete) {
-          scene.delete_gate(scene.currently_moved_gate);
-          return;
-        }
+        scene.currently_moved_gate = gate;
         scene.set_window_mode(Window_Mode::gate_moving);
         return;
       }
 
+      // Move camera regardless of where we click.
       scene.set_window_mode(Window_Mode::camera_moving);
-      scene.last_mouse_position = scene_position;
-    } else if(action == Input_Action::release) {
-      if(scene.mode == Window_Mode::port_linking) {
+    } else if(action == Input_Action::press && key == Key::mouse_right) {
+      Gate* const g = test_hit_gates(scene, scene_position);
+      if(g != nullptr && g->kind == Gate_Kind::e_input) {
+        g->evaluation = {!g->evaluation.prev_value, !g->evaluation.value};
         return;
       }
+    }
+  } break;
 
+  case Window_Mode::port_linking: {
+    Vec2 const cursor_pos = windowing::get_cursor_position(window);
+    Vec2 const scene_position = unproject_point(cursor_pos);
+    Port* const p = test_hit_ports(scene, scene_position);
+    // Can't connect to the same port
+    if(p == nullptr || p->kind == scene.connected_port->kind) {
+      scene.remove_tmp_port(scene.connected_port);
+    } else {
+      scene.connect_ports(scene.connected_port, p);
+    }
+    // Quit connecting mode
+    scene.connected_port = nullptr;
+    scene.set_window_mode(Window_Mode::none);
+  } break;
+
+  case Window_Mode::gate_moving:
+  case Window_Mode::camera_moving: {
+    if(action == Input_Action::release) {
       scene.currently_moved_gate = nullptr;
       scene.connected_port = nullptr;
       scene.set_window_mode(Window_Mode::none);
     }
-  } else if(key == Key::mouse_right && action == Input_Action::press) {
-    Vec2 const cursor_position = windowing::get_cursor_position(window);
-
-    Camera& cam = get_primary_camera();
-    Vec2 const framebuffer_size = get_framebuffer_size(window);
-    Vec2 const window_size = get_window_size(window);
-    Vec2 const scene_position = cam.window_to_scene_position(
-      cursor_position, window_size, framebuffer_size);
-    Port* p = scene.check_if_port_clicked(scene_position);
-    if(p != nullptr) {
-      p->remove_all_connections();
-      return;
-    }
-    Gate* g = scene.check_if_gate_clicked(scene_position);
-    if(g != nullptr && g->kind == Gate_Kind::e_input) {
-      g->evaluation = {!g->evaluation.prev_value, !g->evaluation.value};
-      return;
-    }
+  } break;
   }
 }
 
@@ -200,26 +209,14 @@ static void cursor_position_callback(windowing::Window* const window,
 {
   ANTON_UNUSED(window);
   Scene& scene = *reinterpret_cast<Scene*>(data);
-  Vec2 cursor_position = {x, y};
-  Camera& cam = get_primary_camera();
-  Vec2 const window_size = get_window_size(window);
-  Vec2 framebuffer_size = get_framebuffer_size(window);
-  cursor_position -= window_size - scene.viewport_size - 10;
-  if(cursor_position.x < 0 || cursor_position.y < 0) {
-    return;
-  }
-  framebuffer_size.x =
-    framebuffer_size.y * (scene.viewport_size.x / scene.viewport_size.y);
-  Vec2 const scene_position = cam.window_to_scene_position(
-    cursor_position, scene.viewport_size, framebuffer_size);
-
-  math::Vec2 offset = (scene_position - scene.last_mouse_position) *
-                      framebuffer_size / window_size;
-
+  Vec2 const cursor_pos{x, y};
+  Vec2 const scene_position = unproject_point(cursor_pos);
+  math::Vec2 const offset = scene_position - scene.last_mouse_position;
   if(scene.mode == Window_Mode::port_linking) {
     scene.move_tmp_port(offset);
   } else if(scene.mode == Window_Mode::camera_moving) {
-    cam.move(offset);
+    Camera& camera = get_primary_camera();
+    camera.move(offset);
   } else if(scene.mode == Window_Mode::gate_moving) {
     scene.currently_moved_gate->move(offset);
   }
@@ -328,24 +325,17 @@ static void render_scene(Scene& scene, Vec2 const viewport_size)
 
 static void display_viewport(Scene& scene)
 {
-  i8 const margin = 10;
-  ImVec2 display_size = ImGui::GetIO().DisplaySize;
-  // Leave margin
-  display_size.x -= margin;
-  display_size.y -= margin;
-  ImGui::SetNextWindowSize({display_size.x, display_size.y},
-                           ImGuiCond_FirstUseEver);
-  ImGui::SetNextWindowSizeConstraints({display_size.x, display_size.y},
-                                      {display_size.x, display_size.y});
-  ImGui::SetNextWindowPos(display_size, ImGuiCond_Always, {1.0f, 1.0f});
-  ImGui::SetNextWindowPos({display_size.x, margin}, ImGuiCond_Always,
-                          {1.0f, 0.0f});
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
   ImGui::Begin("Viewport", nullptr,
                ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar |
                  ImGuiWindowFlags_NoBringToFrontOnFocus);
-  ImVec2 const im_viewport_size = ImGui::GetWindowSize();
-  Vec2 const viewport_size{im_viewport_size.x - margin,
-                           im_viewport_size.y - margin};
+  ImGui::PopStyleVar(3);
+  ImVec2 const im_viewport_size = ImGui::GetContentRegionAvail();
+  viewport_size = {im_viewport_size.x, im_viewport_size.y};
+  ImVec2 const im_viewport_position = ImGui::GetWindowPos();
+  viewport_position = {im_viewport_position.x, im_viewport_position.y};
   rendering::resize_framebuffers(viewport_size.x, viewport_size.y);
   glViewport(0, 0, viewport_size.x, viewport_size.y);
   rendering::Framebuffer* const primary_fb =
@@ -497,14 +487,15 @@ int main(int argc, char* argv[])
 
     windowing::poll_events();
 
-    if(single_step_evaluation) {
-      evaluate(scene.gates);
-      single_step_evaluation = false;
-    } else if(scene.mode == Window_Mode::evaluation_mode) {
+    if(run_evaluation) {
       if(frame_counter % evaluation_frequency == 0) {
         evaluate(scene.gates);
       }
+    } else if(single_step_evaluation) {
+      evaluate(scene.gates);
     }
+
+    single_step_evaluation = false;
 
     Vec2 const window_size = windowing::get_framebuffer_size(window);
 

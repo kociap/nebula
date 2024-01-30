@@ -128,6 +128,8 @@ target_sources(nebula
   "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders/compiler.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/scene.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/scene.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/viewport.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/ui/viewport.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/windowing/window.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/components/camera.cpp"
 )

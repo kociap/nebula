@@ -5,10 +5,12 @@
 
 namespace nebula {
   /**
-   * @brief Compiles a shader program from vertex and fragment shader source code.
+   * @brief Compiles a shader program from vertex and fragment shader source
+   * code.
    *
-   * This function takes vertex and fragment shader source code as input, compiles
-   * them into a shader program, and returns a handle to the compiled shader.
+   * This function takes vertex and fragment shader source code as input,
+   * compiles them into a shader program, and returns a handle to the compiled
+   * shader.
    *
    * @param vertex The source code of the vertex shader.
    * @param fragment The source code of the fragment shader.

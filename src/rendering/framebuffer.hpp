@@ -13,9 +13,9 @@ namespace nebula::rendering {
   /**
    * @brief Represents a framebuffer object for rendering.
    *
-   * The Framebuffer class encapsulates the functionality related to framebuffers,
-   * including color attachments, depth, and stencil buffers. It provides methods
-   * for creating, resizing, and managing the framebuffer.
+   * The Framebuffer class encapsulates the functionality related to
+   * framebuffers, including color attachments, depth, and stencil buffers. It
+   * provides methods for creating, resizing, and managing the framebuffer.
    */
   class Framebuffer {
   public:
@@ -98,7 +98,8 @@ namespace nebula::rendering {
     Framebuffer& operator=(Framebuffer const&) = delete;
 
     /**
-     * @brief Creates the framebuffer based on the provided construction information.
+     * @brief Creates the framebuffer based on the provided construction
+     * information.
      *
      * @param info - Construction information for the framebuffer.
      * @return Expected<void, Error> indicating success or failure.
@@ -143,7 +144,8 @@ namespace nebula::rendering {
     [[nodiscard]] math::Vec2 size() const;
 
     /**
-     * @brief Gets the OpenGL handle of the color texture at the specified index.
+     * @brief Gets the OpenGL handle of the color texture at the specified
+     * index.
      *
      * @param index - Index of the color texture.
      * @return OpenGL handle of the color texture.
@@ -151,7 +153,8 @@ namespace nebula::rendering {
     [[nodiscard]] u32 get_color_texture(i32 index) const;
 
     /**
-     * @brief Gets a slice of OpenGL handles for all color textures attached to the framebuffer.
+     * @brief Gets a slice of OpenGL handles for all color textures attached to
+     * the framebuffer.
      *
      * @return Slice of OpenGL handles for color textures.
      */
@@ -196,42 +199,48 @@ namespace nebula::rendering {
   };
 
   /**
-   * @brief Blits the contents of the source framebuffer to the destination framebuffer.
+   * @brief Blits the contents of the source framebuffer to the destination
+   * framebuffer.
    *
-   * This function performs a framebuffer blit operation, copying the contents of the
-   * source framebuffer to the destination framebuffer. The specified buffer mask determines
-   * which buffers are included in the blit operation.
+   * This function performs a framebuffer blit operation, copying the contents
+   * of the source framebuffer to the destination framebuffer. The specified
+   * buffer mask determines which buffers are included in the blit operation.
    *
    * @param dest - Reference to the destination framebuffer.
    * @param source - Reference to the source framebuffer.
-   * @param buffer_mask - Buffer mask indicating which buffers to include in the blit operation.
+   * @param buffer_mask - Buffer mask indicating which buffers to include in the
+   * blit operation.
    */
   void blit_framebuffer(Framebuffer& dest, Framebuffer const& source,
                         opengl::Buffer_Mask);
   /**
-   * @brief Blits the contents of the source framebuffer to the destination framebuffer.
+   * @brief Blits the contents of the source framebuffer to the destination
+   * framebuffer.
    *
-   * This function performs a framebuffer blit operation, copying the contents of the
-   * source framebuffer to the destination framebuffer. The specified buffer mask determines
-   * which buffers are included in the blit operation.
+   * This function performs a framebuffer blit operation, copying the contents
+   * of the source framebuffer to the destination framebuffer. The specified
+   * buffer mask determines which buffers are included in the blit operation.
    *
    * @param dest - Pointer to the destination framebuffer.
    * @param source - Pointer to the source framebuffer.
-   * @param buffer_mask - Buffer mask indicating which buffers to include in the blit operation.
+   * @param buffer_mask - Buffer mask indicating which buffers to include in the
+   * blit operation.
    */
   void blit_framebuffer(Framebuffer* dest, Framebuffer const* source,
                         opengl::Buffer_Mask);
 
   /**
-   * @brief Blits the contents of the source framebuffer to the destination framebuffer.
+   * @brief Blits the contents of the source framebuffer to the destination
+   * framebuffer.
    *
-   * This function performs a framebuffer blit operation, copying the contents of the
-   * source framebuffer to the destination framebuffer. The specified buffer mask determines
-   * which buffers are included in the blit operation.
+   * This function performs a framebuffer blit operation, copying the contents
+   * of the source framebuffer to the destination framebuffer. The specified
+   * buffer mask determines which buffers are included in the blit operation.
    *
    * @param dest - Pointer to the destination framebuffer.
    * @param source - Pointer to the source framebuffer.
-   * @param buffer_mask - Buffer mask indicating which buffers to include in the blit operation.
+   * @param buffer_mask - Buffer mask indicating which buffers to include in the
+   * blit operation.
    */
   void bind_default_framebuffer(
     Framebuffer::Bind_Mode bind_mode = Framebuffer::read_draw);

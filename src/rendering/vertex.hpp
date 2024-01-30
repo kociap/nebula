@@ -14,8 +14,8 @@ namespace nebula {
    * normal, and texture coordinates.
    */
   struct Vertex {
-    math::Vec3 position; /**< Position of the vertex in 3D space. */
-    math::Vec3 normal; /**< Normal vector at the vertex. */
-    math::Vec2 uv; /**< Texture coordinates of the vertex. */
+    math::Vec3 position;
+    math::Vec3 normal;
+    math::Vec2 uv;
   };
 } // namespace nebula

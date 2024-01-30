@@ -2,6 +2,11 @@
 #include <rendering/rendering.hpp>
 
 namespace nebula {
+  Port_Kind invert_port_kind(Port_Kind const kind)
+  {
+    return kind == Port_Kind::in ? Port_Kind::out : Port_Kind::in;
+  }
+
   Port::Port(Vec2 const coordinates, Port_Kind const kind, Gate* gate)
     : coordinates(coordinates), kind(kind), gate(gate)
   {
@@ -50,9 +55,10 @@ namespace nebula {
     return coordinates;
   }
 
-  bool Port::is_under_mouse(Vec2 const point) const
+  bool test_hit(Port const& port, Vec2 const point)
   {
-    return math::length_squared(point - coordinates) <= radius * radius;
+    f32 const r2 = port.radius * port.radius;
+    return math::length_squared(point - port.coordinates) <= r2;
   }
 
   rendering::Draw_Elements_Command prepare_draw(Port const& port)

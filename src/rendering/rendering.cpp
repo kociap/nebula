@@ -332,23 +332,4 @@ namespace nebula::rendering {
     draw_cmd_buffer.head += draw_cmds->size();
     draw_cmds->clear();
   }
-
-  void render_texture_quad()
-  {
-    struct Vertex {
-      math::Vec3 position;
-      math::Vec2 uv;
-    };
-
-    // 6 vertices plane (2 triangles) facing Z axis.
-    Vertex vertices[] = {
-      Vertex({-1, 1, 0}, {0, 1}), Vertex({-1, -1, 0}, {0, 0}),
-      Vertex({1, -1, 0}, {1, 0}), Vertex({-1, 1, 0}, {0, 1}),
-      Vertex({1, -1, 0}, {1, 0}), Vertex({1, 1, 0}, {1, 1})};
-
-    // TODO: Upload vertices to a buffer.
-
-    // glBindVertexBuffer(0, vbo, 0, sizeof(Vertex));
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
-  }
 } // namespace nebula::rendering
