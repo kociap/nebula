@@ -110,4 +110,24 @@ namespace nebula {
       }
     }
   }
+
+  void Scene::toggle_evaluation_mode()
+  {
+    if(mode == Window_Mode::evaluation_mode) {
+      mode = Window_Mode::none;
+      return;
+    }
+    if(mode == Window_Mode::port_linking) {
+      remove_tmp_port(connected_port);
+    }
+    mode = Window_Mode::evaluation_mode;
+  }
+
+  void Scene::set_window_mode(Window_Mode _mode)
+  {
+    if(mode == Window_Mode::evaluation_mode) {
+      return;
+    }
+    mode = _mode;
+  }
 } // namespace nebula

@@ -13,6 +13,7 @@ namespace nebula {
     gate_moving, ///< Moving a gate mode.
     port_linking, ///< Linking ports mode.
     object_delete, ///< Deleting objects mode.
+    evaluation_mode, ///< Evaluating mode.
   };
 
   /**
@@ -117,6 +118,10 @@ namespace nebula {
      * @param offset The offset vector.
      */
     void move_tmp_port(Vec2 offset);
+
+    void toggle_evaluation_mode();
+
+    void set_window_mode(Window_Mode mode);
   };
 
 } // namespace nebula
