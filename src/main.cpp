@@ -28,7 +28,6 @@ using namespace nebula;
 namespace {
   bool is_draged_from_menu = false;
   Gate_Kind last_menu_gate_choice = Gate_Kind::e_count;
-  bool run_evaluation = false;
   bool single_step_evaluation = false;
   i64 evaluation_frequency = 1; // TODO: Frequency switching button (1,2,4,8,16)
   i64 frame_counter = 0;
@@ -388,13 +387,13 @@ static void display_viewport(Scene& scene)
   return "INVALID";
 }
 
-void display_toolbar()
+void display_toolbar(Scene& scene)
 {
   ImGui::Begin("Toolbar", nullptr,
                ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove |
                  ImGuiWindowFlags_NoTitleBar);
   if(ImGui::Button("Toggle evaluation")) {
-    run_evaluation = !run_evaluation;
+    scene.toggle_evaluation_mode();
   }
   if(ImGui::Button("Single step evaluation")) {
     single_step_evaluation = true;
@@ -542,7 +541,7 @@ int main(int argc, char* argv[])
     }
 
     display_viewport(scene);
-    display_toolbar();
+    display_toolbar(scene);
 
     // Close the dock window.
     ImGui::End();
