@@ -1,8 +1,7 @@
-#include "persistence/persistence.hpp"
-#include <iostream>
+#include <persistence/persistence.hpp>
 
 namespace nebula {
-  void Save::saveToFile(const std::string& filename, const Scene& scene)
+  void Persistence::saveToFile(const std::string& filename, const Scene& scene)
   {
     std::ofstream file(filename);
 
@@ -12,13 +11,10 @@ namespace nebula {
       saveConnections(file, scene);
 
       file.close();
-    } else {
-      std::cerr << "Error: Unable to open file for saving: " << filename
-                << std::endl;
     }
   }
 
-  void Save::loadFromFile(const std::string& filename, Scene& scene)
+  void Persistence::loadFromFile(const std::string& filename, Scene& scene)
   {
     std::ifstream file(filename);
 
@@ -28,13 +24,10 @@ namespace nebula {
       loadConnections(file, scene);
 
       file.close();
-    } else {
-      std::cerr << "Error: Unable to open file for loading: " << filename
-                << std::endl;
     }
   }
 
-  void Save::saveGates(std::ofstream& file, const Scene& scene)
+  void Persistence::saveGates(std::ofstream& file, const Scene& scene)
   {
     for(const Gate& gate: scene.gates) {
       file << "gate " << gate.dimensions.x << " " << gate.dimensions.y << " "
@@ -44,14 +37,11 @@ namespace nebula {
     file<<"endgates\n";
   }
 
-  void Save::loadGates(std::ifstream& file, Scene& scene)
+  void Persistence::loadGates(std::ifstream& file, Scene& scene)
   {
     while(file) {
       std::string type;
       file >> type;
-      if(type == "endgates"){
-        return;
-      }
       if(type == "gate") {
         Vec2 dimensions, coordinates;
         int kind;
@@ -61,10 +51,12 @@ namespace nebula {
         Gate_Kind gateKind = static_cast<Gate_Kind>(kind);
         scene.add_gate(dimensions, coordinates, gateKind);
       }
+      if(type == "endgates")
+          return;
     }
   }
 
-  void Save::savePorts(std::ofstream& file, const Scene& scene)
+  void Persistence::savePorts(std::ofstream& file, const Scene& scene)
   {
     for(const Port* port: scene.ports) {
       file << "port " << port->coordinates.x << " " << port->coordinates.y
@@ -73,14 +65,11 @@ namespace nebula {
     file<<"endports\n";
   }
 
-  void Save::loadPorts(std::ifstream& file, Scene& scene)
+  void Persistence::loadPorts(std::ifstream& file, Scene& scene)
   {
     while(file) {
       std::string type;
       file >> type;
-      if(type == "endports"){
-        return;
-      }
       if(type == "port") {
         Vec2 coordinates;
         int kind;
@@ -90,37 +79,12 @@ namespace nebula {
         Port* newPort = new Port(coordinates, portKind, nullptr);
         scene.ports.emplace_back(newPort);
       }
+      if(type == "endports")
+        return;
     }
   }
 
-  // Add these two functions to Save class
-void Save::saveConnectionsToFile(const std::string& filename, const Scene& scene)
-{
-    std::ofstream file(filename);
-
-    if (file.is_open()) {
-        saveConnections(file, scene);
-        file.close();
-    }
-    else {
-        std::cerr << "Error: Unable to open file for saving connections: " << filename << std::endl;
-    }
-}
-
-void Save::loadConnectionsFromFile(const std::string& filename, Scene& scene)
-{
-    std::ifstream file(filename);
-
-    if (file.is_open()) {
-        loadConnections(file, scene);
-        file.close();
-    }
-    else {
-        std::cerr << "Error: Unable to open file for loading connections: " << filename << std::endl;
-    }
-}
-
-void Save::saveConnections(std::ofstream& file, const Scene& scene)
+void Persistence::saveConnections(std::ofstream& file, const Scene& scene)
 {
     for (const Port* port : scene.ports) {
         for (const Port* connection : port->connections) {
@@ -131,37 +95,33 @@ void Save::saveConnections(std::ofstream& file, const Scene& scene)
     file<<"endconnections\n";
 }
 
-void Save::loadConnections(std::ifstream& file, Scene& scene)
+void Persistence::loadConnections(std::ifstream& file, Scene& scene)
 {
     
     while (file) {
         std::string type;
         file >> type;
-        if(type == "endconnections"){
-        return;
-      }
-        
         if (type == "connection") {
             Vec2 source, destination;
             file >> source.x >> source.y >> destination.x >> destination.y;
 
-            // Find the corresponding ports in the scene and establish the connection
             Port* sourcePort = findPortByCoordinates(scene, source);
             Port* destinationPort = findPortByCoordinates(scene, destination);
 
             if (sourcePort && destinationPort) {
-                std::cout<<source[0]<<" "<<source[1]<<":"<<destination[0]<<" "<<destination[0]<<std::endl;
                 sourcePort->add_connection(destinationPort);
             }
         }
+        if(type == "endconnections")
+        return;
     }
 }
 
-Port* Save::findPortByCoordinates(const Scene& scene, const Vec2& coordinates)
+Port* Persistence::findPortByCoordinates(const Scene& scene, const Vec2& coordinates)
 {
     for (const Port* port : scene.ports) {
         if (port->get_coordinates() == coordinates) {
-            return const_cast<Port*>(port); // Const-cast to maintain compatibility with add_connection
+            return const_cast<Port*>(port);
         }
     }
     return nullptr;

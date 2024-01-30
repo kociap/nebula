@@ -17,8 +17,7 @@
 #include <shaders/compiler.hpp>
 #include <ui/scene.hpp>
 #include <windowing/window.hpp>
-#include <cstring>
-#include "persistence/persistence.hpp"
+#include <persistence/persistence.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -495,7 +494,7 @@ int main(int argc, char* argv[])
   }
 
   if(input_file != "") {
-    Save::loadFromFile(input_file, scene);
+    Persistence::loadFromFile(input_file, scene);
   } 
 
   // Main loop
@@ -585,8 +584,8 @@ int main(int argc, char* argv[])
     windowing::swap_buffers(window);
   }
 
-   if(output_file != "") {
-    Save::saveToFile(output_file, scene);
+  if(output_file != "") {
+    Persistence::saveToFile(output_file, scene);
   }
 
   ImGui_ImplGlfw_Shutdown();

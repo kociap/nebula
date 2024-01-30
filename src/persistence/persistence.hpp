@@ -1,12 +1,12 @@
 #ifndef SAVE_HPP
 #define SAVE_HPP
 
-#include "ui/scene.hpp"
+#include <ui/scene.hpp>
 #include <fstream>
 #include <string>
 
 namespace nebula {
-  class Save {
+  class Persistence {
   public:
     static void saveToFile(const std::string& filename, const Scene& scene);
     static void loadFromFile(const std::string& filename, Scene& scene);
