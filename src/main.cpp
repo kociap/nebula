@@ -21,6 +21,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_internal.h>
 
 using namespace nebula;
 
@@ -315,7 +316,7 @@ static void render_scene(Scene& scene, Vec2 const viewport_size)
   rendering::commit_draw();
 }
 
-static void render_viewport(Scene& scene)
+static void display_viewport(Scene& scene)
 {
   i8 const margin = 10;
   ImVec2 display_size = ImGui::GetIO().DisplaySize;
@@ -506,19 +507,28 @@ int main(int argc, char* argv[])
     ImGui::Begin("Main Dock", nullptr, window_flags);
     ImGui::PopStyleVar(3);
 
+    // Dock the toolbar and the viewport side-by-side.
     ImGuiID dockspace_id = ImGui::GetID("_MainDock");
-    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f),
-                     ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGuiDockNodeFlags const dockspace_flags =
+      ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_NoTabBar;
+    static bool first_time_dock = true;
+    if(first_time_dock) {
+      first_time_dock = false;
+      ImGui::DockBuilderAddNode(dockspace_id,
+                                dockspace_flags | ImGuiDockNodeFlags_DockSpace);
+      ImGui::DockBuilderSetNodePos(dockspace_id, ImGui::GetWindowPos());
+      ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetWindowSize());
+      ImGuiID node_a;
+      ImGuiID node_b;
+      ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.2f, &node_a,
+                                  &node_b);
+      ImGui::DockBuilderDockWindow("Toolbar", node_a);
+      ImGui::DockBuilderDockWindow("Viewport", node_b);
+    } else {
+      ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+    }
 
-    render_viewport(scene);
-
-    f32 display_size_y = ImGui::GetIO().DisplaySize.y;
-    ImGui::SetNextWindowPos({0.0, 0.0}, ImGuiCond_FirstUseEver, {0.0, 0.0});
-    // ImGui::SetNextWindowPos({0.0, display_size_y}, ImGuiCond_FirstUseEver,
-    //                         {0.0f, 1.0f});
-    ImGui::SetNextWindowSizeConstraints({FLT_MIN, display_size_y},
-                                        {FLT_MAX, display_size_y});
-
+    display_viewport(scene);
     display_toolbar();
 
     // Close the dock window.
