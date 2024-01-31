@@ -1,0 +1,71 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper, margin=2cm]{geometry}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\title{Nebula -- Persistence Documentation}
+\author{Michał Biszczanik, Miłosz Chojecki}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+
+Storage of created designs is essential, as recreating them from scratch each
+time would be deterring to say the least. Persistence is capable of
+serialising the model to store it externally and reconstructing the model from
+serialised data.
+
+\section*{How it works}
+
+User specifies input and output files as command-line arguments: \\
+\verb|./nebula [-l in_file.neb] [-s out_file.neb]| \\
+If no input file is specified, Nebula loads a sample project consisting of two logic gates. \\
+If no output file is specified, the project is discarded when exiting Nebula.
+
+\section*{Structure of a .neb file}
+
+An example \verb|.neb| file looks like this:
+\begin{verbatim}
+gate 0.6 0.5 -2.76016 2.21604 1
+gate 0.6 0.5 -0.978603 1.93038 0
+endgates
+port -2.76016 2.34104 0
+port -2.76016 2.59104 0
+port -2.16016 2.46604 1
+port -0.978603 2.05538 0
+port -0.978603 2.30538 0
+port -0.3786 2.18038 1
+endports
+connection -2.16016 2.46604 -0.978603 2.05538
+connection -2.16016 2.46604 -0.978603 2.30538
+connection -0.978603 2.05538 -2.16016 2.46604
+connection -0.978603 2.30538 -2.16016 2.46604
+endconnections
+\end{verbatim}
+
+The file consists of three sections: gates, ports and connections. \\
+Each gate is stored as follows: \\
+\verb|gate <x_size> <y_size> <x_coord> <y_coord> <gate_type>| \\
+Each port is stored as follows: \\
+\verb|port <x_coord> <y_coord> <type>| \\
+Each connection is stored as follows: \\
+\verb|connection <first_x_coord> <first_y_coord> <second_x_coord> <second_y_coord>|.
+
+\section*{Class diagram of persistence module}
+
+\includegraphics[]{class-persistence.png}
+
+\section*{Swimlane diagram of persistence module}
+
+\includegraphics[scale=0.85]{swimlane-persistence1.png}
+
+\end{document}
+
